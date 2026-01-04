@@ -58,12 +58,12 @@ You may now add components.
 
 global.css に色定義が追加される
 
-## Button
+## Button 追加
 
 - [Button](https://ui.shadcn.com/docs/components/button)
 
 ```zsh
-% npx shadcn@latest add button
+% pnpm dlx shadcn@latest add button
 ✔ Checking registry.
 ✔ Installing dependencies.
 ✔ Created 1 file:
@@ -74,7 +74,7 @@ global.css に色定義が追加される
 
 ```json
   "dependencies": {
-    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-slot": "^1.2.4",
   }
 ```
 
@@ -83,7 +83,7 @@ global.css に色定義が追加される
 - [Card](https://ui.shadcn.com/docs/components/card)
 
 ```zsh
-% npx shadcn@latest add card
+% pnpm dlx shadcn@latest add card
 ✔ Checking registry.
 ✔ Created 1 file:
   - src/components/ui/card.tsx
