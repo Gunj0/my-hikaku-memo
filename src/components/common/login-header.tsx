@@ -1,3 +1,5 @@
+'use client";';
+
 import { SignIn } from "@/components/auth/sign-in";
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
@@ -11,7 +13,9 @@ export default function LoginHeader() {
   // ログインボタン付きヘッダー
   return (
     <header className="flex items-center h-16 border-b w-full justify-between">
-      <Title />
+      <div className="mx-6">
+        <Title />
+      </div>
       {!session?.data?.session ? (
         <div className="flex gap-2 items-center mx-3">
           <SignIn />

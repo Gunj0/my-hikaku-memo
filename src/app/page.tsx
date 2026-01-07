@@ -1,11 +1,8 @@
 "use client";
 
 import LoginHeader from "@/components/common/login-header";
-import { authClient } from "@/lib/auth-client";
 
 export default function Home() {
-  const session = authClient.useSession();
-
   return (
     <>
       <LoginHeader />
