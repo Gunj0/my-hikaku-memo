@@ -1,47 +1,30 @@
-# OpenNext Starter
+# my-hikaku-memo
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+[オレの比較メモ](https://my-hikaku-memo.com/)
+のフロントエンドサービスです。
 
-## Getting Started
+## 技術構成
 
-Read the documentation at https://opennext.js.org/cloudflare.
+- Next.js 15
+  - App router
+- Better Auth
+- Shadcn/ui
+- Tailwind CSS
 
-## Develop
+## 起動方法
 
-Run the Next.js development server:
-
-```bash
-npm run dev
-# or similar package manager command
+```zsh
+pnpm install
+pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 を開く
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Cloudflare 動作確認
 
-## Preview
+このプロジェクトは Cloudflare Workers で動作することを想定しています。
+以下で Cloudflare 上での動作確認を行うことができます。
 
-Preview the application locally on the Cloudflare runtime:
-
-```bash
-npm run preview
-# or similar package manager command
+```zsh
+pnpm run preview
 ```
-
-## Deploy
-
-Deploy the application to Cloudflare:
-
-```bash
-npm run deploy
-# or similar package manager command
-```
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
