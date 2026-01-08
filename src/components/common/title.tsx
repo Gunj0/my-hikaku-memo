@@ -1,10 +1,16 @@
-import { NotebookPen } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Title() {
   return (
     <Link href={"/"} className="flex items-center">
-      <NotebookPen className="mr-1" size={24} aria-hidden />
+      <Image
+        src={"/icon.svg"}
+        className="mr-1"
+        alt="サイトロゴ"
+        width={40}
+        height={40}
+      />
       <h1 className="text-xl font-bold">オレの比較メモ</h1>
     </Link>
   );

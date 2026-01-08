@@ -1,5 +1,4 @@
 import Footer from "@/components/common/footer";
-import Head from "@/components/common/head";
 import { PATH } from "@/const/Path";
 import { SITE } from "@/const/Site";
 import type { Metadata } from "next";
@@ -16,6 +15,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL!),
   title: SITE.TITLE + " | " + SITE.DESCRIPTION,
   description: SITE.DESCRIPTION,
+  keywords: SITE.KEYWORDS,
   openGraph: {
     title: SITE.TITLE,
     description: SITE.DESCRIPTION,
@@ -34,6 +34,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    images: [new URL(process.env.NEXT_PUBLIC_BASE_URL! + PATH.OGP)],
+    title: SITE.TITLE,
+    description: SITE.DESCRIPTION,
   },
   robots: {
     index: true,
@@ -48,7 +51,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <Head />
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml"></link>
+      </head>
       <body className={`${notoSansJP.variable} antialiased`}>
         {children}
         <Footer />

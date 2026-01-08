@@ -34,7 +34,7 @@ export function SignIn({ redirectTo }: { redirectTo?: string }) {
       onClick={login}
     >
       <Image src="/google-logo.svg" alt="Google Logo" width={16} height={16} />
-      Googleでログインして事前登録
+      Googleで事前登録
     </Button>
   );
 }
