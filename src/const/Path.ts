@@ -1,8 +1,7 @@
 export const PATH = {
   HOME: "/",
   OGP: "/ogp.png",
-  LOGIN: "/login",
-  SIGNUP: "/signup",
+  ICON: "/icon.svg",
   USER: "/user",
   MEMO: {
     NEW: "/memo/new",
@@ -12,7 +11,5 @@ export const PATH = {
   },
   API: {
     MEMO: "/memo",
-    LOGIN: "/auth/login",
-    EXTERNAL_LOGIN: "/auth/external-login",
   },
 };

@@ -1,11 +1,12 @@
+import { PATH } from "@/const/Path";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Title() {
   return (
-    <Link href={"/"} className="flex items-center">
+    <Link href={PATH.HOME} className="flex items-center">
       <Image
-        src={"/icon.svg"}
+        src={PATH.ICON}
         className="mr-1"
         alt="サイトロゴ"
         width={40}

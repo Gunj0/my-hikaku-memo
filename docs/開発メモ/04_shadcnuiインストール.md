@@ -88,3 +88,25 @@ global.css に色定義が追加される
 ✔ Created 1 file:
   - src/components/ui/card.tsx
 ```
+
+## Textarea
+
+[Textarea](https://ui.shadcn.com/docs/components/textarea)
+
+```zsh
+% pnpm dlx shadcn@latest add textarea
+✔ Checking registry.
+✔ Created 1 file:
+  - src/components/ui/textarea.tsx
+```
+
+## Input
+
+[Input](https://ui.shadcn.com/docs/components/input)
+
+```zsh
+% pnpm dlx shadcn@latest add input
+✔ Checking registry.
+✔ Created 1 file:
+  - src/components/ui/input.tsx
+```
