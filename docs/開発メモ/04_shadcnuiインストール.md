@@ -110,3 +110,51 @@ global.css に色定義が追加される
 ✔ Created 1 file:
   - src/components/ui/input.tsx
 ```
+
+## Radio Group
+
+[Radio Group](https://ui.shadcn.com/docs/components/radio-group)
+
+```zsh
+% pnpm dlx shadcn@latest add radio-group
+✔ Checking registry.
+✔ Installing dependencies.
+✔ Created 1 file:
+  - src/components/ui/radio-group.tsx
+```
+
+## Label
+
+[Label](https://ui.shadcn.com/docs/components/label)
+
+```zsh
+% pnpm dlx shadcn@latest add label
+✔ Checking registry.
+✔ Installing dependencies.
+✔ Created 1 file:
+  - src/components/ui/label.tsx
+```
+
+## Badge
+
+[Badge](https://ui.shadcn.com/docs/components/badge)
+
+```zsh
+% pnpm dlx shadcn@latest add badge
+✔ Checking registry.
+✔ Installing dependencies.
+✔ Created 1 file:
+  - src/components/ui/badge.tsx
+```
+
+## Checkbox
+
+[Checkbox](https://ui.shadcn.com/docs/components/checkbox)
+
+```zsh
+% pnpm dlx shadcn@latest add checkbox
+✔ Checking registry.
+✔ Installing dependencies.
+✔ Created 1 file:
+  - src/components/ui/checkbox.tsx
+```

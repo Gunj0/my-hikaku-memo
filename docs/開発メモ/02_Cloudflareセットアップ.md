@@ -15,4 +15,3 @@
   - Build > Git repository > connect
     - GitHub リポジトリを連携する
     - Build cache: Enabled
--
