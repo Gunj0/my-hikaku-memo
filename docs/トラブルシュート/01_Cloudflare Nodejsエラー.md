@@ -1,6 +1,6 @@
 # Node.js バージョンエラー
 
-- Cloudflare で CI 実行時、以下のようなエラーが発生
+- Cloudflare ビルド実行時、以下エラーが発生
 
 ```zsh
 npm error `npm ci` can only install packages when your package.json

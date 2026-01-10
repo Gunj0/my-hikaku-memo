@@ -1,10 +1,8 @@
 # Cloudflare 環境変数エラー
 
-- Cloudflare Worker へデプロイ時にエラー
+- Cloudflare Workers へデプロイ時にエラー
 
-- [Next.js の事前レンダリング エラー](https://nextjs.org/docs/messages/prerender-error)
-
-```text
+```log
 17:54:56.678 Error occurred prerendering page "/". Read more: https://nextjs.org/docs/messages/prerender-error
 17:54:56.678	TypeError: Failed to parse URL from undefinednote
 17:54:56.678	    at <unknown> (.next/server/chunks/586.js:1:56470)
@@ -27,6 +25,7 @@
 ```
 
 - ビルド時に環境変数を取得できず失敗している
+  - [Next.js の事前レンダリング エラー](https://nextjs.org/docs/messages/prerender-error)
 - Cloudflare の「設定 > 変数とシークレット」はアプリ実行時のもの
   - 「設定 > ビルド > 変数とシークレット」にビルド時の環境変数設定が必要
-  - →API_URL をビルド時環境変数に設定することで解決
+  - API_URL, NEXT_PUBLIC_BASE_URL をビルド時環境変数に設定することで解決

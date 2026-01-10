@@ -1,9 +1,9 @@
 import Title from "./title";
 
-export default async function SimpleHeader() {
+export default function SimpleHeader() {
   return (
     <header className="flex items-center h-16 border-b w-full justify-between">
-      <div className="mx-6">
+      <div className="mx-4">
         <Title />
       </div>
     </header>

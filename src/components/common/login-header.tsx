@@ -11,20 +11,19 @@ export default function LoginHeader() {
   // セッション取得
   const session = authClient.useSession();
 
-  // ログインボタン付きヘッダー
   return (
     <header className="flex items-center h-16 border-b w-full justify-between">
       <div className="mx-4">
         <Title />
       </div>
-      {!session?.data?.session ? (
-        <div className="flex gap-2 items-center mx-4">
+      {!session?.data ? (
+        <div className="mx-4">
           <SignIn />
         </div>
       ) : (
         <div className="mx-4">
           {session.data.user.image && (
-            <Link href={PATH.USER}>
+            <Link href={PATH.MEMO.LIST}>
               <Image
                 src={session.data.user.image}
                 alt="User Avatar"

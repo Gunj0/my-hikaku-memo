@@ -42,6 +42,15 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: [
+      {
+        url: "/favicon.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -51,10 +60,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml"></link>
-      </head>
-      <body className={`${notoSansJP.variable} antialiased`}>
+      <body
+        className={`${notoSansJP.variable} antialiased min-h-screen flex flex-col`}
+      >
         {children}
         <Footer />
       </body>
