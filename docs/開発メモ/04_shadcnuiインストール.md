@@ -158,3 +158,15 @@ global.css に色定義が追加される
 ✔ Created 1 file:
   - src/components/ui/checkbox.tsx
 ```
+
+## Spinner
+
+[Spinner](https://ui.shadcn.com/docs/components/spinner)
+
+```zsh
+pnpm dlx shadcn@latest add spinner
+✔ Checking registry.
+✔ Installing dependencies.
+✔ Created 1 file:
+  - src/components/ui/spinner.tsx
+```

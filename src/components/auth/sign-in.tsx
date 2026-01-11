@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { PATH } from "@/const/Path";
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
 import { useState } from "react";
@@ -12,14 +13,11 @@ export function SignIn({ redirectTo }: { redirectTo?: string }) {
     await authClient.signIn.social(
       {
         provider: "google",
-        callbackURL: "/" + (redirectTo ?? ""),
+        callbackURL: redirectTo ?? PATH.AUTH.USER,
       },
       {
         onRequest: () => {
           setLoading(true);
-        },
-        onResponse: () => {
-          setLoading(false);
         },
       }
     );
@@ -34,7 +32,7 @@ export function SignIn({ redirectTo }: { redirectTo?: string }) {
       onClick={login}
     >
       <Image src="/google-logo.svg" alt="Google Logo" width={16} height={16} />
-      Googleで事前登録
+      <p>Googleで事前登録</p>
     </Button>
   );
 }

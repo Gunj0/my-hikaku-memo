@@ -4,13 +4,13 @@ export const PATH = {
   ICON: "/icon.svg",
   AUTH: {
     LOGIN: "/login",
+    USER: "/user",
   },
-  USER: "/user",
   MEMO: {
     NEW: "/memo/new",
     EDIT: "/memo/edit",
     LIST: "/memo/list",
-    DETAIL: "/memo/detail",
+    DETAIL: "/memo/",
   },
   // API Route
   API: {
