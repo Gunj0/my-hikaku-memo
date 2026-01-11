@@ -12,9 +12,9 @@ import {
 import { PATH } from "@/const/Path";
 import { authClient } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
-export default function LoginPage() {
+function LoginContent() {
   // セッション取得
   const session = authClient.useSession();
 
@@ -49,5 +49,13 @@ export default function LoginPage() {
         </Card>
       </main>
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>読み込み中...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

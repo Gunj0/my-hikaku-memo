@@ -1,7 +1,7 @@
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { User } from "lucide-react";
 import Image from "next/image";
-import { Badge } from "./ui/badge";
 
 interface UserProfileCardProps {
   userName?: string | null | undefined;

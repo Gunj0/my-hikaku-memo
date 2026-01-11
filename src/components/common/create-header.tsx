@@ -7,8 +7,9 @@ import { PATH } from "@/const/Path";
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
 import Link from "next/link";
+import CreateMemoButton from "./create-memo-button";
 
-export default function LoginHeader() {
+export default function CreateHeader() {
   // セッション取得
   const session = authClient.useSession();
 
@@ -34,6 +35,7 @@ export default function LoginHeader() {
             <div className="flex items-center gap-4">
               {session.data.user.image && (
                 <>
+                  <CreateMemoButton />
                   <Link href={PATH.AUTH.USER}>
                     <Image
                       src={session.data.user.image}

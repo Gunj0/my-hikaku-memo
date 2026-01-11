@@ -1,6 +1,5 @@
 "use client";
 
-import SimpleHeader from "@/components/common/simple-header";
 import { Spinner } from "@/components/ui/spinner";
 import { PATH } from "@/const/Path";
 import { authClient } from "@/lib/auth-client";
@@ -29,11 +28,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [router, session?.data?.user, session.isPending]);
 
-  // セッション取得中はローディング表示
-  if (session.isPending) {
+  // セッション取得中、または認証されていない場合はローディング表示
+  if (session.isPending || !session?.data?.user) {
     return (
       <>
-        <SimpleHeader />
         <main className="flex flex-1 flex-col items-center justify-center bg-background">
           <Spinner />
         </main>

@@ -19,7 +19,7 @@ export async function getMemos(): Promise<HikakuMemo[]> {
 
 // TODO: 本実装
 export async function getMemoByUserId(userId: string): Promise<HikakuMemo[]> {
-  return dummyMemos;
+  return dummyMemos.filter((memo) => memo.userId === userId);
 }
 
 export async function searchMemos(query: string): Promise<HikakuMemo[]> {
