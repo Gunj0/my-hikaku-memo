@@ -1,67 +1,92 @@
 "use client";
 
-import { SignIn } from "@/components/auth/sign-in";
+import AuthGuard from "@/components/auth/auth-guard";
 import { SignOut } from "@/components/auth/sign-out";
-import LoginHeader from "@/components/common/login-header";
+import CreateMemoButton from "@/components/common/create-memo-button";
+import SimpleHeader from "@/components/common/simple-header";
+import { MemoCard } from "@/components/memo/memo-card";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { UserProfileCard } from "@/components/user-profile-card";
 import { PATH } from "@/const/Path";
 import { authClient } from "@/lib/auth-client";
+import { getMemos } from "@/lib/get-memo";
+import { HikakuMemo } from "@/types/memo";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function UserPage() {
+  // セッション取得
   const session = authClient.useSession();
-  const [memos, setMemos] = useState("");
-  const getMemos = async () => {
-    const { data, error } = await authClient.token();
-    if (error || !data) {
-      setMemos(`error, ${error.message}`);
-      return;
-    }
-    const jwtToken = data.token;
-    console.log("JWT Token:", jwtToken);
-    const result = await fetch("/api/backend", {
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-      },
-    });
-    if (result.status === 500) {
-      setMemos("取得に失敗しました");
-      return;
-    }
-    const memos = await result.json();
-    console.log("Memos from backend API:", memos);
+  const [isLoading, setIsLoading] = useState(true);
 
-    setMemos(JSON.stringify(memos));
+  // メモ取得
+  const [memos, setMemos] = useState<HikakuMemo[]>([]);
+  const loadMemos = async () => {
+    const results = await getMemos();
+    setMemos(results);
   };
 
+  // 初回ロード時にメモを読み込み
+  useEffect(() => {
+    (async () => {
+      await loadMemos();
+      setIsLoading(false);
+    })();
+  }, []);
+
   return (
-    <>
-      <LoginHeader />
-      {session?.data?.session ? (
-        <div className="text-center min-h-screen mt-10">
-          <p className="mb-10">事前登録ありがとうございます！</p>
-          <p className="mb-10">ログイン中: {session.data.user.email}</p>
-          <div className="flex justify-center flex-col items-center">
-            <Button className="mb-10" variant="outline" asChild>
-              <Link href={PATH.MEMO.NEW}>メモ作成サンプルページ</Link>
-            </Button>
-            <Button className="mb-10" onClick={getMemos} variant="outline">
-              メモリスト(作成中)
-            </Button>
-            {memos && (
-              <pre className="text-left max-w-3xl mx-auto mb-10">{memos}</pre>
+    <AuthGuard>
+      {/* ヘッダ */}
+      <SimpleHeader />
+      {/* セッションあり */}
+      <main className="flex flex-1 flex-col bg-linear-to-br from-slate-50 via-blue-50 to-slate-100">
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          {/* ユーザープロフィール */}
+          <UserProfileCard
+            idOwner={true}
+            userIcon={session?.data?.user?.image}
+            userName={session?.data?.user?.email}
+          />
+
+          {/* 比較メモを作る */}
+          <div className="mt-24 text-center">
+            <CreateMemoButton />
+          </div>
+
+          {/* 比較メモリスト */}
+          <div className="mt-24">
+            <h2 className="text-lg text-gray-600 font-bold mb-4">
+              <p className="mr-4 mb-4">あなたの比較メモ ({memos.length}件)</p>
+              <Button className="border" variant="outline" asChild>
+                <Link href={PATH.MEMO.LIST}>すべての比較メモ</Link>
+              </Button>
+            </h2>
+
+            {isLoading ? (
+              <div className="text-center py-12 border-2 border-dashed rounded-lg">
+                <Spinner />
+              </div>
+            ) : memos.length === 0 ? (
+              <div className="text-center py-12 border-2 border-dashed rounded-lg">
+                <p className="text-muted-foreground">まだメモがありません</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {memos.map((memo, id) => (
+                  <MemoCard key={id} memo={memo} />
+                ))}
+              </div>
             )}
           </div>
 
-          <SignOut />
+          {/* アカウント */}
+          <div className="mt-8">
+            <h2 className="text-lg text-gray-600 font-bold mb-4">アカウント</h2>
+            <SignOut />
+          </div>
         </div>
-      ) : (
-        <div className="text-center mt-10">
-          <h1 className="mb-10">ログインしてください</h1>
-          <SignIn />
-        </div>
-      )}
-    </>
+      </main>
+    </AuthGuard>
   );
 }

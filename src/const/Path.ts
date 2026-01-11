@@ -7,11 +7,12 @@ export const PATH = {
     USER: "/user",
   },
   MEMO: {
+    LIST: "/memo",
     NEW: "/memo/new",
     EDIT: "/memo/edit",
-    LIST: "/memo/list",
     DETAIL: "/memo/",
   },
+  NOT_FOUND: "/404",
   // API Route
   API: {
     MEMO: {

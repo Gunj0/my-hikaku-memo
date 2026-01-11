@@ -17,6 +17,11 @@ export async function getMemos(): Promise<HikakuMemo[]> {
   return dummyMemos;
 }
 
+// TODO: 本実装
+export async function getMemoByUserId(userId: string): Promise<HikakuMemo[]> {
+  return dummyMemos;
+}
+
 export async function searchMemos(query: string): Promise<HikakuMemo[]> {
   const memos = await getMemos();
   const lowerQuery = query.toLowerCase() || "";
@@ -68,7 +73,7 @@ export async function getMemosTmp(): Promise<string> {
     // 成功したらJson化して返却
     const memos = await result.json();
     return JSON.stringify(memos);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return `その他エラー: ${error}`;
   }
 }

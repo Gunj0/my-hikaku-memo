@@ -1,7 +1,6 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,22 +11,14 @@ import {
 import { PATH } from "@/const/Path";
 import { formatDate } from "@/lib/format-date";
 import type { HikakuMemo } from "@/types/memo";
-import { Edit, ShoppingCart, Trash2 } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
 
 interface MemoCardProps {
   memo: HikakuMemo;
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-  isEditable?: boolean;
 }
 
-export function MemoCard({
-  memo,
-  onEdit,
-  onDelete,
-  isEditable = false,
-}: MemoCardProps) {
+export function MemoCard({ memo }: MemoCardProps) {
   const selectedProduct = memo.products?.find(
     (p) => p.id === memo.selectedProductId
   );
@@ -44,24 +35,6 @@ export function MemoCard({
                 {formattedDate}
               </CardDescription>
             </div>
-            {isEditable && (
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onEdit(memo.id)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(memo.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-3 flex-1">

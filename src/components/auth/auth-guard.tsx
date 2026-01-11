@@ -1,35 +1,36 @@
 "use client";
 
-import type React from "react";
-
+import SimpleHeader from "@/components/common/simple-header";
 import { Spinner } from "@/components/ui/spinner";
 import { PATH } from "@/const/Path";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import SimpleHeader from "./common/simple-header";
+import type React from "react";
+import { useEffect } from "react";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  // セッション取得
+  // セッション
   const session = authClient.useSession();
-  // ロード中
-  const [isLoading, setIsLoading] = useState(true);
   // ルータ
   const router = useRouter();
 
   useEffect(() => {
-    // ログインしてない場合ログイン画面へ
+    // セッション取得中は何もしない
+    if (session.isPending) {
+      return;
+    }
+
     if (!session?.data?.user) {
+      // ログインしてない場合、クエリを付けてログイン画面へ
       const currentPath = window.location.pathname;
       router.push(
         `${PATH.AUTH.LOGIN}?callbackUrl=${encodeURIComponent(currentPath)}`
       );
-    } else {
-      setIsLoading(false);
     }
-  }, [router]);
+  }, [router, session?.data?.user, session.isPending]);
 
-  if (isLoading) {
+  // セッション取得中はローディング表示
+  if (session.isPending) {
     return (
       <>
         <SimpleHeader />
