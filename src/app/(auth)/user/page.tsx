@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 export default function UserPage() {
   // セッション取得
   const session = authClient.useSession();
+  // ロード中フラグ
   const [isLoading, setIsLoading] = useState(true);
 
   // メモ取得
@@ -50,9 +51,9 @@ export default function UserPage() {
           <div className="mx-auto max-w-7xl">
             {/* ユーザープロフィール */}
             <UserProfileCard
-              idOwner={true}
-              userIcon={session?.data?.user?.image}
               userName={session?.data?.user?.email}
+              userIcon={session?.data?.user?.image}
+              isOwner={true}
             />
 
             {/* 比較メモを作る */}
@@ -62,7 +63,7 @@ export default function UserPage() {
 
             {/* 比較メモリスト */}
             <div className="mt-24">
-              <div className="text-gray-600 mb-4">
+              <div className="text-gray-600 mb-4 text-center">
                 <h2 className="text-lg font-bold mb-4">
                   あなたの比較メモ ({memos.length}件)
                 </h2>
@@ -89,7 +90,7 @@ export default function UserPage() {
             </div>
 
             {/* アカウント */}
-            <div className="mt-8 text-gray-600">
+            <div className="mt-20 text-gray-600 text-center">
               <h2 className="text-lg font-bold mb-4">アカウント</h2>
               <SignOut />
             </div>

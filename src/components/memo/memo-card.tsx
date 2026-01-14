@@ -19,10 +19,6 @@ interface MemoCardProps {
 }
 
 export default function MemoCard({ memo }: MemoCardProps) {
-  const selectedProduct = memo.products?.find(
-    (p) => p.id === memo.selectedProductId
-  );
-
   return (
     <Link href={PATH.MEMO.DETAIL + memo.id} className="h-full">
       <Card className="h-full transition-shadow hover:shadow-md cursor-pointer flex flex-col">
@@ -32,8 +28,9 @@ export default function MemoCard({ memo }: MemoCardProps) {
               {/* タイトル */}
               <CardTitle className="text-lg">{memo.title}</CardTitle>
               {/* 更新日付 */}
-              <CardDescription className="mt-1">
-                {memo.updatedAt && formatDate(memo.updatedAt)}
+              <CardDescription className="mt-1 flex flex-row gap-2">
+                <p>{memo.updatedAt && formatDate(memo.updatedAt)}</p>
+                <p>{memo.userId}</p>
               </CardDescription>
             </div>
           </div>

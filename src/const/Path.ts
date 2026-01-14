@@ -11,6 +11,7 @@ const PATH = {
     NEW: "/memo/new",
     EDIT: "/memo/edit",
     DETAIL: "/memo/",
+    USER: "/memo/user/",
   },
   NOT_FOUND: "/404",
   // API Route

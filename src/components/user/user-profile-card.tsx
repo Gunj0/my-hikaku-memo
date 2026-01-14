@@ -6,13 +6,13 @@ import Image from "next/image";
 interface UserProfileCardProps {
   userName?: string | null | undefined;
   userIcon?: string | null | undefined;
-  idOwner?: boolean;
+  isOwner?: boolean;
 }
 
 export default function UserProfileCard({
   userName,
   userIcon,
-  idOwner,
+  isOwner,
 }: UserProfileCardProps) {
   return (
     <Card className="bg-linear-to-br from-slate-100 via-blue-100 to-slate-200">
@@ -29,13 +29,13 @@ export default function UserProfileCard({
             />
           ) : (
             // デフォルトアイコン
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-              <User className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center border-2">
+              <User className="w-6 h-6" />
             </div>
           )}
           {/* ユーザー名 */}
           <div>
-            {idOwner && (
+            {isOwner && (
               <Badge className="bg-blue-500 text-white font-bold">
                 ログイン中
               </Badge>

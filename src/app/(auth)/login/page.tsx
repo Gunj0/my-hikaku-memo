@@ -61,6 +61,7 @@ function LoginContent() {
   );
 }
 
+// useSearchParamsをSuspenseでラップする必要がある
 // https://nextjs.org/docs/messages/missing-suspense-with-csr-bailout
 export default function LoginPage() {
   return (
