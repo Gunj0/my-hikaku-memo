@@ -37,9 +37,7 @@ function LoginContent() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">オレの比較メモ</CardTitle>
-            <CardDescription>
-              あなただけの比較メモを作りましょう
-            </CardDescription>
+            <CardDescription>あなただけの比較過程を記録しよう</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mx-auto my-20 flex justify-center">

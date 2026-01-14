@@ -3,9 +3,9 @@ interface HikakuMemo {
   id: string;
   userId: string;
   title: string;
-  category: string[]; // e.g., "スマホ", "PC", "モニター"
-  points?: Point[];
-  products?: Product[];
+  categories: string[]; // e.g., "スマホ", "PC", "モニター"
+  points: Point[];
+  products: Product[];
   evaluations?: Evaluation[];
   selectedProductId?: string; // 購入決定した製品
   finalDecisionReason?: string; // 購入決定理由・総評
@@ -15,7 +15,7 @@ interface HikakuMemo {
 
 // ポイント
 interface Point {
-  id: string;
+  id?: string;
   name: string;
   isImportant: boolean;
   constraint?: string; // e.g., "〜10万円", "50cm〜120cm"
@@ -23,7 +23,7 @@ interface Point {
 
 // 製品
 interface Product {
-  id: string;
+  id?: string;
   name: string;
   isSelected: boolean;
 }
@@ -33,29 +33,23 @@ interface Evaluation {
   productId: string;
   pointId: string;
   rating?: number; // 1-5 stars
-  memo: string;
+  memo?: string;
 }
 
-// 削除予定
-interface ComparisonPoint {
-  id: string;
-  name: string;
-  isImportant: boolean;
-  constraint?: string; // e.g., "〜10万円", "50cm〜120cm"
-}
-
-// 削除予定
-interface ComparisonMemo {
-  id: string;
-  userId: string;
-  category: string; // e.g., "スマホ", "PC", "モニター"
-  comparisonPoints: ComparisonPoint[];
+// 比較メモ作成リクエスト
+interface HikakuMemoCreateRequest {
+  title: string;
+  categories: string[];
+  points: Point[];
   products: Product[];
-  evaluations: Evaluation[];
-  selectedProductId?: string; // 購入決定した製品
-  finalDecisionReason?: string; // 購入決定理由・総評
-  createdAt: string;
-  updatedAt: string;
+  evaluations?: Evaluation[];
+  selectedProductId?: string;
+  finalDecisionReason?: string;
+}
+
+// 比較メモ更新リクエスト
+interface HikakuMemoUpdateRequest extends HikakuMemoCreateRequest {
+  id: string;
 }
 
 export {
@@ -63,6 +57,8 @@ export {
   ComparisonPoint,
   Evaluation,
   HikakuMemo,
+  HikakuMemoCreateRequest,
+  HikakuMemoUpdateRequest,
   Point,
   Product,
 };

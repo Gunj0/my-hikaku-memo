@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PATH } from "@/const/Path";
 import { authClient } from "@/lib/auth-client";
-import { getMemos, searchMemos } from "@/lib/get-memo";
+import { getMyMemos, searchMyMemos } from "@/lib/get-memo";
 import type { HikakuMemo } from "@/types/memo";
 import { Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -27,16 +27,16 @@ export default function MemosPage() {
 
   const loadMemos = async () => {
     setIsLoading(true);
-    const userMemos = await getMemos();
-    setMemos(userMemos);
+    const userMemos = await getMyMemos();
+    setMemos(userMemos.data);
     setIsLoading(false);
   };
 
   const handleSearch = async () => {
     setIsLoading(true);
     if (searchQuery.trim()) {
-      const results = await searchMemos(searchQuery);
-      setMemos(results);
+      const results = await searchMyMemos(searchQuery);
+      setMemos(results.data);
     } else {
       await loadMemos();
     }

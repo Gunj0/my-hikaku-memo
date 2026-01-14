@@ -40,7 +40,7 @@ export function UserProfileCard({
                 ログイン中
               </Badge>
             )}
-            <p className="text-gray-600">
+            <p className="text-gray-600 pointer-events-none">
               {userName ? userName : "ゲストユーザー"}
             </p>
           </div>

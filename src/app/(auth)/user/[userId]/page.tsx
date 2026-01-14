@@ -51,7 +51,13 @@ export default function UserPage({
       setUser(targetUser);
       // ユーザのメモ取得
       const userMemos = await getMemoByUserId(resolvedParams.userId);
-      setMemos(userMemos);
+      if (userMemos.error) {
+        setMemos([]);
+        // ロード完了
+        setIsLoading(false);
+        return;
+      }
+      setMemos(userMemos.data);
       // ロード完了
       setIsLoading(false);
     })();

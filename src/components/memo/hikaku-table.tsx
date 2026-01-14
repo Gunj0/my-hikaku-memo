@@ -8,7 +8,7 @@ import type { Evaluation, Point, Product } from "@/types/memo";
 import { ShoppingCart, Star } from "lucide-react";
 import { useState } from "react";
 
-interface ComparisonTableProps {
+interface HikakuTableProps {
   comparisonPoints: Point[];
   products: Product[];
   evaluations: Evaluation[];
@@ -19,7 +19,7 @@ interface ComparisonTableProps {
   onFinalDecisionReasonChange: (reason: string) => void;
 }
 
-export function ComparisonTable({
+export function HikakuTable({
   comparisonPoints,
   products,
   evaluations,
@@ -28,7 +28,7 @@ export function ComparisonTable({
   onSelectedProductChange,
   finalDecisionReason,
   onFinalDecisionReasonChange,
-}: ComparisonTableProps) {
+}: HikakuTableProps) {
   const [editingCell, setEditingCell] = useState<string | null>(null);
 
   const getEvaluation = (productId: string, pointId: string): Evaluation => {
@@ -69,7 +69,7 @@ export function ComparisonTable({
 
   const calculateTotalScore = (productId: string): number => {
     return comparisonPoints.reduce((total, point) => {
-      const evaluation = getEvaluation(productId, point.id);
+      const evaluation = getEvaluation(productId, point.id ?? "");
       return total + (evaluation.rating || 0);
     }, 0);
   };
@@ -147,7 +147,10 @@ export function ComparisonTable({
                       </div>
                     </td>
                     {comparisonPoints.map((point) => {
-                      const evaluation = getEvaluation(product.id, point.id);
+                      const evaluation = getEvaluation(
+                        product.id ?? "",
+                        point.id ?? ""
+                      );
                       const cellId = `${product.id}-${point.id}`;
                       const isEditing = editingCell === cellId;
 
@@ -160,9 +163,13 @@ export function ComparisonTable({
                                 <button
                                   key={star}
                                   onClick={() =>
-                                    updateEvaluation(product.id, point.id, {
-                                      rating: star,
-                                    })
+                                    updateEvaluation(
+                                      product.id ?? "",
+                                      point.id ?? "",
+                                      {
+                                        rating: star,
+                                      }
+                                    )
                                   }
                                   className="transition-colors"
                                   type="button"
@@ -185,9 +192,13 @@ export function ComparisonTable({
                                 placeholder="評価やメモを入力..."
                                 value={evaluation.memo}
                                 onChange={(e) =>
-                                  updateEvaluation(product.id, point.id, {
-                                    memo: e.target.value,
-                                  })
+                                  updateEvaluation(
+                                    product.id ?? "",
+                                    point.id ?? "",
+                                    {
+                                      memo: e.target.value,
+                                    }
+                                  )
                                 }
                                 onBlur={() => setEditingCell(null)}
                                 autoFocus
@@ -215,7 +226,7 @@ export function ComparisonTable({
                     <td key={product.id} className="p-3 border-t-2 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <span className="text-2xl">
-                          {calculateTotalScore(product.id)}
+                          {calculateTotalScore(product.id ?? "")}
                         </span>
                         <span className="text-sm text-muted-foreground">
                           / {comparisonPoints.length * 5}
@@ -248,11 +259,11 @@ export function ComparisonTable({
                 {products.map((product) => (
                   <div key={product.id} className="flex items-center space-x-2">
                     <RadioGroupItem
-                      value={product.id}
-                      id={`select-${product.id}`}
+                      value={product.id ?? ""}
+                      id={`select-${product.id ?? ""}`}
                     />
                     <Label
-                      htmlFor={`select-${product.id}`}
+                      htmlFor={`select-${product.id ?? ""}`}
                       className="cursor-pointer"
                     >
                       {product.name}

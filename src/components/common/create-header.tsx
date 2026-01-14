@@ -35,7 +35,7 @@ export default function CreateHeader() {
             <div className="flex items-center gap-4">
               {session.data.user.image && (
                 <>
-                  <CreateMemoButton />
+                  <CreateMemoButton message="メモ作成" />
                   <Link href={PATH.AUTH.USER}>
                     <Image
                       src={session.data.user.image}

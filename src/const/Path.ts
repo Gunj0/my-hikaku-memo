@@ -18,6 +18,10 @@ export const PATH = {
     MEMO: {
       LIST: "/api/memo/get-memos",
     },
+    AI: {
+      SUGGEST_POINTS: "/api/ai/suggest-points",
+      SUGGEST_PRODUCTS: "/api/ai/suggest-products",
+    },
   },
   // 外部API
   BACKEND: {
