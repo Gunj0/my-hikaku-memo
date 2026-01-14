@@ -1,7 +1,7 @@
+import "@/app/globals.css";
 import Footer from "@/components/common/footer";
 import PATH from "@/const/Path";
 import SITE from "@/const/Site";
-import "@/globals.css";
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 
