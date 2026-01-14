@@ -1,4 +1,4 @@
-import Title from "./title";
+import Title from "@/components/common/title";
 
 export default function SimpleHeader() {
   return (

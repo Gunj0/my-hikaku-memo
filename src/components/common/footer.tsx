@@ -1,4 +1,4 @@
-import { SITE } from "@/const/Site";
+import SITE from "@/const/Site";
 
 export default function Footer() {
   return (

@@ -1,8 +1,8 @@
 "use client";
 
-import { Spinner } from "@/components/ui/spinner";
-import { PATH } from "@/const/Path";
-import { authClient } from "@/lib/auth-client";
+import NowLoading from "@/components/common/now-loading";
+import PATH from "@/const/Path";
+import authClient from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect } from "react";
@@ -32,9 +32,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   if (session.isPending || !session?.data?.user) {
     return (
       <>
-        <main className="flex flex-1 flex-col items-center justify-center bg-background">
-          <Spinner />
-        </main>
+        <NowLoading />
       </>
     );
   }

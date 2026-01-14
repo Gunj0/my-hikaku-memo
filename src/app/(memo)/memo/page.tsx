@@ -2,11 +2,11 @@
 
 import AuthGuard from "@/components/auth/auth-guard";
 import CreateHeader from "@/components/common/create-header";
-import { MemoCard } from "@/components/memo/memo-card";
+import MemoCard from "@/components/memo/memo-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PATH } from "@/const/Path";
-import { authClient } from "@/lib/auth-client";
+import PATH from "@/const/Path";
+import authClient from "@/lib/auth-client";
 import { getMyMemos, searchMyMemos } from "@/lib/get-memo";
 import type { HikakuMemo } from "@/types/memo";
 import { Plus, Search } from "lucide-react";

@@ -2,11 +2,11 @@
 
 import LoginHeader from "@/components/common/login-header";
 import SimpleHeader from "@/components/common/simple-header";
-import { MemoCard } from "@/components/memo/memo-card";
+import MemoCard from "@/components/memo/memo-card";
 import { Spinner } from "@/components/ui/spinner";
-import { UserProfileCard } from "@/components/user/user-profile-card";
-import { PATH } from "@/const/Path";
-import { authClient } from "@/lib/auth-client";
+import UserProfileCard from "@/components/user/user-profile-card";
+import PATH from "@/const/Path";
+import authClient from "@/lib/auth-client";
 import { getMemoByUserId } from "@/lib/get-memo";
 import { getUserByUserId } from "@/lib/get-user";
 import type { HikakuMemo } from "@/types/memo";

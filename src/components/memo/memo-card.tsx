@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PATH } from "@/const/Path";
+import PATH from "@/const/Path";
 import { formatDate } from "@/lib/format-date";
 import type { HikakuMemo } from "@/types/memo";
 import { Check, CircleCheck, Crown, ShoppingCart } from "lucide-react";
@@ -18,7 +18,7 @@ interface MemoCardProps {
   memo: HikakuMemo;
 }
 
-export function MemoCard({ memo }: MemoCardProps) {
+export default function MemoCard({ memo }: MemoCardProps) {
   const selectedProduct = memo.products?.find(
     (p) => p.id === memo.selectedProductId
   );

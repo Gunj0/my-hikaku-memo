@@ -1,4 +1,4 @@
-import { PATH } from "@/const/Path";
+import PATH from "@/const/Path";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -8,7 +8,7 @@ export default function Title() {
       <Image
         src={PATH.ICON}
         className="mr-1"
-        alt="サイトロゴ"
+        alt="オレの比較メモアイコン"
         width={40}
         height={40}
       />

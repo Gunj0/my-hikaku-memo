@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { PATH } from "@/const/Path";
+import PATH from "@/const/Path";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 

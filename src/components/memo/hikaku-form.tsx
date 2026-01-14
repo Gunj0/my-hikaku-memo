@@ -24,7 +24,7 @@ interface HikakuFormProps {
   onAISuggestProducts: () => void;
 }
 
-export function HikakuForm({
+export default function HikakuForm({
   categories,
   onCategoriesChange,
   points,

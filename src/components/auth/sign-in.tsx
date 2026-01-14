@@ -1,11 +1,12 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
-import { PATH } from "@/const/Path";
-import { authClient } from "@/lib/auth-client";
+import PATH from "@/const/Path";
+import authClient from "@/lib/auth-client";
 import Image from "next/image";
 import { useState } from "react";
 
-export function SignIn({ redirectTo }: { redirectTo?: string }) {
+export default function SignIn({ redirectTo }: { redirectTo?: string }) {
   // ローディング状態
   const [loading, setLoading] = useState(false);
   // ログイン処理

@@ -1,4 +1,4 @@
-export const PATH = {
+const PATH = {
   HOME: "/",
   OGP: "/ogp.png",
   ICON: "/icon.svg",
@@ -28,3 +28,5 @@ export const PATH = {
     MEMO: "/memo",
   },
 };
+
+export default PATH;

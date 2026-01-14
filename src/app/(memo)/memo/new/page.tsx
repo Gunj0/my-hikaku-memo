@@ -2,10 +2,10 @@
 
 import AuthGuard from "@/components/auth/auth-guard";
 import CreateHeader from "@/components/common/create-header";
-import { HikakuForm } from "@/components/memo/hikaku-form";
-import { HikakuTable } from "@/components/memo/hikaku-table";
+import HikakuForm from "@/components/memo/hikaku-form";
+import HikakuTable from "@/components/memo/hikaku-table";
 import { Button } from "@/components/ui/button";
-import { PATH } from "@/const/Path";
+import PATH from "@/const/Path";
 import { createMemo } from "@/lib/post-memo";
 import type {
   Evaluation,

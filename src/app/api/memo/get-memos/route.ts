@@ -1,4 +1,4 @@
-import { PATH } from "@/const/Path";
+import PATH from "@/const/Path";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {

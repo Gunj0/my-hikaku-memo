@@ -19,7 +19,7 @@ interface HikakuTableProps {
   onFinalDecisionReasonChange: (reason: string) => void;
 }
 
-export function HikakuTable({
+export default function HikakuTable({
   comparisonPoints,
   products,
   evaluations,

@@ -1,15 +1,15 @@
 "use client";
 
 import AuthGuard from "@/components/auth/auth-guard";
-import { SignOut } from "@/components/auth/sign-out";
+import SignOut from "@/components/auth/sign-out";
 import CreateHeader from "@/components/common/create-header";
 import CreateMemoButton from "@/components/common/create-memo-button";
-import { MemoCard } from "@/components/memo/memo-card";
+import MemoCard from "@/components/memo/memo-card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { UserProfileCard } from "@/components/user/user-profile-card";
-import { PATH } from "@/const/Path";
-import { authClient } from "@/lib/auth-client";
+import UserProfileCard from "@/components/user/user-profile-card";
+import PATH from "@/const/Path";
+import authClient from "@/lib/auth-client";
 import { getMyMemos } from "@/lib/get-memo";
 import { HikakuMemo } from "@/types/memo";
 import Link from "next/link";

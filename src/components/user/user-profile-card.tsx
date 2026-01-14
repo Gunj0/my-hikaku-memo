@@ -9,7 +9,7 @@ interface UserProfileCardProps {
   idOwner?: boolean;
 }
 
-export function UserProfileCard({
+export default function UserProfileCard({
   userName,
   userIcon,
   idOwner,

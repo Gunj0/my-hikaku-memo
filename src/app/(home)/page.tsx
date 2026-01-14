@@ -2,11 +2,11 @@
 
 import CreateHeader from "@/components/common/create-header";
 import CreateMemoButton from "@/components/common/create-memo-button";
-import { MemoCard } from "@/components/memo/memo-card";
+import MemoCard from "@/components/memo/memo-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { SITE } from "@/const/Site";
+import SITE from "@/const/Site";
 import { getAllMemos, searchAllMemos } from "@/lib/get-memo";
 import type { HikakuMemo } from "@/types/memo";
 import { Search } from "lucide-react";
