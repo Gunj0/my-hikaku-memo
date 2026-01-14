@@ -1,9 +1,9 @@
 import Footer from "@/components/common/footer";
-import { PATH } from "@/const/Path";
-import { SITE } from "@/const/Site";
+import PATH from "@/const/Path";
+import SITE from "@/const/Site";
+import "@/globals.css";
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
-import "./globals.css";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"], // latinだけを指定して軽量化

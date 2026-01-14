@@ -1,6 +1,6 @@
 import SimpleHeader from "@/components/common/simple-header";
 import { Button } from "@/components/ui/button";
-import { PATH } from "@/const/Path";
+import PATH from "@/const/Path";
 import Link from "next/link";
 
 export default function NotFound() {
