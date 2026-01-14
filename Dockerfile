@@ -16,7 +16,6 @@ RUN \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
   else echo "Lockfile not found." && exit 1; \
   fi
-RUN pnpm rebuild @cloudflare/workerd-linux-64
 
 # Rebuild the source code only when needed
 FROM base AS builder

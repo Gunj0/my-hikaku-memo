@@ -12,4 +12,6 @@ export default nextConfig;
 // Enable calling `getCloudflareContext()` in `next dev`.
 // See https://opennext.js.org/cloudflare/bindings#local-access-to-bindings.
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
-initOpenNextCloudflareForDev();
+
+// Cloudflareのときだけ有効化
+if (process.env.CLOUDFLARE_BUILD === "true") initOpenNextCloudflareForDev();
