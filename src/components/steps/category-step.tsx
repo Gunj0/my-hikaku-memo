@@ -1,47 +1,50 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { 
-  SmartphoneIcon, 
-  LaptopIcon, 
-  HeadphonesIcon, 
-  CameraIcon, 
-  WatchIcon, 
-  TvIcon,
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import {
+  CameraIcon,
   GamepadIcon,
+  HeadphonesIcon,
+  LaptopIcon,
   MonitorIcon,
-  PlusIcon
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+  PlusIcon,
+  SmartphoneIcon,
+  TvIcon,
+  WashingMachineIcon,
+  WatchIcon,
+} from "lucide-react";
 
 interface CategoryStepProps {
-  category: string
-  categoryMemo: string
-  onCategoryChange: (category: string) => void
-  onMemoChange: (memo: string) => void
+  category: string;
+  categoryMemo: string;
+  onCategoryChange: (category: string) => void;
+  onMemoChange: (memo: string) => void;
 }
 
 const PRESET_CATEGORIES = [
-  { name: 'スマートフォン', icon: SmartphoneIcon },
-  { name: 'ノートPC', icon: LaptopIcon },
-  { name: 'イヤホン・ヘッドホン', icon: HeadphonesIcon },
-  { name: 'カメラ', icon: CameraIcon },
-  { name: 'スマートウォッチ', icon: WatchIcon },
-  { name: 'テレビ', icon: TvIcon },
-  { name: 'ゲーム機', icon: GamepadIcon },
-  { name: 'モニター', icon: MonitorIcon },
-]
+  { name: "スマートフォン", icon: SmartphoneIcon },
+  { name: "ノートPC", icon: LaptopIcon },
+  { name: "イヤホン・ヘッドホン", icon: HeadphonesIcon },
+  { name: "カメラ", icon: CameraIcon },
+  { name: "スマートウォッチ", icon: WatchIcon },
+  { name: "テレビ", icon: TvIcon },
+  { name: "ゲーム機", icon: GamepadIcon },
+  { name: "モニター", icon: MonitorIcon },
+  { name: "洗濯機", icon: WashingMachineIcon },
+];
 
-export function CategoryStep({ 
-  category, 
-  categoryMemo, 
-  onCategoryChange, 
-  onMemoChange 
+export function CategoryStep({
+  category,
+  categoryMemo,
+  onCategoryChange,
+  onMemoChange,
 }: CategoryStepProps) {
-  const isCustomCategory = category && !PRESET_CATEGORIES.some(c => c.name === category)
+  const isCustomCategory =
+    category && !PRESET_CATEGORIES.some((c) => c.name === category);
 
   return (
     <div className="space-y-6">
@@ -56,10 +59,11 @@ export function CategoryStep({
         {PRESET_CATEGORIES.map(({ name, icon: Icon }) => (
           <Button
             key={name}
-            variant={category === name ? 'default' : 'secondary'}
+            variant={category === name ? "default" : "secondary"}
             className={cn(
-              'h-auto py-4 flex flex-col gap-2',
-              category === name && 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+              "h-auto py-4 flex flex-col gap-2",
+              category === name &&
+                "ring-2 ring-primary ring-offset-2 ring-offset-background",
             )}
             onClick={() => onCategoryChange(name)}
           >
@@ -75,7 +79,7 @@ export function CategoryStep({
           <Input
             id="custom-category"
             placeholder="カテゴリ名を入力..."
-            value={isCustomCategory ? category : ''}
+            value={isCustomCategory ? category : ""}
             onChange={(e) => onCategoryChange(e.target.value)}
             className="flex-1"
           />
@@ -83,8 +87,10 @@ export function CategoryStep({
             variant="outline"
             size="icon"
             onClick={() => {
-              const input = document.getElementById('custom-category') as HTMLInputElement
-              if (input?.value) onCategoryChange(input.value)
+              const input = document.getElementById(
+                "custom-category",
+              ) as HTMLInputElement;
+              if (input?.value) onCategoryChange(input.value);
             }}
           >
             <PlusIcon className="w-4 h-4" />
@@ -103,5 +109,5 @@ export function CategoryStep({
         />
       </div>
     </div>
-  )
+  );
 }
