@@ -1,27 +1,27 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Product, DecisionPoint, ProductScore } from '@/lib/types'
-import { cn } from '@/lib/utils'
-import { CheckCircle2Icon, TrophyIcon, PartyPopperIcon } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Product, DecisionPoint, ProductScore } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { CheckCircle2Icon, TrophyIcon, PartyPopperIcon } from "lucide-react";
 
 interface DecisionStepProps {
-  products: Product[]
-  decisionPoints: DecisionPoint[]
-  scores: ProductScore[]
-  selectedProductId: string | null
-  decisionMemo: string
-  onSelectProduct: (id: string | null) => void
-  onMemoChange: (memo: string) => void
+  products: Product[];
+  decisionPoints: DecisionPoint[];
+  scores: ProductScore[];
+  selectedProductId: string | null;
+  decisionMemo: string;
+  onSelectProduct: (id: string | null) => void;
+  onMemoChange: (memo: string) => void;
 }
 
 interface ProductTotal {
-  product: Product
-  totalScore: number
-  maxPossible: number
-  percentage: number
+  product: Product;
+  totalScore: number;
+  maxPossible: number;
+  percentage: number;
 }
 
 export function DecisionStep({
@@ -31,38 +31,41 @@ export function DecisionStep({
   selectedProductId,
   decisionMemo,
   onSelectProduct,
-  onMemoChange
+  onMemoChange,
 }: DecisionStepProps) {
-  const importantPoints = decisionPoints.filter(p => p.isImportant)
+  const importantPoints = decisionPoints.filter((p) => p.isImportant);
 
   const getScore = (productId: string, pointId: string): number => {
-    return scores.find(s => s.productId === productId && s.pointId === pointId)?.score || 0
-  }
+    return (
+      scores.find((s) => s.productId === productId && s.pointId === pointId)
+        ?.score || 0
+    );
+  };
 
   const calculateProductTotal = (product: Product): ProductTotal => {
-    let totalScore = 0
-    let maxPossible = 0
-    
-    importantPoints.forEach(point => {
-      const rawScore = getScore(product.id, point.id)
-      totalScore += rawScore * point.weight
-      maxPossible += 5 * point.weight
-    })
-    
+    let totalScore = 0;
+    let maxPossible = 0;
+
+    importantPoints.forEach((point) => {
+      const rawScore = getScore(product.id, point.id);
+      totalScore += rawScore * point.weight;
+      maxPossible += 5 * point.weight;
+    });
+
     return {
       product,
       totalScore,
       maxPossible,
-      percentage: maxPossible > 0 ? (totalScore / maxPossible) * 100 : 0
-    }
-  }
+      percentage: maxPossible > 0 ? (totalScore / maxPossible) * 100 : 0,
+    };
+  };
 
   const productTotals = products
     .map(calculateProductTotal)
-    .sort((a, b) => b.totalScore - a.totalScore)
+    .sort((a, b) => b.totalScore - a.totalScore);
 
-  const topScore = productTotals[0]?.totalScore || 0
-  const selectedProduct = products.find(p => p.id === selectedProductId)
+  const topScore = productTotals[0]?.totalScore || 0;
+  const selectedProduct = products.find((p) => p.id === selectedProductId);
 
   if (products.length === 0) {
     return (
@@ -74,7 +77,7 @@ export function DecisionStep({
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -113,19 +116,21 @@ export function DecisionStep({
               key={product.id}
               onClick={() => onSelectProduct(product.id)}
               className={cn(
-                'p-4 rounded-lg border text-left transition-all',
+                "p-4 rounded-lg border text-left transition-all",
                 selectedProductId === product.id
-                  ? 'border-primary bg-primary/10 ring-2 ring-primary ring-offset-2 ring-offset-background'
-                  : 'border-border bg-card hover:border-primary/50'
+                  ? "border-primary bg-primary/10 ring-2 ring-primary ring-offset-2 ring-offset-background"
+                  : "border-border bg-card hover:border-primary/50",
               )}
             >
               <div className="flex items-start gap-3">
-                <div className={cn(
-                  'flex items-center justify-center w-8 h-8 rounded-full shrink-0',
-                  index === 0 && topScore > 0
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground'
-                )}>
+                <div
+                  className={cn(
+                    "flex items-center justify-center w-8 h-8 rounded-full shrink-0",
+                    index === 0 && topScore > 0
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground",
+                  )}
+                >
                   {index === 0 && topScore > 0 ? (
                     <TrophyIcon className="w-4 h-4" />
                   ) : (
@@ -156,7 +161,7 @@ export function DecisionStep({
           placeholder="この製品を選んだ理由、購入予定日、注意点など..."
           value={decisionMemo}
           onChange={(e) => onMemoChange(e.target.value)}
-          className="min-h-[150px] resize-none"
+          className="min-h-37.5 resize-none"
         />
       </div>
 
@@ -172,5 +177,5 @@ export function DecisionStep({
         </div>
       )}
     </div>
-  )
+  );
 }

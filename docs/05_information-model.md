@@ -1,0 +1,163 @@
+# 情報モデル設計
+
+## 1. 文書の目的
+
+本書は、アプリ内で扱うデータ構造、項目意味、制約、および各データ間の関係を定義する。
+
+## 2. データモデル一覧
+
+本アプリで扱う主要データは次の 6 種類である。
+
+1. ComparisonData
+2. ComparisonMemoSummary
+3. ComparisonMemo
+4. DecisionPoint
+5. Product
+6. ProductScore
+
+## 3. ComparisonData
+
+比較フロー全体の入力状態を保持するルートモデルである。
+
+| 項目名            | 型              | 必須 | 説明                           |
+| ----------------- | --------------- | ---- | ------------------------------ |
+| category          | string          | 必須 | 比較対象カテゴリ名             |
+| categoryMemo      | string          | 任意 | カテゴリや購入背景に関するメモ |
+| decisionPoints    | DecisionPoint[] | 必須 | 比較ポイント一覧               |
+| pointsMemo        | string          | 任意 | 比較ポイント全体に関するメモ   |
+| products          | Product[]       | 必須 | 候補製品一覧                   |
+| productsMemo      | string          | 任意 | 候補製品全体に関するメモ       |
+| scores            | ProductScore[]  | 必須 | 製品と比較ポイントの評価情報   |
+| selectedProductId | string \| null  | 任意 | 最終決定した製品 ID            |
+| decisionMemo      | string          | 任意 | 最終決定理由や補足メモ         |
+
+## 4. 保存済みメモモデル
+
+### 4.1 ComparisonMemoSummary
+
+保存済みメモ一覧に表示するための要約モデルである。
+
+| 項目名    | 型     | 必須 | 説明                      |
+| --------- | ------ | ---- | ------------------------- |
+| id        | string | 必須 | 保存済みメモ識別子        |
+| title     | string | 必須 | 利用者が指定するメモ名    |
+| category  | string | 必須 | 比較対象カテゴリの要約    |
+| createdAt | string | 必須 | 作成日時の ISO 文字列表現 |
+| updatedAt | string | 必須 | 更新日時の ISO 文字列表現 |
+
+### 4.2 ComparisonMemo
+
+保存済みメモ詳細を表すモデルである。
+
+| 項目名 | 型                    | 必須 | 説明                     |
+| ------ | --------------------- | ---- | ------------------------ |
+| ...    | ComparisonMemoSummary | 必須 | 一覧表示に必要なメタ情報 |
+| data   | ComparisonData        | 必須 | 保存された比較フロー状態 |
+
+### 4.3 保存済みメモの制約
+
+- id は永続層で一意であること。
+- title は空文字でないこと。
+- data は ComparisonData として復元できる JSON 構造であること。
+
+## 5. DecisionPoint
+
+比較時に利用者が確認したい観点を表す。
+
+| 項目名      | 型      | 必須 | 説明                    |
+| ----------- | ------- | ---- | ----------------------- |
+| id          | string  | 必須 | 比較ポイント識別子      |
+| name        | string  | 必須 | 比較ポイント名          |
+| isImportant | boolean | 必須 | 重視対象かどうか        |
+| weight      | number  | 必須 | 重要度。1 から 5 の整数 |
+| memo        | string  | 任意 | 当該ポイントの補足メモ  |
+
+### 5.1 制約
+
+- id は画面内で一意であること。
+- name は空文字でないことが望ましい。
+- weight は UI 上 1 から 5 を前提とする。
+- isImportant が false の場合も weight 値自体は保持されうるが、集計には使わない。
+
+## 6. Product
+
+比較対象として登録された候補製品を表す。
+
+| 項目名 | 型     | 必須 | 説明                 |
+| ------ | ------ | ---- | -------------------- |
+| id     | string | 必須 | 製品識別子           |
+| name   | string | 必須 | 製品名               |
+| memo   | string | 任意 | 製品に関する補足メモ |
+
+### 6.1 制約
+
+- id は画面内で一意であること。
+- name は空文字でないことが望ましい。
+
+## 7. ProductScore
+
+1 つの製品と 1 つの比較ポイントの組み合わせに対する評価情報を表す。
+
+| 項目名    | 型     | 必須 | 説明                        |
+| --------- | ------ | ---- | --------------------------- |
+| productId | string | 必須 | 対象製品の ID               |
+| pointId   | string | 必須 | 対象比較ポイントの ID       |
+| score     | number | 必須 | 評価点。0 から 5 相当で扱う |
+| memo      | string | 任意 | 評価理由や補足メモ          |
+
+### 7.1 制約
+
+- productId と pointId の組み合わせは一意であることが望ましい。
+- score の入力 UI は 1 から 5 を提供する。
+- メモ先行入力時には score が 0 のレコードが生成されうる。
+
+## 8. データ間の関係
+
+```text
+ComparisonData
+  |- decisionPoints: DecisionPoint[]
+  |- products: Product[]
+  |- scores: ProductScore[]
+  |- selectedProductId -> Product.id
+
+ProductScore.productId -> Product.id
+ProductScore.pointId -> DecisionPoint.id
+
+ComparisonMemo.data -> ComparisonData
+```
+
+## 9. 初期値設計
+
+### 8.1 ComparisonData 初期値
+
+- category は空文字
+- categoryMemo は空文字
+- decisionPoints は初期比較ポイントの複製
+- pointsMemo は空文字
+- products は空配列
+- productsMemo は空文字
+- scores は空配列
+- selectedProductId は null
+- decisionMemo は空文字
+
+### 8.2 初期比較ポイント
+
+初期比較ポイントは次の性質を持つ。
+
+- 家電・ガジェット比較で汎用的に使える項目を含む
+- 価格、機能・スペックは初期状態で重視対象とする
+- 各項目は初期重要度を持つ
+
+## 10. ID 生成方針
+
+- 比較ポイント ID は生成時に UUID を採番する。
+- 候補製品 ID は生成時に UUID を採番する。
+- 保存済みメモ ID は保存時に UUID を採番する。
+- 初期比較ポイントも画面初期化時に都度 UUID を振り直す。
+
+## 11. モデル上の注意点
+
+- scores は重視ポイント以外のレコードを理論上持ちうるが、現行 UI では重視ポイントのみ入力対象とする。
+- 候補製品や比較ポイントを削除しても、関連する score レコードの自動整理は現行仕様では実施していない。
+- selectedProductId は products に存在しない ID を持つ可能性が理論上あるため、参照時は存在確認を前提とする。
+- 保存済みメモは ComparisonData 全体を JSON として保持し、読込時にスキーマ検証を行う。

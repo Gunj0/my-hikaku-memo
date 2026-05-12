@@ -31,6 +31,18 @@ export interface ComparisonData {
   decisionMemo: string;
 }
 
+export interface ComparisonMemoSummary {
+  id: string;
+  title: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ComparisonMemo extends ComparisonMemoSummary {
+  data: ComparisonData;
+}
+
 export const DEFAULT_DECISION_POINTS: Omit<DecisionPoint, "id">[] = [
   { name: "価格", isImportant: true, weight: 3, memo: "" },
   { name: "メーカー・ブランド", isImportant: false, weight: 2, memo: "" },

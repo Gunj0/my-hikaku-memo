@@ -105,7 +105,7 @@ export function CategoryStep({
           placeholder="購入の背景、予算感、利用シーンなど自由にメモ..."
           value={categoryMemo}
           onChange={(e) => onMemoChange(e.target.value)}
-          className="min-h-[120px] resize-none"
+          className="min-h-30 resize-none"
         />
       </div>
     </div>

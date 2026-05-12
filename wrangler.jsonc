@@ -29,6 +29,13 @@
       "service": "my-hikaku-memo",
     },
   ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "my-hikaku-memo-db",
+      "database_id": "0ecb1d07-a66d-4480-857c-cdf9aa424d03",
+    },
+  ],
   "observability": {
     "enabled": true,
   },

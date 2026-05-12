@@ -1,73 +1,80 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import { DecisionPoint, DEFAULT_DECISION_POINTS } from '@/lib/types'
-import { PlusIcon, XIcon, RotateCcwIcon, StarIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
-import { useState, useRef } from 'react'
-import { cn } from '@/lib/utils'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DecisionPoint, DEFAULT_DECISION_POINTS } from "@/lib/types";
+import {
+  PlusIcon,
+  XIcon,
+  RotateCcwIcon,
+  StarIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from "lucide-react";
+import { useState, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 interface PointsStepProps {
-  decisionPoints: DecisionPoint[]
-  pointsMemo: string
-  onPointsChange: (points: DecisionPoint[]) => void
-  onMemoChange: (memo: string) => void
+  decisionPoints: DecisionPoint[];
+  pointsMemo: string;
+  onPointsChange: (points: DecisionPoint[]) => void;
+  onMemoChange: (memo: string) => void;
 }
 
 export function PointsStep({
   decisionPoints,
   pointsMemo,
   onPointsChange,
-  onMemoChange
+  onMemoChange,
 }: PointsStepProps) {
-  const [newPointName, setNewPointName] = useState('')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const isComposingRef = useRef(false)
+  const [newPointName, setNewPointName] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const isComposingRef = useRef(false);
 
   const addPoint = () => {
-    if (!newPointName.trim() || isComposingRef.current) return
+    if (!newPointName.trim() || isComposingRef.current) return;
     const newPoint: DecisionPoint = {
       id: crypto.randomUUID(),
       name: newPointName.trim(),
       isImportant: false,
       weight: 2,
-      memo: ''
-    }
-    onPointsChange([...decisionPoints, newPoint])
-    setNewPointName('')
-  }
+      memo: "",
+    };
+    onPointsChange([...decisionPoints, newPoint]);
+    setNewPointName("");
+  };
 
   const removePoint = (id: string) => {
-    onPointsChange(decisionPoints.filter(p => p.id !== id))
-    if (expandedId === id) setExpandedId(null)
-  }
+    onPointsChange(decisionPoints.filter((p) => p.id !== id));
+    if (expandedId === id) setExpandedId(null);
+  };
 
   const updatePoint = (id: string, updates: Partial<DecisionPoint>) => {
     onPointsChange(
-      decisionPoints.map(p => p.id === id ? { ...p, ...updates } : p)
-    )
-  }
+      decisionPoints.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+    );
+  };
 
   const resetToDefault = () => {
-    const defaultPoints = DEFAULT_DECISION_POINTS.map(p => ({
+    const defaultPoints = DEFAULT_DECISION_POINTS.map((p) => ({
       ...p,
-      id: crypto.randomUUID()
-    }))
-    onPointsChange(defaultPoints)
-    setExpandedId(null)
-  }
+      id: crypto.randomUUID(),
+    }));
+    onPointsChange(defaultPoints);
+    setExpandedId(null);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !isComposingRef.current) {
-      e.preventDefault()
-      addPoint()
+    if (e.key === "Enter" && !isComposingRef.current) {
+      e.preventDefault();
+      addPoint();
     }
-  }
+  };
 
-  const importantCount = decisionPoints.filter(p => p.isImportant).length
+  const importantCount = decisionPoints.filter((p) => p.isImportant).length;
 
   return (
     <div className="space-y-6">
@@ -96,14 +103,16 @@ export function PointsStep({
 
       <div className="space-y-2">
         {decisionPoints.map((point) => {
-          const isExpanded = expandedId === point.id
+          const isExpanded = expandedId === point.id;
 
           return (
             <div
               key={point.id}
               className={cn(
-                'rounded-lg border transition-colors',
-                point.isImportant ? 'border-primary bg-primary/5' : 'border-border bg-card'
+                "rounded-lg border transition-colors",
+                point.isImportant
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-card",
               )}
             >
               <div className="p-3 sm:p-4">
@@ -111,17 +120,17 @@ export function PointsStep({
                   <Checkbox
                     id={`important-${point.id}`}
                     checked={point.isImportant}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       updatePoint(point.id, { isImportant: !!checked })
                     }
                   />
-                  <Label 
-                    htmlFor={`important-${point.id}`} 
+                  <Label
+                    htmlFor={`important-${point.id}`}
                     className="flex-1 text-sm sm:text-base font-medium cursor-pointer"
                   >
                     {point.name}
                   </Label>
-                  
+
                   {point.isImportant && (
                     <div className="hidden sm:flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((weight) => (
@@ -133,10 +142,10 @@ export function PointsStep({
                         >
                           <StarIcon
                             className={cn(
-                              'w-5 h-5 transition-colors',
+                              "w-5 h-5 transition-colors",
                               weight <= point.weight
-                                ? 'fill-primary text-primary'
-                                : 'text-muted-foreground/30'
+                                ? "fill-primary text-primary"
+                                : "text-muted-foreground/30",
                             )}
                           />
                         </button>
@@ -147,7 +156,7 @@ export function PointsStep({
                   <button
                     onClick={() => setExpandedId(isExpanded ? null : point.id)}
                     className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label={isExpanded ? '閉じる' : '詳細を開く'}
+                    aria-label={isExpanded ? "閉じる" : "詳細を開く"}
                   >
                     {isExpanded ? (
                       <ChevronUpIcon className="w-5 h-5" />
@@ -170,7 +179,9 @@ export function PointsStep({
                   <div className="mt-4 space-y-4 pl-7">
                     {point.isImportant && (
                       <div className="sm:hidden space-y-2">
-                        <span className="text-xs text-muted-foreground">重要度</span>
+                        <span className="text-xs text-muted-foreground">
+                          重要度
+                        </span>
                         <div className="flex gap-1">
                           {[1, 2, 3, 4, 5].map((weight) => (
                             <button
@@ -181,10 +192,10 @@ export function PointsStep({
                             >
                               <StarIcon
                                 className={cn(
-                                  'w-6 h-6 transition-colors',
+                                  "w-6 h-6 transition-colors",
                                   weight <= point.weight
-                                    ? 'fill-primary text-primary'
-                                    : 'text-muted-foreground/30'
+                                    ? "fill-primary text-primary"
+                                    : "text-muted-foreground/30",
                                 )}
                               />
                             </button>
@@ -194,19 +205,23 @@ export function PointsStep({
                     )}
 
                     <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">メモ（任意）</Label>
+                      <Label className="text-xs text-muted-foreground">
+                        メモ（任意）
+                      </Label>
                       <Textarea
                         placeholder="このポイントに関するメモ..."
                         value={point.memo}
-                        onChange={(e) => updatePoint(point.id, { memo: e.target.value })}
-                        className="min-h-[80px] resize-none text-sm"
+                        onChange={(e) =>
+                          updatePoint(point.id, { memo: e.target.value })
+                        }
+                        className="min-h-20 resize-none text-sm"
                       />
                     </div>
                   </div>
                 )}
               </div>
             </div>
-          )
+          );
         })}
       </div>
 
@@ -219,8 +234,12 @@ export function PointsStep({
             value={newPointName}
             onChange={(e) => setNewPointName(e.target.value)}
             onKeyDown={handleKeyDown}
-            onCompositionStart={() => { isComposingRef.current = true }}
-            onCompositionEnd={() => { isComposingRef.current = false }}
+            onCompositionStart={() => {
+              isComposingRef.current = true;
+            }}
+            onCompositionEnd={() => {
+              isComposingRef.current = false;
+            }}
             className="flex-1"
           />
           <Button onClick={addPoint} disabled={!newPointName.trim()}>
@@ -237,9 +256,9 @@ export function PointsStep({
           placeholder="比較ポイントに関する補足メモ..."
           value={pointsMemo}
           onChange={(e) => onMemoChange(e.target.value)}
-          className="min-h-[100px] resize-none"
+          className="min-h-25 resize-none"
         />
       </div>
     </div>
-  )
+  );
 }

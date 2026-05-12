@@ -1,6 +1,10 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { AuthSessionProvider } from "@/components/auth/session-provider";
+import { Toaster } from "@/components/ui/sonner";
+
 import "./globals.css";
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -36,8 +40,11 @@ export default function RootLayout({
   return (
     <html lang="ja" className="dark bg-background">
       <body className="font-sans antialiased min-h-dvh">
-        {children}
-        {process.env.NODE_ENV === "production" && <Analytics />}
+        <AuthSessionProvider>
+          {children}
+          <Toaster richColors position="top-right" />
+          {process.env.NODE_ENV === "production" && <Analytics />}
+        </AuthSessionProvider>
       </body>
     </html>
   );
