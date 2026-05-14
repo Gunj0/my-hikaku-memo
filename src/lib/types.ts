@@ -57,9 +57,9 @@ export const DEFAULT_DECISION_POINTS: Omit<DecisionPoint, "id">[] = [
 
 export const STEPS = [
   { id: 1, title: "カテゴリ", shortTitle: "カテゴリ" },
-  { id: 2, title: "比較ポイント", shortTitle: "ポイント" },
+  { id: 2, title: "ポイント", shortTitle: "ポイント" },
   { id: 3, title: "候補", shortTitle: "候補" },
-  { id: 4, title: "評価入力", shortTitle: "評価" },
-  { id: 5, title: "集計結果", shortTitle: "集計" },
-  { id: 6, title: "最終決定", shortTitle: "決定" },
+  { id: 4, title: "評価", shortTitle: "評価" },
+  { id: 5, title: "集計", shortTitle: "集計" },
+  { id: 6, title: "結論", shortTitle: "結論" },
 ] as const;
