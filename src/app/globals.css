@@ -125,6 +125,16 @@
   * {
     @apply border-border outline-ring/50;
   }
+  button,
+  [role='button'],
+  [data-slot='button'] {
+    cursor: pointer !important;
+  }
+  button:disabled,
+  [role='button'][aria-disabled='true'],
+  [data-slot='button'][disabled] {
+    cursor: not-allowed !important;
+  }
   body {
     @apply bg-background text-foreground;
   }

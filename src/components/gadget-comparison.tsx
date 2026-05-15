@@ -42,12 +42,11 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   LogInIcon,
-  LogOutIcon,
   RotateCcwIcon,
   SaveIcon,
   Trash2Icon,
 } from "lucide-react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -74,7 +73,7 @@ async function readResponse<T>(response: Response): Promise<T> {
 }
 
 export function GadgetComparison() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [currentStep, setCurrentStep] = useState(1);
   const [data, setData] = useState<ComparisonData>(() =>
     createInitialComparisonData(),
@@ -179,12 +178,6 @@ export function GadgetComparison() {
 
   const handleSignIn = async () => {
     await signIn("google", { redirectTo: "/" });
-  };
-
-  const handleSignOut = async () => {
-    await signOut({ redirectTo: "/" });
-    setSavedMemos([]);
-    setIsLibraryDialogOpen(false);
   };
 
   const handleOpenSaveDialog = () => {
@@ -589,18 +582,10 @@ export function GadgetComparison() {
             <div className="flex flex-col gap-4 mb-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div className="space-y-1">
-                  <h1 className="text-lg font-semibold text-foreground">
-                    オレの比較メモ
-                  </h1>
                   <p className="text-sm text-muted-foreground">
                     {activeMemo
                       ? `編集中: ${activeMemo.title}`
                       : "比較フローはログインなしで使えます。保存するときだけ Google ログインが必要です。"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {isAuthenticated
-                      ? `ログイン中: ${session.user?.name ?? session.user?.email ?? "Googleアカウント"}`
-                      : "未ログイン"}
                   </p>
                 </div>
 
@@ -623,25 +608,6 @@ export function GadgetComparison() {
                     <BookMarkedIcon className="w-4 h-4 mr-1" />
                     保存済みメモ
                   </Button>
-                  {isAuthenticated ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => void handleSignOut()}
-                    >
-                      <LogOutIcon className="w-4 h-4 mr-1" />
-                      ログアウト
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => void handleSignIn()}
-                    >
-                      <LogInIcon className="w-4 h-4 mr-1" />
-                      Googleでログイン
-                    </Button>
-                  )}
                   <Button
                     variant="ghost"
                     size="sm"

@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { AppHeader } from "@/components/app-header";
 import { AuthSessionProvider } from "@/components/auth/session-provider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -41,6 +42,7 @@ export default function RootLayout({
     <html lang="ja" className="dark bg-background">
       <body className="font-sans antialiased min-h-dvh">
         <AuthSessionProvider>
+          <AppHeader />
           {children}
           <Toaster richColors position="top-right" />
           {process.env.NODE_ENV === "production" && <Analytics />}
