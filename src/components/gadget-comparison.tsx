@@ -583,62 +583,26 @@ export function GadgetComparison() {
           <div className="mx-auto max-w-6xl px-4 py-3">
             <div className="mb-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
               <div className="rounded-lg border border-border/80 bg-card/72 px-3 py-3 shadow-[0_0_0_1px_rgb(255_255_255/0.02)]">
-                <div className="flex flex-wrap items-center gap-2 text-[10px] tracking-[0.18em] text-muted-foreground uppercase">
-                  <span className="rounded-sm border border-border/70 bg-background/55 px-2 py-1">
-                    flow:{currentStep.toString().padStart(2, "0")}/
-                    {STEPS.length.toString().padStart(2, "0")}
-                  </span>
-                  <span className="rounded-sm border border-border/70 bg-background/55 px-2 py-1">
-                    pts:{importantPointsCount}
-                  </span>
-                  <span className="rounded-sm border border-border/70 bg-background/55 px-2 py-1">
-                    prod:{data.products.length}
-                  </span>
-                  <span
-                    className={
-                      activeMemo
-                        ? "rounded-sm border border-success/35 bg-success/14 px-2 py-1 text-success"
-                        : "rounded-sm border border-border/70 bg-background/55 px-2 py-1"
-                    }
-                  >
-                    {activeMemo ? "memo:persisted" : "memo:volatile"}
-                  </span>
-                </div>
                 <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                   <div className="space-y-1">
-                    <p className="text-[11px] tracking-[0.22em] text-muted-foreground uppercase">
-                      active context
-                    </p>
                     <p className="text-sm text-foreground">
                       {activeMemo
                         ? `編集中: ${activeMemo.title}`
-                        : "比較フローはゲストで進行可能です。保存操作だけ Google ログインが必要です。"}
+                        : "新規作成中"}
                     </p>
-                  </div>
-                  <div className="min-w-44 rounded-md border border-border/70 bg-background/45 px-3 py-2">
-                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                      <span>progress</span>
-                      <span>{progressPercent}%</span>
-                    </div>
-                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
-                      <div
-                        className="h-full bg-primary transition-[width] duration-100"
-                        style={{ width: `${progressPercent}%` }}
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+              <div className="flex flex-wrap items-center gap-2 justify-end">
                 <Button
-                  variant="success"
+                  variant="ghost"
                   size="sm"
-                  onClick={handleOpenSaveDialog}
-                  disabled={isAuthLoading}
+                  onClick={handleReset}
+                  className="text-muted-foreground"
                 >
-                  <SaveIcon className="w-4 h-4 mr-1" />
-                  保存
+                  <RotateCcwIcon className="w-4 h-4 mr-1" />
+                  元に戻す
                 </Button>
                 <Button
                   variant="outline"
@@ -647,16 +611,16 @@ export function GadgetComparison() {
                   disabled={isAuthLoading}
                 >
                   <BookMarkedIcon className="w-4 h-4 mr-1" />
-                  保存済みメモ
+                  メモ一覧
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="success"
                   size="sm"
-                  onClick={handleReset}
-                  className="text-muted-foreground"
+                  onClick={handleOpenSaveDialog}
+                  disabled={isAuthLoading}
                 >
-                  <RotateCcwIcon className="w-4 h-4 mr-1" />
-                  リセット
+                  <SaveIcon className="w-4 h-4 mr-1" />
+                  保存
                 </Button>
               </div>
             </div>

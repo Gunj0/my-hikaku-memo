@@ -1,21 +1,21 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { DecisionPoint, DEFAULT_DECISION_POINTS } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import {
-  PlusIcon,
-  XIcon,
-  RotateCcwIcon,
-  StarIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  PlusIcon,
+  RotateCcwIcon,
+  StarIcon,
+  XIcon,
 } from "lucide-react";
-import { useState, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { useRef, useState } from "react";
 
 interface PointsStepProps {
   decisionPoints: DecisionPoint[];
@@ -81,7 +81,7 @@ export function PointsStep({
       <div>
         <h2 className="text-xl font-semibold mb-2">比較ポイントと優先度</h2>
         <p className="text-muted-foreground text-sm">
-          製品を選ぶ際に重要な項目を設定し、重視するポイントにチェックを入れてください
+          製品を選ぶ際に重要なポイントを全て洗い出し、その中であなたが重視するポイントにチェックを入れてください
         </p>
       </div>
 

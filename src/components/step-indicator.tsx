@@ -2,7 +2,6 @@
 
 import { STEPS } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { CheckIcon } from "lucide-react";
 
 interface StepIndicatorProps {
   currentStep: number;
@@ -46,11 +45,7 @@ export function StepIndicator({
                     "border-border/50 bg-background/60 text-muted-foreground",
                 )}
               >
-                {isComplete ? (
-                  <CheckIcon className="w-3.5 h-3.5" />
-                ) : (
-                  step.id.toString().padStart(2, "0")
-                )}
+                {step.id.toString().padStart(2, "0")}
               </span>
               <span className="text-left">
                 <span className="block text-[10px] text-muted-foreground/85">

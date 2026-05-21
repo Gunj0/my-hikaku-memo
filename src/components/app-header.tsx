@@ -24,7 +24,7 @@ export function AppHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
           <p className="mb-1 text-[10px] tracking-[0.24em] text-muted-foreground uppercase">
-            tokyo-night // compare.memo
+            My Hikaku Memo
           </p>
           <Link
             href="/"
@@ -34,12 +34,6 @@ export function AppHeader() {
             オレの比較メモ
             <span className="text-primary/80">]</span>
           </Link>
-          {isAuthenticated && (
-            <p className="mt-1 truncate text-[11px] text-muted-foreground">
-              usr:
-              {session.user?.name ?? session.user?.email ?? "google-account"}
-            </p>
-          )}
         </div>
 
         <div className="flex items-center gap-2">

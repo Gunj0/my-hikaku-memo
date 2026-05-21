@@ -7,15 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import {
   CameraIcon,
-  GamepadIcon,
   HeadphonesIcon,
   LaptopIcon,
   MonitorIcon,
-  PlusIcon,
   SmartphoneIcon,
   TvIcon,
   WashingMachineIcon,
-  WatchIcon,
 } from "lucide-react";
 
 interface CategoryStepProps {
@@ -26,15 +23,14 @@ interface CategoryStepProps {
 }
 
 const PRESET_CATEGORIES = [
-  { name: "スマートフォン", icon: SmartphoneIcon },
+  { name: "スマホ", icon: SmartphoneIcon },
   { name: "ノートPC", icon: LaptopIcon },
-  { name: "イヤホン・ヘッドホン", icon: HeadphonesIcon },
+  { name: "イヤホン", icon: HeadphonesIcon },
   { name: "カメラ", icon: CameraIcon },
-  { name: "スマートウォッチ", icon: WatchIcon },
   { name: "テレビ", icon: TvIcon },
-  { name: "ゲーム機", icon: GamepadIcon },
   { name: "モニター", icon: MonitorIcon },
   { name: "洗濯機", icon: WashingMachineIcon },
+  { name: "冷蔵庫", icon: LaptopIcon },
 ];
 
 export function CategoryStep({
@@ -51,11 +47,11 @@ export function CategoryStep({
       <div>
         <h2 className="text-xl font-semibold mb-2">カテゴリ</h2>
         <p className="text-muted-foreground text-sm">
-          比較したい製品のカテゴリを選んでください
+          比較したい製品のカテゴリを選択または入力してください
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {PRESET_CATEGORIES.map(({ name, icon: Icon }) => (
           <Button
             key={name}
@@ -83,18 +79,6 @@ export function CategoryStep({
             onChange={(e) => onCategoryChange(e.target.value)}
             className="flex-1"
           />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => {
-              const input = document.getElementById(
-                "custom-category",
-              ) as HTMLInputElement;
-              if (input?.value) onCategoryChange(input.value);
-            }}
-          >
-            <PlusIcon className="w-4 h-4" />
-          </Button>
         </div>
       </div>
 
