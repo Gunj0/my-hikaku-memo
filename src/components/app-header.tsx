@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { BookMarkedIcon, LogInIcon, LogOutIcon, PlusCircleIcon } from "lucide-react";
+import { BookMarkedIcon, LogInIcon, LogOutIcon, PlusCircleIcon, type LucideIcon } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -19,7 +19,7 @@ export function AppHeader() {
 
     return query ? `${pathname}?${query}` : pathname;
   })();
-  const navItems = [
+  const navItems: { href: string; label: string; icon: LucideIcon }[] = [
     { href: "/memos/new", label: "新規作成", icon: PlusCircleIcon },
     { href: "/memos", label: "マイメモ", icon: BookMarkedIcon },
   ];
@@ -64,6 +64,7 @@ export function AppHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-label={item.label}
                   className={cn(
                     "inline-flex items-center gap-1 rounded-sm border px-2 py-1 transition-colors",
                     isActive
