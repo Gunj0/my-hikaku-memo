@@ -50,16 +50,16 @@ export default async function Home() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-lg border border-primary/30 bg-primary/8 p-4">
                 <p className="mt-2 text-lg font-semibold">
-                  {firstName}の新しい比較を作る
+                  新しい比較メモを作る
                 </p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
                   カテゴリから順番に比較条件を整理して、結論まで保存できます。
                 </p>
                 <div className="mt-4">
-                  <Button asChild>
+                  <Button asChild variant="success">
                     <Link href="/memos/new">
-                      新しいメモを作る
-                      <ArrowRightIcon className="h-4 w-4" />
+                      <PlusCircleIcon className="h-4 w-4" />
+                      新しい比較メモを作る
                     </Link>
                   </Button>
                 </div>
@@ -87,9 +87,6 @@ export default async function Home() {
 
         <Card className="border-border/80 bg-card/74">
           <CardHeader>
-            <p className="text-[11px] tracking-[0.22em] text-primary uppercase">
-              quick guide
-            </p>
             <CardTitle className="text-xl">このアプリでできること</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
@@ -204,7 +201,7 @@ export default async function Home() {
             <Button asChild variant="success">
               <Link href="/memos/new">
                 <PlusCircleIcon className="h-4 w-4" />
-                新しい比較メモを始める
+                新しい比較メモを作る
               </Link>
             </Button>
           </CardContent>

@@ -59,6 +59,10 @@ type MemoDetailResponse = {
   memo: ComparisonMemo;
 };
 
+function cloneComparisonData(data: ComparisonData): ComparisonData {
+  return structuredClone(data);
+}
+
 async function readResponse<T>(response: Response): Promise<T> {
   const json = await response.json().catch(() => null);
 
@@ -85,6 +89,9 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const [data, setData] = useState<ComparisonData>(() =>
     createInitialComparisonData(),
   );
+  const [savedSnapshot, setSavedSnapshot] = useState<ComparisonData | null>(
+    null,
+  );
   const [activeMemo, setActiveMemo] = useState<ComparisonMemoSummary | null>(
     null,
   );
@@ -109,20 +116,16 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
     return query ? `${pathname}?${query}` : pathname;
   })();
+  const hasValidSelectedProduct = data.products.some(
+    (product) => product.id === data.selectedProductId,
+  );
 
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return data.category.trim().length > 0;
       case 2:
-        return (
-          data.decisionPoints.length > 0 &&
-          data.decisionPoints.some((p) => p.isImportant)
-        );
       case 3:
-        return data.products.length >= 2;
       case 4:
-        return true;
       case 5:
         return true;
       case 6:
@@ -203,9 +206,16 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
   const handleReset = () => {
     if (confirm("すべての入力内容がリセットされます。よろしいですか？")) {
+      if (activeMemo && savedSnapshot) {
+        const restoredData = cloneComparisonData(savedSnapshot);
+
+        setData(restoredData);
+        setCurrentStep(getInitialStepForComparisonData(restoredData));
+        return;
+      }
+
       setData(createInitialComparisonData());
       setCurrentStep(1);
-      setActiveMemo(null);
     }
   };
 
@@ -242,7 +252,8 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       });
       const { memo } = await readResponse<MemoDetailResponse>(response);
 
-      setData(memo.data);
+      setData(cloneComparisonData(memo.data));
+      setSavedSnapshot(cloneComparisonData(memo.data));
       setCurrentStep(getInitialStepForComparisonData(memo.data));
       setActiveMemo({
         id: memo.id,
@@ -326,6 +337,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       } satisfies ComparisonMemoSummary;
 
       setActiveMemo(summary);
+      setSavedSnapshot(cloneComparisonData(memo.data));
       setMemoTitle(summary.title);
       setIsSaveDialogOpen(false);
       await refreshSavedMemos();
@@ -403,6 +415,19 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     setData((prev) => ({ ...prev, [key]: value }));
   };
 
+  const updateProducts = (products: ComparisonData["products"]) => {
+    setData((prev) => {
+      const hasDeletion = products.length < prev.products.length;
+
+      return {
+        ...prev,
+        products,
+        selectedProductId:
+          hasDeletion && prev.selectedProductId ? null : prev.selectedProductId,
+      };
+    });
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -428,7 +453,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
           <ProductsStep
             products={data.products}
             productsMemo={data.productsMemo}
-            onProductsChange={(products) => updateData("products", products)}
+            onProductsChange={updateProducts}
             onMemoChange={(memo) => updateData("productsMemo", memo)}
           />
         );
@@ -710,7 +735,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                     <div className="flex items-center justify-between gap-3">
                       <span>decision</span>
                       <span className="text-foreground">
-                        {data.selectedProductId ? "locked" : "pending"}
+                        {hasValidSelectedProduct ? "locked" : "pending"}
                       </span>
                     </div>
                   </div>
@@ -761,7 +786,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                 <Button
                   variant="default"
                   className="flex-1 sm:flex-none"
-                  disabled={!data.selectedProductId}
+                  disabled={!hasValidSelectedProduct}
                 >
                   完了
                 </Button>

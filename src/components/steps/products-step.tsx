@@ -1,56 +1,54 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Product } from '@/lib/types'
-import { PlusIcon, XIcon, PackageIcon } from 'lucide-react'
-import { useState, useRef } from 'react'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Product } from "@/lib/types";
+import { PackageIcon, PlusIcon, XIcon } from "lucide-react";
+import { useRef, useState } from "react";
 
 interface ProductsStepProps {
-  products: Product[]
-  productsMemo: string
-  onProductsChange: (products: Product[]) => void
-  onMemoChange: (memo: string) => void
+  products: Product[];
+  productsMemo: string;
+  onProductsChange: (products: Product[]) => void;
+  onMemoChange: (memo: string) => void;
 }
 
 export function ProductsStep({
   products,
   productsMemo,
   onProductsChange,
-  onMemoChange
+  onMemoChange,
 }: ProductsStepProps) {
-  const [newProductName, setNewProductName] = useState('')
-  const isComposingRef = useRef(false)
+  const [newProductName, setNewProductName] = useState("");
+  const isComposingRef = useRef(false);
 
   const addProduct = () => {
-    if (!newProductName.trim() || isComposingRef.current) return
+    if (!newProductName.trim() || isComposingRef.current) return;
     const newProduct: Product = {
       id: crypto.randomUUID(),
       name: newProductName.trim(),
-      memo: ''
-    }
-    onProductsChange([...products, newProduct])
-    setNewProductName('')
-  }
+      memo: "",
+    };
+    onProductsChange([...products, newProduct]);
+    setNewProductName("");
+  };
 
   const removeProduct = (id: string) => {
-    onProductsChange(products.filter(p => p.id !== id))
-  }
+    onProductsChange(products.filter((p) => p.id !== id));
+  };
 
   const updateProductMemo = (id: string, memo: string) => {
-    onProductsChange(
-      products.map(p => p.id === id ? { ...p, memo } : p)
-    )
-  }
+    onProductsChange(products.map((p) => (p.id === id ? { ...p, memo } : p)));
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !isComposingRef.current) {
-      e.preventDefault()
-      addProduct()
+    if (e.key === "Enter" && !isComposingRef.current) {
+      e.preventDefault();
+      addProduct();
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -70,8 +68,12 @@ export function ProductsStep({
             value={newProductName}
             onChange={(e) => setNewProductName(e.target.value)}
             onKeyDown={handleKeyDown}
-            onCompositionStart={() => { isComposingRef.current = true }}
-            onCompositionEnd={() => { isComposingRef.current = false }}
+            onCompositionStart={() => {
+              isComposingRef.current = true;
+            }}
+            onCompositionEnd={() => {
+              isComposingRef.current = false;
+            }}
             className="flex-1"
           />
           <Button onClick={addProduct} disabled={!newProductName.trim()}>
@@ -103,6 +105,7 @@ export function ProductsStep({
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => removeProduct(product.id)}
+                  aria-label={`${product.name}を削除`}
                 >
                   <XIcon className="w-4 h-4 text-muted-foreground hover:text-destructive" />
                 </Button>
@@ -111,7 +114,7 @@ export function ProductsStep({
                 placeholder="この製品に関するメモ（価格、購入先など）..."
                 value={product.memo}
                 onChange={(e) => updateProductMemo(product.id, e.target.value)}
-                className="min-h-[80px] resize-none text-sm"
+                className="min-h-20 resize-none text-sm"
               />
             </div>
           ))}
@@ -125,9 +128,9 @@ export function ProductsStep({
           placeholder="候補製品に関する補足メモ..."
           value={productsMemo}
           onChange={(e) => onMemoChange(e.target.value)}
-          className="min-h-[100px] resize-none"
+          className="min-h-25 resize-none"
         />
       </div>
     </div>
-  )
+  );
 }

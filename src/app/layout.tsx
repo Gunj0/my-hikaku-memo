@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/app-header";
 import { AuthSessionProvider } from "@/components/auth/session-provider";
 import { Toaster } from "@/components/ui/sonner";
 
+import { Suspense } from "react";
 import "./globals.css";
 
 const plexMono = IBM_Plex_Mono({
@@ -55,7 +56,9 @@ export default function RootLayout({
         className={`${plexMono.variable} ${jetBrainsMono.variable} font-sans antialiased min-h-dvh`}
       >
         <AuthSessionProvider>
-          <AppHeader />
+          <Suspense fallback={null}>
+            <AppHeader />
+          </Suspense>
           {children}
           <Toaster richColors position="top-right" />
           {process.env.NODE_ENV === "production" && <Analytics />}
