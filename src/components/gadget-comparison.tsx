@@ -163,9 +163,7 @@ export function GadgetComparison() {
   };
 
   const handleStepClick = (step: number) => {
-    if (step <= currentStep) {
-      setCurrentStep(step);
-    }
+    setCurrentStep(step);
   };
 
   const handleReset = () => {
