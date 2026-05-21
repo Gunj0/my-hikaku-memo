@@ -93,6 +93,10 @@ export function GadgetComparison() {
 
   const isAuthenticated = status === "authenticated";
   const isAuthLoading = status === "loading";
+  const importantPointsCount = data.decisionPoints.filter(
+    (point) => point.isImportant,
+  ).length;
+  const progressPercent = Math.round((currentStep / STEPS.length) * 100);
 
   const canProceed = () => {
     switch (currentStep) {
@@ -478,7 +482,7 @@ export function GadgetComparison() {
             </Button>
             {activeMemo ? (
               <Button
-                variant="outline"
+                variant="success"
                 onClick={() => void saveMemo("create")}
                 disabled={isSaving}
               >
@@ -487,6 +491,7 @@ export function GadgetComparison() {
               </Button>
             ) : null}
             <Button
+              variant="success"
               onClick={() => void saveMemo(activeMemo ? "update" : "create")}
               disabled={isSaving}
             >
@@ -574,50 +579,88 @@ export function GadgetComparison() {
       </Dialog>
 
       <div className="min-h-dvh flex flex-col">
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
-          <div className="max-w-5xl mx-auto px-4 py-4">
-            <div className="flex flex-col gap-4 mb-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">
-                    {activeMemo
-                      ? `編集中: ${activeMemo.title}`
-                      : "比較フローはログインなしで使えます。保存するときだけ Google ログインが必要です。"}
-                  </p>
+        <header className="sticky top-0 z-40 border-b border-border/80 bg-background/82 backdrop-blur-md">
+          <div className="mx-auto max-w-6xl px-4 py-3">
+            <div className="mb-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+              <div className="rounded-lg border border-border/80 bg-card/72 px-3 py-3 shadow-[0_0_0_1px_rgb(255_255_255/0.02)]">
+                <div className="flex flex-wrap items-center gap-2 text-[10px] tracking-[0.18em] text-muted-foreground uppercase">
+                  <span className="rounded-sm border border-border/70 bg-background/55 px-2 py-1">
+                    flow:{currentStep.toString().padStart(2, "0")}/
+                    {STEPS.length.toString().padStart(2, "0")}
+                  </span>
+                  <span className="rounded-sm border border-border/70 bg-background/55 px-2 py-1">
+                    pts:{importantPointsCount}
+                  </span>
+                  <span className="rounded-sm border border-border/70 bg-background/55 px-2 py-1">
+                    prod:{data.products.length}
+                  </span>
+                  <span
+                    className={
+                      activeMemo
+                        ? "rounded-sm border border-success/35 bg-success/14 px-2 py-1 text-success"
+                        : "rounded-sm border border-border/70 bg-background/55 px-2 py-1"
+                    }
+                  >
+                    {activeMemo ? "memo:persisted" : "memo:volatile"}
+                  </span>
                 </div>
-
-                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleOpenSaveDialog}
-                    disabled={isAuthLoading}
-                  >
-                    <SaveIcon className="w-4 h-4 mr-1" />
-                    保存
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleOpenLibrary}
-                    disabled={isAuthLoading}
-                  >
-                    <BookMarkedIcon className="w-4 h-4 mr-1" />
-                    保存済みメモ
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleReset}
-                    className="text-muted-foreground"
-                  >
-                    <RotateCcwIcon className="w-4 h-4 mr-1" />
-                    リセット
-                  </Button>
+                <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="space-y-1">
+                    <p className="text-[11px] tracking-[0.22em] text-muted-foreground uppercase">
+                      active context
+                    </p>
+                    <p className="text-sm text-foreground">
+                      {activeMemo
+                        ? `編集中: ${activeMemo.title}`
+                        : "比較フローはゲストで進行可能です。保存操作だけ Google ログインが必要です。"}
+                    </p>
+                  </div>
+                  <div className="min-w-44 rounded-md border border-border/70 bg-background/45 px-3 py-2">
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>progress</span>
+                      <span>{progressPercent}%</span>
+                    </div>
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+                      <div
+                        className="h-full bg-primary transition-[width] duration-100"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={handleOpenSaveDialog}
+                  disabled={isAuthLoading}
+                >
+                  <SaveIcon className="w-4 h-4 mr-1" />
+                  保存
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOpenLibrary}
+                  disabled={isAuthLoading}
+                >
+                  <BookMarkedIcon className="w-4 h-4 mr-1" />
+                  保存済みメモ
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleReset}
+                  className="text-muted-foreground"
+                >
+                  <RotateCcwIcon className="w-4 h-4 mr-1" />
+                  リセット
+                </Button>
+              </div>
             </div>
+
             <StepIndicator
               currentStep={currentStep}
               onStepClick={handleStepClick}
@@ -625,15 +668,63 @@ export function GadgetComparison() {
           </div>
         </header>
 
-        {/* Main content */}
         <main className="flex-1">
-          <div className="max-w-3xl mx-auto px-4 py-6">{renderStep()}</div>
+          <div className="mx-auto grid max-w-6xl gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-start">
+            <section className="min-w-0 rounded-lg border border-border/80 bg-card/74 p-4 shadow-[0_0_0_1px_rgb(255_255_255/0.02),0_20px_40px_rgb(0_0_0/0.2)] md:p-5">
+              {renderStep()}
+            </section>
+
+            <aside className="hidden lg:block">
+              <div className="sticky top-32 space-y-3 rounded-lg border border-border/80 bg-card/74 p-3 text-xs text-muted-foreground shadow-[0_0_0_1px_rgb(255_255_255/0.02)]">
+                <div>
+                  <p className="text-[10px] tracking-[0.18em] uppercase">
+                    runtime
+                  </p>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
+                      <span>category</span>
+                      <span className="text-right text-foreground">
+                        {data.category.trim() || "unset"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
+                      <span>important</span>
+                      <span className="text-foreground">
+                        {importantPointsCount}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
+                      <span>products</span>
+                      <span className="text-foreground">
+                        {data.products.length}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span>decision</span>
+                      <span className="text-foreground">
+                        {data.selectedProductId ? "locked" : "pending"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-md border border-border/70 bg-background/50 p-3">
+                  <p className="text-[10px] tracking-[0.18em] uppercase">
+                    hints
+                  </p>
+                  <p className="mt-2 leading-5">
+                    score = rating × weight
+                    <br />
+                    top rank != final decision
+                  </p>
+                </div>
+              </div>
+            </aside>
+          </div>
         </main>
 
-        {/* Footer navigation */}
-        <footer className="sticky bottom-0 bg-background/80 backdrop-blur-sm border-t border-border">
-          <div className="max-w-3xl mx-auto px-4 py-4">
-            <div className="flex items-center justify-between gap-4">
+        <footer className="sticky bottom-0 border-t border-border/80 bg-background/82 backdrop-blur-md">
+          <div className="mx-auto max-w-6xl px-4 py-3">
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-border/80 bg-card/72 px-3 py-3">
               <Button
                 variant="outline"
                 onClick={handlePrev}
@@ -644,8 +735,9 @@ export function GadgetComparison() {
                 戻る
               </Button>
 
-              <div className="hidden sm:block text-sm text-muted-foreground">
-                {currentStep} / {STEPS.length}
+              <div className="hidden text-xs tracking-[0.16em] text-muted-foreground uppercase sm:block">
+                {currentStep.toString().padStart(2, "0")} /{" "}
+                {STEPS.length.toString().padStart(2, "0")}
               </div>
 
               {currentStep < STEPS.length ? (

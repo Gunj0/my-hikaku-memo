@@ -1,6 +1,6 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
 
 import { AppHeader } from "@/components/app-header";
 import { AuthSessionProvider } from "@/components/auth/session-provider";
@@ -8,8 +8,19 @@ import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "オレの比較メモ",
@@ -40,7 +51,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className="dark bg-background">
-      <body className="font-sans antialiased min-h-dvh">
+      <body
+        className={`${plexMono.variable} ${jetBrainsMono.variable} font-sans antialiased min-h-dvh`}
+      >
         <AuthSessionProvider>
           <AppHeader />
           {children}

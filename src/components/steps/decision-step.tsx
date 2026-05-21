@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Product, DecisionPoint, ProductScore } from "@/lib/types";
+import { Textarea } from "@/components/ui/textarea";
+import { DecisionPoint, Product, ProductScore } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { CheckCircle2Icon, TrophyIcon, PartyPopperIcon } from "lucide-react";
+import { CheckCircle2Icon, PartyPopperIcon, TrophyIcon } from "lucide-react";
 
 interface DecisionStepProps {
   products: Product[];
@@ -90,11 +90,11 @@ export function DecisionStep({
       </div>
 
       {selectedProduct && (
-        <div className="p-6 bg-primary/10 border border-primary rounded-lg">
+        <div className="p-6 bg-success/10 border border-success/40 rounded-lg">
           <div className="flex items-center gap-3 mb-4">
-            <PartyPopperIcon className="w-8 h-8 text-primary" />
+            <PartyPopperIcon className="w-8 h-8 text-success" />
             <div>
-              <p className="text-sm text-primary">購入決定</p>
+              <p className="text-sm text-success">購入決定</p>
               <h3 className="text-2xl font-bold">{selectedProduct.name}</h3>
             </div>
           </div>
@@ -127,7 +127,7 @@ export function DecisionStep({
                   className={cn(
                     "flex items-center justify-center w-8 h-8 rounded-full shrink-0",
                     index === 0 && topScore > 0
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-success text-success-foreground"
                       : "bg-secondary text-secondary-foreground",
                   )}
                 >

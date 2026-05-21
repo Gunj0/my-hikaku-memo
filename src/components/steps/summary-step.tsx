@@ -1,65 +1,75 @@
-'use client'
+"use client";
 
-import { Product, DecisionPoint, ProductScore } from '@/lib/types'
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
   TableRow,
-  TableFooter
-} from '@/components/ui/table'
-import { cn } from '@/lib/utils'
-import { TrophyIcon, StarIcon, TrendingUpIcon } from 'lucide-react'
+} from "@/components/ui/table";
+import { DecisionPoint, Product, ProductScore } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { StarIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 
 interface SummaryStepProps {
-  products: Product[]
-  decisionPoints: DecisionPoint[]
-  scores: ProductScore[]
+  products: Product[];
+  decisionPoints: DecisionPoint[];
+  scores: ProductScore[];
 }
 
 interface ProductTotal {
-  product: Product
-  totalScore: number
-  maxPossible: number
-  percentage: number
+  product: Product;
+  totalScore: number;
+  maxPossible: number;
+  percentage: number;
 }
 
-export function SummaryStep({ products, decisionPoints, scores }: SummaryStepProps) {
-  const importantPoints = decisionPoints.filter(p => p.isImportant)
+export function SummaryStep({
+  products,
+  decisionPoints,
+  scores,
+}: SummaryStepProps) {
+  const importantPoints = decisionPoints.filter((p) => p.isImportant);
 
   const getScore = (productId: string, pointId: string): number => {
-    return scores.find(s => s.productId === productId && s.pointId === pointId)?.score || 0
-  }
+    return (
+      scores.find((s) => s.productId === productId && s.pointId === pointId)
+        ?.score || 0
+    );
+  };
 
-  const calculateWeightedScore = (productId: string, point: DecisionPoint): number => {
-    const rawScore = getScore(productId, point.id)
-    return rawScore * point.weight
-  }
+  const calculateWeightedScore = (
+    productId: string,
+    point: DecisionPoint,
+  ): number => {
+    const rawScore = getScore(productId, point.id);
+    return rawScore * point.weight;
+  };
 
   const calculateProductTotal = (product: Product): ProductTotal => {
-    let totalScore = 0
-    let maxPossible = 0
-    
-    importantPoints.forEach(point => {
-      totalScore += calculateWeightedScore(product.id, point)
-      maxPossible += 5 * point.weight
-    })
-    
+    let totalScore = 0;
+    let maxPossible = 0;
+
+    importantPoints.forEach((point) => {
+      totalScore += calculateWeightedScore(product.id, point);
+      maxPossible += 5 * point.weight;
+    });
+
     return {
       product,
       totalScore,
       maxPossible,
-      percentage: maxPossible > 0 ? (totalScore / maxPossible) * 100 : 0
-    }
-  }
+      percentage: maxPossible > 0 ? (totalScore / maxPossible) * 100 : 0,
+    };
+  };
 
   const productTotals = products
     .map(calculateProductTotal)
-    .sort((a, b) => b.totalScore - a.totalScore)
+    .sort((a, b) => b.totalScore - a.totalScore);
 
-  const topScore = productTotals[0]?.totalScore || 0
+  const topScore = productTotals[0]?.totalScore || 0;
 
   if (products.length === 0 || importantPoints.length === 0) {
     return (
@@ -71,7 +81,7 @@ export function SummaryStep({ products, decisionPoints, scores }: SummaryStepPro
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -89,19 +99,21 @@ export function SummaryStep({ products, decisionPoints, scores }: SummaryStepPro
           <div
             key={item.product.id}
             className={cn(
-              'p-4 rounded-lg border transition-all',
+              "p-4 rounded-lg border transition-all",
               index === 0 && topScore > 0
-                ? 'border-primary bg-primary/10'
-                : 'border-border bg-card'
+                ? "border-success/40 bg-success/10"
+                : "border-border bg-card/80",
             )}
           >
             <div className="flex items-center gap-4">
-              <div className={cn(
-                'flex items-center justify-center w-10 h-10 rounded-full',
-                index === 0 && topScore > 0
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-secondary-foreground'
-              )}>
+              <div
+                className={cn(
+                  "flex items-center justify-center w-10 h-10 rounded-full",
+                  index === 0 && topScore > 0
+                    ? "bg-success text-success-foreground"
+                    : "bg-secondary text-secondary-foreground",
+                )}
+              >
                 {index === 0 && topScore > 0 ? (
                   <TrophyIcon className="w-5 h-5" />
                 ) : (
@@ -112,7 +124,7 @@ export function SummaryStep({ products, decisionPoints, scores }: SummaryStepPro
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium truncate">{item.product.name}</h3>
                   {index === 0 && topScore > 0 && (
-                    <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-success text-success-foreground px-2 py-0.5 rounded-full">
                       最高評価
                     </span>
                   )}
@@ -122,13 +134,17 @@ export function SummaryStep({ products, decisionPoints, scores }: SummaryStepPro
                     <span className="text-muted-foreground">
                       {item.totalScore} / {item.maxPossible} pt
                     </span>
-                    <span className="font-medium">{item.percentage.toFixed(0)}%</span>
+                    <span className="font-medium">
+                      {item.percentage.toFixed(0)}%
+                    </span>
                   </div>
                   <div className="h-2 bg-secondary rounded-full overflow-hidden">
                     <div
                       className={cn(
-                        'h-full transition-all duration-500',
-                        index === 0 && topScore > 0 ? 'bg-primary' : 'bg-muted-foreground/50'
+                        "h-full transition-all duration-500",
+                        index === 0 && topScore > 0
+                          ? "bg-success"
+                          : "bg-muted-foreground/50",
                       )}
                       style={{ width: `${item.percentage}%` }}
                     />
@@ -148,7 +164,10 @@ export function SummaryStep({ products, decisionPoints, scores }: SummaryStepPro
               <TableHead className="min-w-[150px]">ポイント</TableHead>
               <TableHead className="text-center w-20">重要度</TableHead>
               {productTotals.map(({ product }) => (
-                <TableHead key={product.id} className="text-center min-w-[100px]">
+                <TableHead
+                  key={product.id}
+                  className="text-center min-w-[100px]"
+                >
                   {product.name}
                 </TableHead>
               ))}
@@ -165,8 +184,8 @@ export function SummaryStep({ products, decisionPoints, scores }: SummaryStepPro
                   </span>
                 </TableCell>
                 {productTotals.map(({ product }) => {
-                  const raw = getScore(product.id, point.id)
-                  const weighted = calculateWeightedScore(product.id, point)
+                  const raw = getScore(product.id, point.id);
+                  const weighted = calculateWeightedScore(product.id, point);
                   return (
                     <TableCell key={product.id} className="text-center">
                       <div className="text-sm">
@@ -176,7 +195,7 @@ export function SummaryStep({ products, decisionPoints, scores }: SummaryStepPro
                         </span>
                       </div>
                     </TableCell>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -197,13 +216,15 @@ export function SummaryStep({ products, decisionPoints, scores }: SummaryStepPro
 
       <div className="p-4 bg-secondary/50 rounded-lg">
         <div className="flex items-start gap-3">
-          <TrendingUpIcon className="w-5 h-5 text-primary mt-0.5" />
+          <TrendingUpIcon className="w-5 h-5 text-success mt-0.5" />
           <div className="text-sm text-muted-foreground">
             <p>スコアは「評価点 × 重要度」の合計で計算されています。</p>
-            <p className="mt-1">最高スコアの製品が最もあなたの重視ポイントにマッチしています。</p>
+            <p className="mt-1">
+              最高スコアの製品が最もあなたの重視ポイントにマッチしています。
+            </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -15,7 +15,7 @@ export function StepIndicator({
 }: StepIndicatorProps) {
   return (
     <nav className="w-full" aria-label="進捗状況">
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto rounded-lg border border-border/80 bg-card/72 p-2 scrollbar-hide">
         {STEPS.map((step) => {
           const isComplete = currentStep > step.id;
           const isCurrent = currentStep === step.id;
@@ -25,25 +25,41 @@ export function StepIndicator({
               key={step.id}
               onClick={() => onStepClick?.(step.id)}
               className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg whitespace-nowrap text-sm transition-colors",
-                isCurrent && "bg-primary text-primary-foreground",
-                isComplete && "bg-secondary text-secondary-foreground",
-                !isCurrent && !isComplete && "bg-muted text-muted-foreground",
+                "flex min-w-fit items-center gap-2 rounded-md border px-3 py-2 whitespace-nowrap text-xs tracking-[0.08em] transition-colors",
+                isCurrent && "border-primary/60 bg-primary/16 text-foreground",
+                isComplete &&
+                  "border-border/70 bg-secondary/82 text-secondary-foreground",
+                !isCurrent &&
+                  !isComplete &&
+                  "border-transparent bg-muted/65 text-muted-foreground hover:border-border/65 hover:text-foreground",
               )}
             >
               <span
                 className={cn(
-                  "flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium",
-                  isCurrent && "bg-primary-foreground text-primary",
-                  isComplete && "bg-primary text-primary-foreground",
+                  "flex h-6 min-w-6 items-center justify-center rounded-sm border px-1 text-[10px] font-medium",
+                  isCurrent &&
+                    "border-primary/60 bg-primary text-primary-foreground",
+                  isComplete &&
+                    "border-border/70 bg-secondary text-secondary-foreground",
                   !isCurrent &&
                     !isComplete &&
-                    "bg-muted-foreground/30 text-muted-foreground",
+                    "border-border/50 bg-background/60 text-muted-foreground",
                 )}
               >
-                {isComplete ? <CheckIcon className="w-4 h-4" /> : step.id}
+                {isComplete ? (
+                  <CheckIcon className="w-3.5 h-3.5" />
+                ) : (
+                  step.id.toString().padStart(2, "0")
+                )}
               </span>
-              {step.shortTitle}
+              <span className="text-left">
+                <span className="block text-[10px] text-muted-foreground/85">
+                  STEP
+                </span>
+                <span className="block leading-none text-foreground">
+                  {step.shortTitle}
+                </span>
+              </span>
             </button>
           );
         })}

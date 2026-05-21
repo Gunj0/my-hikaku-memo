@@ -20,45 +20,56 @@ export function AppHeader() {
   };
 
   return (
-    <header className="border-b border-border bg-background/95">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4">
+    <header className="border-b border-border/80 bg-background/88 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
+          <p className="mb-1 text-[10px] tracking-[0.24em] text-muted-foreground uppercase">
+            tokyo-night // compare.memo
+          </p>
           <Link
             href="/"
-            className="text-lg font-semibold text-foreground transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-2 text-base font-semibold tracking-[0.05em] text-foreground transition-opacity hover:opacity-80"
           >
+            <span className="text-primary/80">[</span>
             オレの比較メモ
+            <span className="text-primary/80">]</span>
           </Link>
           {isAuthenticated && (
-            <p className="truncate text-sm text-muted-foreground">
-              {session.user?.name ?? session.user?.email ?? "Googleアカウント"}
+            <p className="mt-1 truncate text-[11px] text-muted-foreground">
+              usr:
+              {session.user?.name ?? session.user?.email ?? "google-account"}
             </p>
           )}
         </div>
 
-        {isAuthenticated ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => void handleSignOut()}
-            disabled={isLoading}
-            className="shrink-0"
-          >
-            <LogOutIcon className="h-4 w-4" />
-            ログアウト
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => void handleSignIn()}
-            disabled={isLoading}
-            className="shrink-0"
-          >
-            <LogInIcon className="h-4 w-4" />
-            Googleでログイン
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <span className="hidden rounded-sm border border-border/80 bg-card/80 px-2 py-1 text-[10px] tracking-[0.18em] text-muted-foreground md:inline-flex">
+            {isAuthenticated ? "SESSION:LIVE" : "SESSION:GUEST"}
+          </span>
+          {isAuthenticated ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void handleSignOut()}
+              disabled={isLoading}
+              className="shrink-0"
+            >
+              <LogOutIcon className="h-4 w-4" />
+              ログアウト
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void handleSignIn()}
+              disabled={isLoading}
+              className="shrink-0"
+            >
+              <LogInIcon className="h-4 w-4" />
+              Googleでログイン
+            </Button>
+          )}
+        </div>
       </div>
     </header>
   );
