@@ -5,8 +5,14 @@ import {
   comparisonMemoPayloadSchema,
   type ComparisonMemoPayload,
 } from "@/lib/comparison-schemas";
-import type { ComparisonMemo, ComparisonMemoSummary } from "@/lib/types";
 import { ensureDatabaseSetup } from "@/lib/server/database";
+import type {
+  ComparisonMemo,
+  ComparisonMemoAuthor,
+  ComparisonMemoSummary,
+  PublicComparisonMemo,
+  PublicComparisonMemoSummary,
+} from "@/lib/types";
 
 type ComparisonMemoRow = {
   id: string;
@@ -16,6 +22,11 @@ type ComparisonMemoRow = {
   data: string;
   created_at: number;
   updated_at: number;
+};
+
+type PublicComparisonMemoRow = ComparisonMemoRow & {
+  user_name: string | null;
+  user_image: string | null;
 };
 
 async function getDatabase() {
@@ -29,6 +40,14 @@ async function getDatabase() {
 
 function toIsoString(timestamp: number) {
   return new Date(timestamp).toISOString();
+}
+
+function mapAuthor(row: PublicComparisonMemoRow): ComparisonMemoAuthor {
+  return {
+    id: row.user_id,
+    name: row.user_name,
+    image: row.user_image,
+  };
 }
 
 function mapSummary(row: ComparisonMemoRow): ComparisonMemoSummary {
@@ -45,6 +64,26 @@ function mapMemo(row: ComparisonMemoRow): ComparisonMemo {
   return {
     ...mapSummary(row),
     data: comparisonDataSchema.parse(JSON.parse(row.data)),
+  };
+}
+
+function mapPublicSummary(
+  row: PublicComparisonMemoRow,
+): PublicComparisonMemoSummary {
+  return {
+    ...mapSummary(row),
+    author: mapAuthor(row),
+  };
+}
+
+function mapPublicMemo(
+  row: PublicComparisonMemoRow,
+  viewerUserId?: string,
+): PublicComparisonMemo {
+  return {
+    ...mapMemo(row),
+    author: mapAuthor(row),
+    isOwner: row.user_id === viewerUserId,
   };
 }
 
@@ -90,6 +129,51 @@ export async function getComparisonMemo(userId: string, memoId: string) {
     .first<ComparisonMemoRow>();
 
   return row ? mapMemo(row) : null;
+}
+
+export async function listRandomComparisonMemos(
+  limit: number,
+  excludeUserId?: string,
+) {
+  const database = await getDatabase();
+  const result = await database
+    .prepare(
+      `
+        SELECT m.id, m.user_id, m.title, m.category, m.data, m.created_at, m.updated_at,
+               u.name AS user_name, u.image AS user_image
+        FROM comparison_memos AS m
+        LEFT JOIN users AS u ON u.id = m.user_id
+        WHERE (?1 IS NULL OR m.user_id != ?1)
+        ORDER BY RANDOM()
+        LIMIT ?2
+      `,
+    )
+    .bind(excludeUserId ?? null, limit)
+    .all<PublicComparisonMemoRow>();
+
+  return result.results.map(mapPublicSummary);
+}
+
+export async function getPublicComparisonMemo(
+  memoId: string,
+  viewerUserId?: string,
+) {
+  const database = await getDatabase();
+  const row = await database
+    .prepare(
+      `
+        SELECT m.id, m.user_id, m.title, m.category, m.data, m.created_at, m.updated_at,
+               u.name AS user_name, u.image AS user_image
+        FROM comparison_memos AS m
+        LEFT JOIN users AS u ON u.id = m.user_id
+        WHERE m.id = ?1
+        LIMIT 1
+      `,
+    )
+    .bind(memoId)
+    .first<PublicComparisonMemoRow>();
+
+  return row ? mapPublicMemo(row, viewerUserId) : null;
 }
 
 export async function createComparisonMemo(

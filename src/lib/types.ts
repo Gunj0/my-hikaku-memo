@@ -43,6 +43,21 @@ export interface ComparisonMemo extends ComparisonMemoSummary {
   data: ComparisonData;
 }
 
+export interface ComparisonMemoAuthor {
+  id: string;
+  name: string | null;
+  image: string | null;
+}
+
+export interface PublicComparisonMemoSummary extends ComparisonMemoSummary {
+  author: ComparisonMemoAuthor;
+}
+
+export interface PublicComparisonMemo extends ComparisonMemo {
+  author: ComparisonMemoAuthor;
+  isOwner: boolean;
+}
+
 export const DEFAULT_DECISION_POINTS: Omit<DecisionPoint, "id">[] = [
   { name: "価格", isImportant: true, weight: 3, memo: "" },
   { name: "メーカー・ブランド", isImportant: false, weight: 2, memo: "" },

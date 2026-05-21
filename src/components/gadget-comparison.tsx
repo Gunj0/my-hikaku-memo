@@ -47,6 +47,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -72,8 +73,14 @@ async function readResponse<T>(response: Response): Promise<T> {
   return json as T;
 }
 
-export function GadgetComparison() {
+type GadgetComparisonProps = {
+  initialMemoId?: string;
+};
+
+export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const { status } = useSession();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [data, setData] = useState<ComparisonData>(() =>
     createInitialComparisonData(),
@@ -97,6 +104,11 @@ export function GadgetComparison() {
     (point) => point.isImportant,
   ).length;
   const progressPercent = Math.round((currentStep / STEPS.length) * 100);
+  const redirectTo = (() => {
+    const query = searchParams.toString();
+
+    return query ? `${pathname}?${query}` : pathname;
+  })();
 
   const canProceed = () => {
     switch (currentStep) {
@@ -154,6 +166,25 @@ export function GadgetComparison() {
     }
   }, [isAuthenticated, isLibraryDialogOpen]);
 
+  useEffect(() => {
+    if (!initialMemoId) {
+      return;
+    }
+
+    if (status === "unauthenticated") {
+      setIsAuthDialogOpen(true);
+      return;
+    }
+
+    if (
+      status === "authenticated" &&
+      activeMemo?.id !== initialMemoId &&
+      isLoadingMemoId !== initialMemoId
+    ) {
+      void loadMemoById(initialMemoId, { skipConfirm: true });
+    }
+  }, [activeMemo?.id, initialMemoId, isLoadingMemoId, status]);
+
   const handleNext = () => {
     if (currentStep < STEPS.length && canProceed()) {
       setCurrentStep(currentStep + 1);
@@ -179,7 +210,62 @@ export function GadgetComparison() {
   };
 
   const handleSignIn = async () => {
-    await signIn("google", { redirectTo: "/" });
+    await signIn("google", { redirectTo });
+  };
+
+  const loadMemoById = async (
+    memoId: string,
+    options?: {
+      skipConfirm?: boolean;
+      onLoaded?: () => void;
+    },
+  ) => {
+    if (!isAuthenticated) {
+      setIsAuthDialogOpen(true);
+      return;
+    }
+
+    if (
+      !options?.skipConfirm &&
+      activeMemo?.id !== memoId &&
+      hasMeaningfulComparisonData(data) &&
+      !confirm("現在の編集中内容を保存せずに置き換えます。よろしいですか？")
+    ) {
+      return;
+    }
+
+    setIsLoadingMemoId(memoId);
+
+    try {
+      const response = await fetch(`/api/memos/${memoId}`, {
+        cache: "no-store",
+      });
+      const { memo } = await readResponse<MemoDetailResponse>(response);
+
+      setData(memo.data);
+      setCurrentStep(getInitialStepForComparisonData(memo.data));
+      setActiveMemo({
+        id: memo.id,
+        title: memo.title,
+        category: memo.category,
+        createdAt: memo.createdAt,
+        updatedAt: memo.updatedAt,
+      });
+      options?.onLoaded?.();
+      toast.success("保存済みメモを読み込みました。");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "保存済みメモを読み込めませんでした。";
+      toast.error(message);
+
+      if (message.includes("ログイン")) {
+        setIsAuthDialogOpen(true);
+      }
+    } finally {
+      setIsLoadingMemoId(null);
+    }
   };
 
   const handleOpenSaveDialog = () => {
@@ -260,51 +346,9 @@ export function GadgetComparison() {
   };
 
   const handleLoadMemo = async (memoSummary: ComparisonMemoSummary) => {
-    if (!isAuthenticated) {
-      setIsAuthDialogOpen(true);
-      return;
-    }
-
-    if (
-      activeMemo?.id !== memoSummary.id &&
-      hasMeaningfulComparisonData(data) &&
-      !confirm("現在の編集中内容を保存せずに置き換えます。よろしいですか？")
-    ) {
-      return;
-    }
-
-    setIsLoadingMemoId(memoSummary.id);
-
-    try {
-      const response = await fetch(`/api/memos/${memoSummary.id}`, {
-        cache: "no-store",
-      });
-      const { memo } = await readResponse<MemoDetailResponse>(response);
-
-      setData(memo.data);
-      setCurrentStep(getInitialStepForComparisonData(memo.data));
-      setActiveMemo({
-        id: memo.id,
-        title: memo.title,
-        category: memo.category,
-        createdAt: memo.createdAt,
-        updatedAt: memo.updatedAt,
-      });
-      setIsLibraryDialogOpen(false);
-      toast.success("保存済みメモを読み込みました。");
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "保存済みメモを読み込めませんでした。";
-      toast.error(message);
-
-      if (message.includes("ログイン")) {
-        setIsAuthDialogOpen(true);
-      }
-    } finally {
-      setIsLoadingMemoId(null);
-    }
+    await loadMemoById(memoSummary.id, {
+      onLoaded: () => setIsLibraryDialogOpen(false),
+    });
   };
 
   const handleDeleteMemo = async (memoSummary: ComparisonMemoSummary) => {

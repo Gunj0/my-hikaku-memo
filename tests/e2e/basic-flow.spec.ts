@@ -3,14 +3,14 @@ import { expect, test } from "@playwright/test";
 test("未ログインでも基本フローで評価入力まで進める", async ({ page }) => {
   await page.goto("/");
 
-  await expect(
-    page.getByRole("heading", { name: "製品カテゴリを選択" }),
-  ).toBeVisible();
+  await page.getByRole("link", { name: "新しいメモを作る" }).click();
+
+  await expect(page.getByRole("heading", { name: "カテゴリ" })).toBeVisible();
 
   const nextButton = page.getByRole("button", { name: "次へ" });
   await expect(nextButton).toBeDisabled();
 
-  await page.getByRole("button", { name: "スマートフォン" }).click();
+  await page.getByLabel("その他のカテゴリ").fill("スマホ");
   await expect(nextButton).toBeEnabled();
 
   await nextButton.click();
