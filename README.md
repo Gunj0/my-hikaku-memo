@@ -66,6 +66,34 @@ AUTH_GOOGLE_SECRET=your-google-client-secret
 pnpm dev
 ```
 
+## UIテスト
+
+Playwright で未ログインの基本フローを E2E テストできます。
+
+初回はブラウザをインストールします。
+
+```bash
+pnpm test:e2e:install
+```
+
+テスト実行
+
+```bash
+pnpm test:e2e
+```
+
+特定のテストだけ実行する場合
+
+```bash
+pnpm exec playwright test tests/e2e/basic-flow.spec.ts --project=chromium
+```
+
+レポートUIを開く場合
+
+```bash
+pnpm exec playwright show-report
+```
+
 ## ビルド
 
 ```bash
