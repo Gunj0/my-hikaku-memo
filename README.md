@@ -50,6 +50,7 @@ pnpm install
 AUTH_SECRET=your-auth-secret
 AUTH_GOOGLE_ID=your-google-client-id
 AUTH_GOOGLE_SECRET=your-google-client-secret
+NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000
 ```
 
 .dev.vars
@@ -59,6 +60,7 @@ NEXTJS_ENV=development
 AUTH_SECRET=your-auth-secret
 AUTH_GOOGLE_ID=your-google-client-id
 AUTH_GOOGLE_SECRET=your-google-client-secret
+NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000
 ```
 
 ### Google OAuth 設定
@@ -68,6 +70,7 @@ AUTH_GOOGLE_SECRET=your-google-client-secret
 - リダイレクト URI に http://localhost:3000/api/auth/callback/google を追加する
 - pnpm preview を使う場合は リダイレクト URI に http://localhost:8787/api/auth/callback/google も追加する
 - 本番環境ではデプロイ URL の /api/auth/callback/google を追加する
+- SEO 用の canonical / Open Graph / sitemap を正しい URL で出すため、本番環境では NEXT_PUBLIC_SITE_URL に公開 URL を設定する
 
 ### Cloudflare D1 設定
 
@@ -120,6 +123,12 @@ pnpm exec playwright show-report
 ```bash
 pnpm build
 ```
+
+## SEO
+
+- ホームと公開メモ詳細ページに Open Graph / Twitter Card / canonical を設定しています。
+- `/robots.txt` と `/sitemap.xml` は App Router の metadata routes で生成されます。
+- 公開 URL が決まっている環境では `NEXT_PUBLIC_SITE_URL` を設定してください。
 
 ## Cloudflare 向けプレビューと配備
 

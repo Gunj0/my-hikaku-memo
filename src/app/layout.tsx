@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
 
+import { siteConfig, getSiteUrl } from "@/lib/seo";
 import { Suspense } from "react";
 import "./globals.css";
 
@@ -23,8 +24,47 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "オレの比較メモ",
-  description: "製品を比較して最適な購入判断をサポートするアプリ",
+  metadataBase: getSiteUrl(),
+  applicationName: siteConfig.name,
+  title: {
+    default: siteConfig.defaultTitle,
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  category: "shopping",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: siteConfig.locale,
+    siteName: siteConfig.name,
+    title: siteConfig.defaultTitle,
+    description: siteConfig.description,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: siteConfig.socialImageAlt,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.defaultTitle,
+    description: siteConfig.description,
+    images: ["/twitter-image"],
+  },
   icons: {
     icon: [
       {

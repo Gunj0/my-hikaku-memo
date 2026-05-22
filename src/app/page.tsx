@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import { auth } from "@/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,6 +13,10 @@ import {
 } from "@/components/ui/card";
 import { listRandomComparisonMemos } from "@/lib/server/comparison-memos";
 import {
+  buildPageMetadata,
+  getWebsiteStructuredData,
+} from "@/lib/seo";
+import {
   ArrowRightIcon,
   BookMarkedIcon,
   EyeIcon,
@@ -19,6 +24,11 @@ import {
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = buildPageMetadata({
+  path: "/",
+});
+
+const websiteStructuredData = getWebsiteStructuredData();
 
 function getAuthorLabel(name: string | null) {
   return name?.trim() || "匿名ユーザー";
@@ -34,6 +44,12 @@ export default async function Home() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 md:py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(websiteStructuredData),
+        }}
+      />
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,1fr)]">
         <Card className="overflow-hidden border-border/80 bg-card/78">
           <CardHeader className="space-y-4 pb-4">

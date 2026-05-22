@@ -1,10 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { auth } from "@/auth";
 import { ComparisonMemoView } from "@/components/comparison-memo-view";
 import { Button } from "@/components/ui/button";
 import { getPublicComparisonMemo } from "@/lib/server/comparison-memos";
+import { buildPageMetadata } from "@/lib/seo";
 import { ArrowRightIcon, PencilIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +16,44 @@ type MemoDetailPageProps = {
     memoId: string;
   }>;
 };
+
+function getMemoDescription(
+  title: string,
+  category: string,
+  pointCount: number,
+  productCount: number,
+) {
+  return `${title} の比較メモです。カテゴリ「${category || "未設定"}」で、${pointCount} 個の比較ポイントと ${productCount} 件の候補製品を整理した内容を閲覧できます。`;
+}
+
+export async function generateMetadata({
+  params,
+}: MemoDetailPageProps): Promise<Metadata> {
+  const { memoId } = await params;
+  const session = await auth();
+  const memo = await getPublicComparisonMemo(memoId, session?.user?.id);
+
+  if (!memo) {
+    return buildPageMetadata({
+      title: "比較メモが見つかりません",
+      description: "指定された比較メモは見つからないか、閲覧権限がありません。",
+      path: `/memos/${memoId}`,
+      index: false,
+    });
+  }
+
+  return buildPageMetadata({
+    title: memo.title,
+    description: getMemoDescription(
+      memo.title,
+      memo.category,
+      memo.data.decisionPoints.length,
+      memo.data.products.length,
+    ),
+    path: `/memos/${memo.id}`,
+    index: memo.isPublic,
+  });
+}
 
 export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
   const { memoId } = await params;

@@ -30,6 +30,11 @@ type PublicComparisonMemoRow = ComparisonMemoRow & {
   user_image: string | null;
 };
 
+type PublicComparisonMemoSitemapRow = {
+  id: string;
+  updated_at: number;
+};
+
 async function getDatabase() {
   const { env } = getCloudflareContext();
   const database = (env as CloudflareEnv & { DB: D1Database }).DB;
@@ -155,6 +160,25 @@ export async function listRandomComparisonMemos(
     .all<PublicComparisonMemoRow>();
 
   return result.results.map(mapPublicSummary);
+}
+
+export async function listPublicComparisonMemosForSitemap() {
+  const database = await getDatabase();
+  const result = await database
+    .prepare(
+      `
+        SELECT id, updated_at
+        FROM comparison_memos
+        WHERE is_public = 1
+        ORDER BY updated_at DESC
+      `,
+    )
+    .all<PublicComparisonMemoSitemapRow>();
+
+  return result.results.map((row) => ({
+    id: row.id,
+    updatedAt: toIsoString(row.updated_at),
+  }));
 }
 
 export async function getPublicComparisonMemo(

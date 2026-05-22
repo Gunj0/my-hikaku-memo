@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
@@ -10,9 +11,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { listComparisonMemos } from "@/lib/server/comparison-memos";
+import { buildPageMetadata } from "@/lib/seo";
 import { ArrowRightIcon, EyeIcon, PlusCircleIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = buildPageMetadata({
+  title: "作成済みメモ一覧",
+  description:
+    "ログイン後に保存済みの比較メモを再開・管理できる画面です。個人用画面のため検索エンジンには表示しません。",
+  path: "/memos",
+  index: false,
+});
 
 function getVisibilityLabel(isPublic: boolean) {
   return isPublic ? "公開" : "非公開";
