@@ -1,10 +1,9 @@
-import { Analytics } from "@vercel/analytics/next";
-import type { Metadata } from "next";
-import { IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
-
+import { auth } from "@/auth";
 import { AppHeader } from "@/components/app-header";
 import { AuthSessionProvider } from "@/components/auth/session-provider";
 import { Toaster } from "@/components/ui/sonner";
+import type { Metadata } from "next";
+import { IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
 
 import { Suspense } from "react";
 import "./globals.css";
@@ -45,23 +44,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="ja" className="dark bg-background">
       <body
         className={`${plexMono.variable} ${jetBrainsMono.variable} font-sans antialiased min-h-dvh`}
       >
-        <AuthSessionProvider>
+        <AuthSessionProvider session={session}>
           <Suspense fallback={null}>
             <AppHeader />
           </Suspense>
           {children}
           <Toaster richColors position="top-right" />
-          {process.env.NODE_ENV === "production" && <Analytics />}
         </AuthSessionProvider>
       </body>
     </html>

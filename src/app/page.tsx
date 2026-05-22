@@ -31,7 +31,6 @@ function getInitials(name: string | null) {
 export default async function Home() {
   const session = await auth();
   const publicMemos = await listRandomComparisonMemos(6, session?.user?.id);
-  const firstName = session?.user?.name?.split(" ")[0] || "あなた";
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 md:py-8">
@@ -43,7 +42,7 @@ export default async function Home() {
                 あなただけの比較過程を残そう
               </CardTitle>
               <CardDescription className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                ガジェットや家電の比較判断理由を、綺麗にメモして保存できます
+                ガジェットや家電の比較判断理由を、わかりやすくメモするためのアプリ
               </CardDescription>
             </div>
 
@@ -106,13 +105,7 @@ export default async function Home() {
       <section className="space-y-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[11px] tracking-[0.22em] text-primary uppercase">
-              random memos
-            </p>
-            <h2 className="text-xl font-semibold">他のユーザーが作ったメモ</h2>
-            <p className="text-sm text-muted-foreground">
-              毎回ランダムに表示します。内容は閲覧のみで、編集はできません。
-            </p>
+            <h2 className="text-xl font-semibold">他の人が作ったメモ</h2>
           </div>
           <Button asChild variant="ghost" size="sm">
             <Link href="/">
