@@ -12,10 +12,10 @@ import {
 } from "@/components/ui/card";
 import { listRandomComparisonMemos } from "@/lib/server/comparison-memos";
 import {
-  ArrowRightIcon,
   BookMarkedIcon,
   EyeIcon,
   PlusCircleIcon,
+  RefreshCwIcon,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -39,26 +39,26 @@ export default async function Home() {
           <CardHeader className="space-y-4 pb-4">
             <div className="space-y-2">
               <CardTitle className="text-2xl leading-tight md:text-3xl">
-                あなただけの比較過程を残そう
+                あなただけの「比較メモ」を残そう
               </CardTitle>
-              <CardDescription className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                ガジェットや家電の比較判断理由を、わかりやすくメモするためのアプリ
+              <CardDescription className="max-w-2xl text-md leading-6 text-muted-foreground">
+                ガジェットや家電の比較を効率よく記録するためのアプリ
               </CardDescription>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-lg border border-primary/30 bg-primary/8 p-4">
                 <p className="mt-2 text-lg font-semibold">
-                  新しい比較メモを作る
+                  さっそく比較メモを作る
                 </p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  カテゴリから順番に比較条件を整理して、結論まで保存できます。
+                  ログインしなくても作り始めることができます
                 </p>
                 <div className="mt-4">
                   <Button asChild variant="success">
                     <Link href="/memos/new">
                       <PlusCircleIcon className="h-4 w-4" />
-                      新しい比較メモを作る
+                      無料で比較メモを作る
                     </Link>
                   </Button>
                 </div>
@@ -66,16 +66,16 @@ export default async function Home() {
 
               <div className="rounded-lg border border-border/80 bg-background/50 p-4">
                 <p className="mt-2 text-lg font-semibold">
-                  保存済みメモを確認する
+                  保存したメモを確認する
                 </p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  ログインしていれば自分のメモ一覧から再開できます。未ログインでも画面には入れます。
+                  ログインすると自分のメモ一覧を確認できます
                 </p>
                 <div className="mt-4">
                   <Button asChild variant="outline">
                     <Link href="/memos">
-                      メモ一覧へ
                       <BookMarkedIcon className="h-4 w-4" />
+                      メモ一覧へ
                     </Link>
                   </Button>
                 </div>
@@ -90,13 +90,7 @@ export default async function Home() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
             <div className="rounded-lg border border-border/70 bg-background/40 p-3">
-              新規作成画面では、比較ポイント、候補製品、評価、最終決定までを一連で編集できます。
-            </div>
-            <div className="rounded-lg border border-border/70 bg-background/40 p-3">
-              マイメモ一覧画面では、自分が保存した比較メモの再開と閲覧モードへの移動ができます。
-            </div>
-            <div className="rounded-lg border border-border/70 bg-background/40 p-3">
-              下の一覧からは、公開設定がオンのメモだけを編集不可の閲覧モードで確認できます。
+              開発中...
             </div>
           </CardContent>
         </Card>
@@ -105,12 +99,12 @@ export default async function Home() {
       <section className="space-y-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-xl font-semibold">公開されているメモ</h2>
+            <h2 className="text-xl font-semibold">誰かのメモ</h2>
           </div>
           <Button asChild variant="ghost" size="sm">
             <Link href="/">
-              表示を更新
-              <ArrowRightIcon className="h-4 w-4" />
+              <RefreshCwIcon className="h-4 w-4" />
+              更新
             </Link>
           </Button>
         </div>
@@ -151,9 +145,6 @@ export default async function Home() {
                         </p>
                       </div>
                     </div>
-                    <span className="rounded-full border border-border/70 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                      read only
-                    </span>
                   </div>
                   <div>
                     <CardTitle className="line-clamp-2 text-lg leading-7">
@@ -171,7 +162,7 @@ export default async function Home() {
                     className="w-full justify-between"
                   >
                     <Link href={`/memos/${memo.id}`}>
-                      閲覧モードで見る
+                      閲覧する
                       <EyeIcon className="h-4 w-4" />
                     </Link>
                   </Button>

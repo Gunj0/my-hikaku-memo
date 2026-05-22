@@ -688,12 +688,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
           <div className="mx-auto max-w-6xl px-4 py-3">
             <div className="mb-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
               <div className="rounded-lg border border-border/80 bg-card/72 px-3 py-3 shadow-[0_0_0_1px_rgb(255_255_255/0.02)]">
-                <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                   <div className="space-y-1">
                     <p className="text-sm text-foreground">
-                      {activeMemo
-                        ? `編集中: ${activeMemo.title}`
-                        : "新規作成中"}
+                      {activeMemo ? `編集: ${activeMemo.title}` : "新規メモ"}
                     </p>
                     {activeMemo ? (
                       <p className="text-xs text-muted-foreground">
