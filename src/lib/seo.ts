@@ -91,8 +91,7 @@ export function buildPageMetadata({
     ? `${title} | ${siteConfig.name}`
     : siteConfig.defaultTitle;
 
-  return {
-    ...(title ? { title } : {}),
+  const metadata: Metadata = {
     description,
     alternates: {
       canonical: path,
@@ -121,6 +120,12 @@ export function buildPageMetadata({
       images: ["/twitter-image"],
     },
   };
+
+  if (title) {
+    metadata.title = title;
+  }
+
+  return metadata;
 }
 
 export function getWebsiteStructuredData() {
