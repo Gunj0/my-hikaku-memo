@@ -20,7 +20,7 @@ export const siteConfig = {
 
 const defaultSiteUrl =
   process.env.NODE_ENV === "production"
-    ? "https://localhost"
+    ? "https://example.com"
     : "http://127.0.0.1:3000";
 
 function getConfiguredSiteUrl() {

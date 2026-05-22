@@ -49,7 +49,7 @@ export default function OpengraphImage() {
               color: "rgba(255, 255, 255, 0.88)",
             }}
           >
-            比較条件・評価・最終判断をひとつのメモに整理し、そのまま公開共有できる購入判断アプリ
+            {siteConfig.description}
           </div>
         </div>
         <div
