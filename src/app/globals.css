@@ -146,11 +146,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image:
-      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px),
-      radial-gradient(circle at top, var(--grid-glow), transparent 40%),
-      linear-gradient(180deg, #0f1424 0%, #090d17 100%);
     background-size:
       28px 28px,
       28px 28px,
