@@ -47,6 +47,7 @@ const memoTableStatements = [
       title TEXT NOT NULL,
       category TEXT NOT NULL,
       data TEXT NOT NULL,
+      is_public INTEGER NOT NULL DEFAULT 0,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -57,6 +58,24 @@ const memoTableStatements = [
     ON comparison_memos(user_id, updated_at DESC)
   `,
 ];
+
+type TableInfoRow = {
+  name: string;
+};
+
+async function ensureMemoVisibilityColumn(database: D1Database) {
+  const columns = await database
+    .prepare('PRAGMA table_info("comparison_memos")')
+    .all<TableInfoRow>();
+
+  if (!columns.results.some((column) => column.name === "is_public")) {
+    await database
+      .prepare(
+        `ALTER TABLE comparison_memos ADD COLUMN is_public INTEGER NOT NULL DEFAULT 0`,
+      )
+      .run();
+  }
+}
 
 let setupPromise: Promise<void> | null = null;
 
@@ -70,6 +89,8 @@ export function ensureDatabaseSetup(database: D1Database) {
       for (const statement of memoTableStatements) {
         await database.prepare(statement).run();
       }
+
+      await ensureMemoVisibilityColumn(database);
     })().catch((error) => {
       setupPromise = null;
       throw error;

@@ -36,6 +36,7 @@ export const comparisonDataSchema = z.object({
 export const comparisonMemoPayloadSchema = z.object({
   title: z.string().trim().min(1).max(120),
   data: comparisonDataSchema,
+  isPublic: z.boolean().optional().default(false),
 });
 
 export type ComparisonMemoPayload = z.infer<typeof comparisonMemoPayloadSchema>;

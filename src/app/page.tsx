@@ -96,7 +96,7 @@ export default async function Home() {
               マイメモ一覧画面では、自分が保存した比較メモの再開と閲覧モードへの移動ができます。
             </div>
             <div className="rounded-lg border border-border/70 bg-background/40 p-3">
-              下のランダム一覧からは、他ユーザーのメモを編集不可の閲覧モードで確認できます。
+              下の一覧からは、公開設定がオンのメモだけを編集不可の閲覧モードで確認できます。
             </div>
           </CardContent>
         </Card>
@@ -105,7 +105,7 @@ export default async function Home() {
       <section className="space-y-4">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-xl font-semibold">他の人が作ったメモ</h2>
+            <h2 className="text-xl font-semibold">公開されているメモ</h2>
           </div>
           <Button asChild variant="ghost" size="sm">
             <Link href="/">
@@ -122,7 +122,7 @@ export default async function Home() {
                 表示できる公開メモがまだありません
               </CardTitle>
               <CardDescription>
-                まずは自分で比較メモを作成し、データがたまるとここに他ユーザーのメモが表示されます。
+                まずは自分で比較メモを作成し、保存時に公開設定をオンにするとここに表示されます。
               </CardDescription>
             </CardHeader>
           </Card>

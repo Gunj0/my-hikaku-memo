@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 import {
   buildComparisonMemoTitle,
   createInitialComparisonData,
@@ -100,6 +101,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const [isLibraryDialogOpen, setIsLibraryDialogOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [memoTitle, setMemoTitle] = useState("");
+  const [memoIsPublic, setMemoIsPublic] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLibraryLoading, setIsLibraryLoading] = useState(false);
   const [isLoadingMemoId, setIsLoadingMemoId] = useState<string | null>(null);
@@ -259,9 +261,11 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         id: memo.id,
         title: memo.title,
         category: memo.category,
+        isPublic: memo.isPublic,
         createdAt: memo.createdAt,
         updatedAt: memo.updatedAt,
       });
+      setMemoIsPublic(memo.isPublic);
       options?.onLoaded?.();
       toast.success("保存済みメモを読み込みました。");
     } catch (error) {
@@ -286,6 +290,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     }
 
     setMemoTitle(activeMemo?.title ?? buildComparisonMemoTitle(data));
+    setMemoIsPublic(activeMemo?.isPublic ?? false);
     setIsSaveDialogOpen(true);
   };
 
@@ -324,6 +329,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
           body: JSON.stringify({
             title,
             data,
+            isPublic: memoIsPublic,
           }),
         },
       );
@@ -332,6 +338,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         id: memo.id,
         title: memo.title,
         category: memo.category,
+        isPublic: memo.isPublic,
         createdAt: memo.createdAt,
         updatedAt: memo.updatedAt,
       } satisfies ComparisonMemoSummary;
@@ -339,6 +346,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setActiveMemo(summary);
       setSavedSnapshot(cloneComparisonData(memo.data));
       setMemoTitle(summary.title);
+      setMemoIsPublic(summary.isPublic);
       setIsSaveDialogOpen(false);
       await refreshSavedMemos();
       toast.success(
@@ -538,6 +546,24 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                 maxLength={120}
               />
             </div>
+            <div className="flex items-start justify-between gap-4 rounded-lg border border-border/70 bg-background/40 p-3">
+              <div className="space-y-1">
+                <label htmlFor="memo-visibility" className="text-sm font-medium">
+                  公開設定
+                </label>
+                <p className="text-sm text-muted-foreground">
+                  非公開のメモは自分の一覧と編集ルートからのみ確認できます。
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  現在: {memoIsPublic ? "公開" : "非公開"}
+                </p>
+              </div>
+              <Switch
+                id="memo-visibility"
+                checked={memoIsPublic}
+                onCheckedChange={setMemoIsPublic}
+              />
+            </div>
             <p className="text-sm text-muted-foreground">
               カテゴリ: {data.category.trim() || "未設定"}
             </p>
@@ -604,13 +630,20 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                   return (
                     <Card key={memo.id}>
                       <CardHeader>
-                        <CardTitle className="text-base">
-                          {memo.title}
-                        </CardTitle>
-                        <CardDescription>
-                          カテゴリ: {memo.category || "未設定"} / 更新:{" "}
-                          {new Date(memo.updatedAt).toLocaleString("ja-JP")}
-                        </CardDescription>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <CardTitle className="text-base">
+                              {memo.title}
+                            </CardTitle>
+                            <CardDescription>
+                              カテゴリ: {memo.category || "未設定"} / 更新:{" "}
+                              {new Date(memo.updatedAt).toLocaleString("ja-JP")}
+                            </CardDescription>
+                          </div>
+                          <span className="rounded-full border border-border/70 px-2 py-0.5 text-[11px] text-muted-foreground">
+                            {memo.isPublic ? "公開" : "非公開"}
+                          </span>
+                        </div>
                       </CardHeader>
                       <CardContent className="flex flex-wrap gap-2">
                         <Button
@@ -659,6 +692,11 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                         ? `編集中: ${activeMemo.title}`
                         : "新規作成中"}
                     </p>
+                    {activeMemo ? (
+                      <p className="text-xs text-muted-foreground">
+                        公開設定: {activeMemo.isPublic ? "公開" : "非公開"}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>

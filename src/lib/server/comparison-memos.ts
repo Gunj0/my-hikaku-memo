@@ -20,6 +20,7 @@ type ComparisonMemoRow = {
   title: string;
   category: string;
   data: string;
+  is_public: number;
   created_at: number;
   updated_at: number;
 };
@@ -55,6 +56,7 @@ function mapSummary(row: ComparisonMemoRow): ComparisonMemoSummary {
     id: row.id,
     title: row.title,
     category: row.category,
+    isPublic: Boolean(row.is_public),
     createdAt: toIsoString(row.created_at),
     updatedAt: toIsoString(row.updated_at),
   };
@@ -94,6 +96,7 @@ function normalizePayload(payload: ComparisonMemoPayload) {
     title: parsed.title.trim(),
     category: parsed.data.category.trim(),
     data: parsed.data,
+    isPublic: parsed.isPublic,
   };
 }
 
@@ -102,7 +105,7 @@ export async function listComparisonMemos(userId: string) {
   const result = await database
     .prepare(
       `
-        SELECT id, user_id, title, category, data, created_at, updated_at
+        SELECT id, user_id, title, category, data, is_public, created_at, updated_at
         FROM comparison_memos
         WHERE user_id = ?1
         ORDER BY updated_at DESC
@@ -119,7 +122,7 @@ export async function getComparisonMemo(userId: string, memoId: string) {
   const row = await database
     .prepare(
       `
-        SELECT id, user_id, title, category, data, created_at, updated_at
+        SELECT id, user_id, title, category, data, is_public, created_at, updated_at
         FROM comparison_memos
         WHERE id = ?1 AND user_id = ?2
         LIMIT 1
@@ -139,11 +142,11 @@ export async function listRandomComparisonMemos(
   const result = await database
     .prepare(
       `
-        SELECT m.id, m.user_id, m.title, m.category, m.data, m.created_at, m.updated_at,
+        SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
                u.name AS user_name, u.image AS user_image
         FROM comparison_memos AS m
         LEFT JOIN users AS u ON u.id = m.user_id
-        WHERE (?1 IS NULL OR m.user_id != ?1)
+        WHERE m.is_public = 1 AND (?1 IS NULL OR m.user_id != ?1)
         ORDER BY RANDOM()
         LIMIT ?2
       `,
@@ -162,15 +165,16 @@ export async function getPublicComparisonMemo(
   const row = await database
     .prepare(
       `
-        SELECT m.id, m.user_id, m.title, m.category, m.data, m.created_at, m.updated_at,
+        SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
                u.name AS user_name, u.image AS user_image
         FROM comparison_memos AS m
         LEFT JOIN users AS u ON u.id = m.user_id
         WHERE m.id = ?1
+          AND (m.is_public = 1 OR (?2 IS NOT NULL AND m.user_id = ?2))
         LIMIT 1
       `,
     )
-    .bind(memoId)
+    .bind(memoId, viewerUserId ?? null)
     .first<PublicComparisonMemoRow>();
 
   return row ? mapPublicMemo(row, viewerUserId) : null;
@@ -188,8 +192,8 @@ export async function createComparisonMemo(
   await database
     .prepare(
       `
-        INSERT INTO comparison_memos (id, user_id, title, category, data, created_at, updated_at)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+        INSERT INTO comparison_memos (id, user_id, title, category, data, is_public, created_at, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
       `,
     )
     .bind(
@@ -198,6 +202,7 @@ export async function createComparisonMemo(
       normalized.title,
       normalized.category,
       JSON.stringify(normalized.data),
+      normalized.isPublic ? 1 : 0,
       now,
       now,
     )
@@ -222,7 +227,8 @@ export async function updateComparisonMemo(
         SET title = ?3,
             category = ?4,
             data = ?5,
-            updated_at = ?6
+            is_public = ?6,
+            updated_at = ?7
         WHERE id = ?1 AND user_id = ?2
       `,
     )
@@ -232,6 +238,7 @@ export async function updateComparisonMemo(
       normalized.title,
       normalized.category,
       JSON.stringify(normalized.data),
+      normalized.isPublic ? 1 : 0,
       now,
     )
     .run();

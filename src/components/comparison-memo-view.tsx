@@ -97,6 +97,9 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
               <span className="rounded-full border border-border/70 px-2 py-0.5">
                 read only
               </span>
+              <span className="rounded-full border border-border/70 px-2 py-0.5 text-foreground">
+                {memo.isPublic ? "公開" : "非公開"}
+              </span>
               {memo.isOwner ? (
                 <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-foreground">
                   your memo

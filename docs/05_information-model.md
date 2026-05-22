@@ -37,13 +37,14 @@
 
 保存済みメモ一覧に表示するための要約モデルである。
 
-| 項目名    | 型     | 必須 | 説明                      |
-| --------- | ------ | ---- | ------------------------- |
-| id        | string | 必須 | 保存済みメモ識別子        |
-| title     | string | 必須 | 利用者が指定するメモ名    |
-| category  | string | 必須 | 比較対象カテゴリの要約    |
-| createdAt | string | 必須 | 作成日時の ISO 文字列表現 |
-| updatedAt | string | 必須 | 更新日時の ISO 文字列表現 |
+| 項目名    | 型      | 必須 | 説明                         |
+| --------- | ------- | ---- | ---------------------------- |
+| id        | string  | 必須 | 保存済みメモ識別子           |
+| title     | string  | 必須 | 利用者が指定するメモ名       |
+| category  | string  | 必須 | 比較対象カテゴリの要約       |
+| isPublic  | boolean | 必須 | 他ユーザーへ公開するかどうか |
+| createdAt | string  | 必須 | 作成日時の ISO 文字列表現    |
+| updatedAt | string  | 必須 | 更新日時の ISO 文字列表現    |
 
 ### 4.2 ComparisonMemo
 
@@ -58,6 +59,7 @@
 
 - id は永続層で一意であること。
 - title は空文字でないこと。
+- isPublic は未指定時に false として扱うこと。
 - data は ComparisonData として復元できる JSON 構造であること。
 
 ## 5. DecisionPoint

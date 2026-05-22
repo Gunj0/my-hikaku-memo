@@ -35,6 +35,7 @@ export interface ComparisonMemoSummary {
   id: string;
   title: string;
   category: string;
+  isPublic: boolean;
   createdAt: string;
   updatedAt: string;
 }

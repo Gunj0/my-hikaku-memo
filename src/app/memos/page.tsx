@@ -14,6 +14,10 @@ import { ArrowRightIcon, EyeIcon, PlusCircleIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
+function getVisibilityLabel(isPublic: boolean) {
+  return isPublic ? "公開" : "非公開";
+}
+
 export default async function MemosPage() {
   const session = await auth();
   const userId = session?.user?.id;
@@ -62,7 +66,7 @@ export default async function MemosPage() {
           </p>
           <h1 className="text-2xl font-semibold">作成済みメモ一覧</h1>
           <p className="text-sm text-muted-foreground">
-            保存した比較メモを再開したり、閲覧モードで内容を確認できます。
+            保存した比較メモを再開したり、公開設定を切り替えながら閲覧モードで内容を確認できます。
           </p>
         </div>
         <Button asChild>
@@ -98,10 +102,20 @@ export default async function MemosPage() {
             <Card key={memo.id} className="border-border/80 bg-card/72">
               <CardHeader className="gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <CardTitle className="text-lg">{memo.title}</CardTitle>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <CardTitle className="text-lg">{memo.title}</CardTitle>
+                    <span className="rounded-full border border-border/70 px-2 py-0.5 text-[11px] text-muted-foreground">
+                      {getVisibilityLabel(memo.isPublic)}
+                    </span>
+                  </div>
                   <CardDescription className="mt-2">
                     カテゴリ: {memo.category || "未設定"}
                   </CardDescription>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {memo.isPublic
+                      ? "公開中のため、他ユーザーは閲覧専用で確認できます。"
+                      : "非公開のため、自分以外のユーザーには表示されません。"}
+                  </p>
                 </div>
                 <div className="text-xs leading-6 text-muted-foreground">
                   <div>

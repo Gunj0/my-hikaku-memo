@@ -16,6 +16,7 @@ const savedMemoResponse = {
     id: "saved-memo",
     title: "保存済みスマホ比較",
     category: "保存済みスマホ",
+    isPublic: false,
     createdAt: "2026-05-21T00:00:00.000Z",
     updatedAt: "2026-05-21T00:00:00.000Z",
     data: {
@@ -58,7 +59,7 @@ const savedMemoResponse = {
   },
 };
 
-async function mockAuthenticatedMemoLoad(page: Page) {
+async function mockAuthenticatedSession(page: Page) {
   await page.route("**/api/auth/session", async (route) => {
     await route.fulfill({
       status: 200,
@@ -66,6 +67,10 @@ async function mockAuthenticatedMemoLoad(page: Page) {
       body: JSON.stringify(authenticatedSession),
     });
   });
+}
+
+async function mockAuthenticatedMemoLoad(page: Page) {
+  await mockAuthenticatedSession(page);
 
   await page.route("**/api/memos/saved-memo", async (route) => {
     await route.fulfill({
@@ -79,7 +84,7 @@ async function mockAuthenticatedMemoLoad(page: Page) {
 test("ステップは未入力でも常に自由に移動できる", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("link", { name: "新しいメモを作る" }).click();
+  await page.getByRole("link", { name: "新しい比較メモを作る" }).click();
 
   const nextButton = page.getByRole("button", { name: "次へ" });
   await expect(nextButton).toBeEnabled();
@@ -104,8 +109,8 @@ test("保存済みメモのリセットは保存時点の状態へ戻る", async
 
   await page.goto("/memos/new?memoId=saved-memo");
 
-  await expect(page.getByText("編集中: 保存済みスマホ比較")).toBeVisible();
   await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
+  await expect(page.getByText("保存済みスマホ比較")).toBeVisible();
 
   await page.getByRole("button", { name: /カテゴリ/ }).click();
   const categoryInput = page.getByLabel("その他のカテゴリ");

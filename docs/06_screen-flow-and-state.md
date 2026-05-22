@@ -11,7 +11,7 @@
 - currentStep: number。現在表示中のステップ番号。
 - data: ComparisonData。比較フロー全体の入力状態。
 - sessionUser: Session.user または null。現在ログイン中の利用者情報。
-- activeMemo: ComparisonMemoSummary または null。現在編集中の保存済みメモ。
+- activeMemo: ComparisonMemoSummary または null。現在編集中の保存済みメモ。公開状態を含む。
 - savedMemos: ComparisonMemoSummary[]。保存済みメモ一覧。
 
 ### 2.2 ステップ内ローカル状態
@@ -44,7 +44,7 @@
 | SelectProduct | 最終決定製品を選択または解除する |
 | SignIn        | Google ログインを開始する        |
 | SignOut       | 現在のセッションを終了する       |
-| SaveMemo      | 現在の比較内容を保存する         |
+| SaveMemo      | 現在の比較内容を公開設定付きで保存する |
 | LoadMemo      | 保存済みメモを読み込む           |
 | DeleteMemo    | 保存済みメモを削除する           |
 
@@ -112,7 +112,9 @@ Step1 -> Step2 -> Step3 -> Step4 -> Step5 -> Step6
 
 - 未ログイン状態でも比較データ編集は継続できる。
 - 保存または保存済みメモ一覧表示を要求したとき、未ログインであればログイン案内ダイアログを表示する。
+- 保存ダイアログでは activeMemo の公開状態を初期値として表示する。
 - 保存済みメモ読込時は、必要に応じて現在の編集中内容を置き換える確認を行う。
+- 非公開メモの閲覧画面は所有者だけが到達できる。
 - リセット時は未保存データを破棄するが、保存済みメモ編集中であれば activeMemo を維持したまま保存時点へ戻す。
 
 ## 9. 補助制御

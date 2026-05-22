@@ -33,7 +33,9 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
           </p>
           <h1 className="text-2xl font-semibold">比較メモの閲覧</h1>
           <p className="text-sm text-muted-foreground">
-            この画面は閲覧専用です。編集は所有者だけが編集ルートから再開できます。
+            {memo.isPublic
+              ? "この画面は閲覧専用です。編集は所有者だけが編集ルートから再開できます。"
+              : "このメモは非公開です。所有者だけが閲覧と編集再開を行えます。"}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
