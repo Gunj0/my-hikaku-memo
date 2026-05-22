@@ -548,7 +548,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
             </div>
             <div className="flex items-start justify-between gap-4 rounded-lg border border-border/70 bg-background/40 p-3">
               <div className="space-y-1">
-                <label htmlFor="memo-visibility" className="text-sm font-medium">
+                <label
+                  htmlFor="memo-visibility"
+                  className="text-sm font-medium"
+                >
                   公開設定
                 </label>
                 <p className="text-sm text-muted-foreground">
