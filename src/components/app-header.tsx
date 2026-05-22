@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { LogInIcon, LogOutIcon } from "lucide-react";
+import { BookMarkedIcon, LogInIcon, LogOutIcon, PlusCircleIcon, type LucideIcon } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -19,9 +19,9 @@ export function AppHeader() {
 
     return query ? `${pathname}?${query}` : pathname;
   })();
-  const navItems = [
-    { href: "/memos/new", label: "新規作成" },
-    { href: "/memos", label: "マイメモ" },
+  const navItems: { href: string; label: string; icon: LucideIcon }[] = [
+    { href: "/memos/new", label: "新規作成", icon: PlusCircleIcon },
+    { href: "/memos", label: "マイメモ", icon: BookMarkedIcon },
   ];
 
   const handleSignIn = async () => {
@@ -34,9 +34,9 @@ export function AppHeader() {
 
   return (
     <header className="border-b border-border/80 bg-background/88 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-6">
-          <div className="min-w-0">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3">
+        <div className="flex min-w-0 items-center gap-2 md:gap-6">
+          <div className="min-w-0 shrink-0">
             <p className="mb-1 text-[10px] tracking-[0.24em] text-muted-foreground uppercase">
               My Hikaku Memo
             </p>
@@ -50,7 +50,7 @@ export function AppHeader() {
             </Link>
           </div>
 
-          <nav className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <nav className="flex items-center gap-2 text-xs text-muted-foreground">
             {navItems.map((item) => {
               const isActive =
                 item.href === "/"
@@ -58,25 +58,29 @@ export function AppHeader() {
                   : pathname === item.href ||
                     pathname.startsWith(`${item.href}/`);
 
+              const Icon = item.icon;
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-label={item.label}
                   className={cn(
-                    "rounded-sm border px-2 py-1 transition-colors",
+                    "inline-flex items-center gap-1 rounded-sm border px-2 py-1 transition-colors",
                     isActive
                       ? "border-primary/50 bg-primary/10 text-foreground"
                       : "border-border/80 bg-card/80 hover:border-primary/40 hover:text-foreground",
                   )}
                 >
-                  {item.label}
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="hidden md:inline">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <span className="hidden rounded-sm border border-border/80 bg-card/80 px-2 py-1 text-[10px] tracking-[0.18em] text-muted-foreground md:inline-flex">
             {isAuthenticated ? "SESSION:LIVE" : "SESSION:GUEST"}
           </span>
