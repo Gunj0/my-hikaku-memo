@@ -23,9 +23,11 @@ function getMemoDescription(
   pointCount: number,
   productCount: number,
 ) {
+  const resolvedCategory = category.trim() || "未設定";
+
   return [
     `${title} の比較メモです。`,
-    `カテゴリ「${category || "未設定"}」で、`,
+    `カテゴリ「${resolvedCategory}」で、`,
     `${pointCount} 個の比較ポイントと ${productCount} 件の候補製品を整理した内容を閲覧できます。`,
   ].join("");
 }

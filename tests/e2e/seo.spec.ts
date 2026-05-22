@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const siteUrl = "http://127.0.0.1:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000";
 
 test("ホームに検索と共有向けのメタデータが設定されている", async ({ page }) => {
   await page.goto("/");
