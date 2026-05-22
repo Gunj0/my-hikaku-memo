@@ -18,13 +18,21 @@ export const siteConfig = {
   socialImageAlt: "オレの比較メモの紹介画像",
 } as const;
 
-const defaultSiteUrl = "http://127.0.0.1:3000";
+const defaultSiteUrl =
+  process.env.NODE_ENV === "production"
+    ? "https://localhost"
+    : "http://127.0.0.1:3000";
 
 function getConfiguredSiteUrl() {
-  const rawUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    process.env.SITE_URL?.trim() ||
-    defaultSiteUrl;
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() || process.env.SITE_URL?.trim();
+  const rawUrl = configuredUrl || defaultSiteUrl;
+
+  if (!configuredUrl && process.env.NODE_ENV === "production") {
+    console.warn(
+      "NEXT_PUBLIC_SITE_URL or SITE_URL is not set. Falling back to a placeholder HTTPS origin for SEO metadata.",
+    );
+  }
 
   try {
     return new URL(rawUrl);
