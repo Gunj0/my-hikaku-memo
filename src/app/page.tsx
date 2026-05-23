@@ -210,7 +210,7 @@ export default async function Home() {
             <Button asChild variant="success">
               <Link href="/memos/new">
                 <PlusCircleIcon className="h-4 w-4" />
-                新しい比較メモを作る
+                比較メモ作成を始める
               </Link>
             </Button>
           </CardContent>
