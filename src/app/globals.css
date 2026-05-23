@@ -83,10 +83,12 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-plex-mono), "IBM Plex Mono", "Geist Mono", monospace;
+  --font-sans:
+    "IBM Plex Mono", "JetBrains Mono", "Geist Mono", "SFMono-Regular", Consolas,
+    "Liberation Mono", Menlo, monospace;
   --font-mono:
-    var(--font-jetbrains-mono), var(--font-plex-mono), "JetBrains Mono",
-    "Geist Mono", monospace;
+    "JetBrains Mono", "IBM Plex Mono", "Geist Mono", "SFMono-Regular", Consolas,
+    "Liberation Mono", Menlo, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

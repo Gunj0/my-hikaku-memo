@@ -3,25 +3,10 @@ import { AppHeader } from "@/components/app-header";
 import { AuthSessionProvider } from "@/components/auth/session-provider";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
 
 import { siteConfig, getSiteUrl } from "@/lib/seo";
 import { Suspense } from "react";
 import "./globals.css";
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-plex-mono",
-  display: "swap",
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-jetbrains-mono",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
@@ -93,9 +78,7 @@ export default async function RootLayout({
 
   return (
     <html lang="ja" className="dark bg-background">
-      <body
-        className={`${plexMono.variable} ${jetBrainsMono.variable} font-sans antialiased min-h-dvh`}
-      >
+      <body className="font-sans antialiased min-h-dvh">
         <AuthSessionProvider session={session}>
           <Suspense fallback={null}>
             <AppHeader />
