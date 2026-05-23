@@ -49,7 +49,7 @@ import {
 } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type MemoListResponse = {
@@ -106,6 +106,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const [isLibraryLoading, setIsLibraryLoading] = useState(false);
   const [isLoadingMemoId, setIsLoadingMemoId] = useState<string | null>(null);
   const [isDeletingMemoId, setIsDeletingMemoId] = useState<string | null>(null);
+  const attemptedInitialMemoIdRef = useRef<string | null>(null);
 
   const isAuthenticated = status === "authenticated";
   const isAuthLoading = status === "loading";
@@ -171,25 +172,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     }
   }, [isAuthenticated, isLibraryDialogOpen]);
 
-  useEffect(() => {
-    if (!initialMemoId) {
-      return;
-    }
-
-    if (status === "unauthenticated") {
-      setIsAuthDialogOpen(true);
-      return;
-    }
-
-    if (
-      status === "authenticated" &&
-      activeMemo?.id !== initialMemoId &&
-      isLoadingMemoId !== initialMemoId
-    ) {
-      void loadMemoById(initialMemoId, { skipConfirm: true });
-    }
-  }, [activeMemo?.id, initialMemoId, isLoadingMemoId, status]);
-
   const handleNext = () => {
     if (currentStep < STEPS.length && canProceed()) {
       setCurrentStep(currentStep + 1);
@@ -228,11 +210,12 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const loadMemoById = async (
     memoId: string,
     options?: {
+      allowUnauthenticatedAttempt?: boolean;
       skipConfirm?: boolean;
       onLoaded?: () => void;
     },
   ) => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !options?.allowUnauthenticatedAttempt) {
       setIsAuthDialogOpen(true);
       return;
     }
@@ -282,6 +265,28 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setIsLoadingMemoId(null);
     }
   };
+
+  useEffect(() => {
+    if (!initialMemoId) {
+      attemptedInitialMemoIdRef.current = null;
+      return;
+    }
+
+    if (
+      status === "loading" ||
+      activeMemo?.id === initialMemoId ||
+      isLoadingMemoId === initialMemoId ||
+      attemptedInitialMemoIdRef.current === initialMemoId
+    ) {
+      return;
+    }
+
+    attemptedInitialMemoIdRef.current = initialMemoId;
+    void loadMemoById(initialMemoId, {
+      allowUnauthenticatedAttempt: true,
+      skipConfirm: true,
+    });
+  }, [activeMemo?.id, initialMemoId, isLoadingMemoId, status]);
 
   const handleOpenSaveDialog = () => {
     if (!isAuthenticated) {
