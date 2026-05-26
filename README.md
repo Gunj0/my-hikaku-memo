@@ -1,30 +1,12 @@
 # オレの比較メモ
 
+## アプリ概要
+
 ガジェットや家電の比較メモ過程を保存できるアプリです。
 
-## UI デザイン方針
+詳細な要件、設計、画面デザイン方針は docs 配下の文書を参照してください。
 
-- Tokyo Night ベースの青紫系を基調にし、保存成功と比較優位だけ Neon Green で強調する。
-- 全体を等幅フォントベースで統一し、IBM Plex Mono と JetBrains Mono を中心に構成する。
-- 情報密度を優先し、薄いボーダー、小さめの角丸、グリッド感のある背景で比較作業に寄せる。
-- ホバーと状態変化は速めにし、アニメーションは補助的に留める。
-- UI ラベルやメタ情報は控えめに記号化し、比較ワークベンチのような見た目を目指す。
-
-## 主な機能
-
-- ログイン不要で使える比較フロー
-- ステップを自由に行き来できる比較フロー
-- Google ログインによる保存済みメモ管理
-- 複数メモの保存、上書き保存、読込、削除
-- Cloudflare D1 への永続化
-
-## 操作メモ
-
-- 進捗インジケータから全ステップへ直接移動できます。
-- 保存済みメモを編集中に元に戻すを押すと、最後に保存した状態へ戻ります。
-- 候補製品を削除した場合、最終決定は解除されるため再選択が必要です。
-
-## 技術スタック
+## 主要な技術スタック
 
 - Next.js 16 / React 19 / TypeScript
 - Auth.js + Google Provider
@@ -34,6 +16,8 @@
 ## セットアップ
 
 ```bash
+git clone git@github.com:Gunj0/my-hikaku-memo.git
+cd my-hikaku-memo
 pnpm install
 ```
 
@@ -75,19 +59,21 @@ AUTH_GOOGLE_SECRET=your-google-client-secret
 2. wrangler.jsonc の database_id を実際の ID に置き換える
 3. Cloudflare の secret に AUTH_SECRET、AUTH_GOOGLE_ID、AUTH_GOOGLE_SECRET を登録する
 
-## 開発
+## 開発用コマンド
+
+### 開発
 
 ```bash
 pnpm dev
 ```
 
-Lint 実行
+### Lint
 
 ```bash
 pnpm lint
 ```
 
-## UIテスト
+### UIテスト
 
 Playwright で未ログインの基本フローを E2E テストできます。
 
@@ -115,20 +101,20 @@ pnpm exec playwright test tests/e2e/basic-flow.spec.ts --project=chromium
 pnpm exec playwright show-report
 ```
 
-## ビルド
+### ビルド
 
 ```bash
 pnpm build
 ```
 
-## Cloudflare 向けプレビューと配備
+### Cloudflare 向けプレビューと配備
 
 ```bash
 pnpm preview
 pnpm deploy
 ```
 
-## 保守
+### 保守
 
 wrangler.jsonc を更新した後は型定義を再生成します。
 
