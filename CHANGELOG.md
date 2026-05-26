@@ -85,3 +85,11 @@ pnpm create cloudflare@latest my-next-app --framework=next
     },
   ],
 ```
+
+## shadcn/ui の導入
+
+- [shadcn/ui](https://ui.shadcn.com/docs/installation)
+
+```bash
+pnpm dlx shadcn@latest init -t next
+```
