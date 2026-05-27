@@ -129,7 +129,7 @@ test("保存済みメモのリセットは保存時点の状態へ戻る", async
   await expect(categoryInput).toHaveValue("保存済みスマホ");
 });
 
-test("候補製品を削除すると最終ステップは完了できない", async ({ page }) => {
+test("候補製品を削除すると最終ステップは保存できない", async ({ page }) => {
   await page.goto("/memos/new");
 
   await page.getByRole("button", { name: /候補/ }).click();
@@ -143,12 +143,14 @@ test("候補製品を削除すると最終ステップは完了できない", as
   await page.getByRole("button", { name: /結論/ }).click();
   await page.getByRole("button", { name: /iPhone 16/ }).click();
 
-  const completeButton = page.getByRole("button", { name: "完了" });
-  await expect(completeButton).toBeEnabled();
+  const saveButton = page
+    .getByRole("contentinfo")
+    .getByRole("button", { name: "保存" });
+  await expect(saveButton).toBeEnabled();
 
   await page.getByRole("button", { name: /候補/ }).click();
   await page.getByRole("button", { name: "Pixel 10を削除" }).click();
 
   await page.getByRole("button", { name: /結論/ }).click();
-  await expect(completeButton).toBeDisabled();
+  await expect(saveButton).toBeDisabled();
 });

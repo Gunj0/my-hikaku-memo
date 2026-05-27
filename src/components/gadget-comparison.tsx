@@ -823,11 +823,12 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                 </Button>
               ) : (
                 <Button
+                  onClick={handleOpenSaveDialog}
                   variant="default"
                   className="flex-1 sm:flex-none"
-                  disabled={!hasValidSelectedProduct}
+                  disabled={!hasValidSelectedProduct || isAuthLoading}
                 >
-                  完了
+                  保存
                 </Button>
               )}
             </div>
