@@ -1,15 +1,4 @@
-import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
-
-const authenticatedSession = {
-  user: {
-    id: "user-1",
-    name: "Playwright User",
-    email: "playwright@example.com",
-    image: null,
-  },
-  expires: "2099-01-01T00:00:00.000Z",
-};
 
 const savedMemoResponse = {
   memo: {
@@ -59,27 +48,7 @@ const savedMemoResponse = {
   },
 };
 
-async function mockAuthenticatedSession(page: Page) {
-  await page.route("**/api/auth/session", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(authenticatedSession),
-    });
-  });
-}
-
-async function mockAuthenticatedMemoLoad(page: Page) {
-  await mockAuthenticatedSession(page);
-
-  await page.route("**/api/memos/saved-memo", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(savedMemoResponse),
-    });
-  });
-}
+const persistedDraftStorageKey = "gadget-comparison-auth-draft";
 
 test("ステップは未入力でも常に自由に移動できる", async ({ page }) => {
   await page.goto("/");
@@ -105,9 +74,35 @@ test("ステップは未入力でも常に自由に移動できる", async ({ pa
 });
 
 test("保存済みメモのリセットは保存時点の状態へ戻る", async ({ page }) => {
-  await mockAuthenticatedMemoLoad(page);
+  await page.addInitScript(
+    ({ key, value }) => {
+      window.sessionStorage.setItem(key, JSON.stringify(value));
+    },
+    {
+      key: persistedDraftStorageKey,
+      value: {
+        redirectTo: "/memos/new",
+        currentStep: 4,
+        data: {
+          ...savedMemoResponse.memo.data,
+          category: "編集中のカテゴリ",
+        },
+        savedSnapshot: savedMemoResponse.memo.data,
+        activeMemo: {
+          id: savedMemoResponse.memo.id,
+          title: savedMemoResponse.memo.title,
+          category: savedMemoResponse.memo.category,
+          isPublic: savedMemoResponse.memo.isPublic,
+          createdAt: savedMemoResponse.memo.createdAt,
+          updatedAt: savedMemoResponse.memo.updatedAt,
+        },
+        memoTitle: savedMemoResponse.memo.title,
+        memoIsPublic: savedMemoResponse.memo.isPublic,
+      },
+    },
+  );
 
-  await page.goto("/memos/new?memoId=saved-memo");
+  await page.goto("/memos/new");
 
   await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
   await expect(page.getByText("保存済みスマホ比較")).toBeVisible();
@@ -115,9 +110,9 @@ test("保存済みメモのリセットは保存時点の状態へ戻る", async
   await page.getByRole("button", { name: /カテゴリ/ }).click();
   const categoryInput = page.getByLabel("その他のカテゴリ");
 
-  await expect(categoryInput).toHaveValue("保存済みスマホ");
-  await categoryInput.fill("編集中のカテゴリ");
   await expect(categoryInput).toHaveValue("編集中のカテゴリ");
+  await categoryInput.fill("さらに編集中のカテゴリ");
+  await expect(categoryInput).toHaveValue("さらに編集中のカテゴリ");
 
   page.once("dialog", async (dialog) => {
     await dialog.accept();
@@ -153,4 +148,69 @@ test("候補製品を削除すると最終ステップは保存できない", as
 
   await page.getByRole("button", { name: /結論/ }).click();
   await expect(saveButton).toBeDisabled();
+});
+
+test("ログイン復帰時に編集中の内容を復元する", async ({ page }) => {
+  await page.addInitScript(
+    ({ key, value }) => {
+      window.sessionStorage.setItem(key, JSON.stringify(value));
+    },
+    {
+      key: persistedDraftStorageKey,
+      value: {
+        redirectTo: "/memos/new",
+        currentStep: 3,
+        data: {
+          category: "ミラーレスカメラ",
+          categoryMemo: "夜景を撮りたい",
+          decisionPoints: [
+            {
+              id: "point-price",
+              name: "価格",
+              isImportant: true,
+              weight: 3,
+              memo: "",
+            },
+          ],
+          pointsMemo: "予算優先",
+          products: [
+            {
+              id: "camera-a",
+              name: "Camera A",
+              memo: "軽さ重視",
+            },
+            {
+              id: "camera-b",
+              name: "Camera B",
+              memo: "",
+            },
+          ],
+          productsMemo: "店頭で触って決める",
+          scores: [],
+          selectedProductId: null,
+          decisionMemo: "",
+        },
+        savedSnapshot: null,
+        activeMemo: null,
+        memoTitle: "",
+        memoIsPublic: false,
+      },
+    },
+  );
+
+  await page.goto("/memos/new");
+
+  await expect(
+    page.getByRole("heading", { name: "候補製品を洗い出す" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
+    "店頭で触って決める",
+  );
+  await expect(page.getByText("Camera A")).toBeVisible();
+
+  await page.getByRole("button", { name: /カテゴリ/ }).click();
+  await expect(page.getByLabel("その他のカテゴリ")).toHaveValue(
+    "ミラーレスカメラ",
+  );
+  await expect(page.getByLabel("メモ（任意）")).toHaveValue("夜景を撮りたい");
 });

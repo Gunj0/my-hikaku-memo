@@ -60,6 +60,18 @@ type MemoDetailResponse = {
   memo: ComparisonMemo;
 };
 
+type PersistedComparisonDraft = {
+  redirectTo: string;
+  currentStep: number;
+  data: ComparisonData;
+  savedSnapshot: ComparisonData | null;
+  activeMemo: ComparisonMemoSummary | null;
+  memoTitle: string;
+  memoIsPublic: boolean;
+};
+
+const PERSISTED_DRAFT_STORAGE_KEY = "gadget-comparison-auth-draft";
+
 function cloneComparisonData(data: ComparisonData): ComparisonData {
   return structuredClone(data);
 }
@@ -106,6 +118,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const [isLibraryLoading, setIsLibraryLoading] = useState(false);
   const [isLoadingMemoId, setIsLoadingMemoId] = useState<string | null>(null);
   const [isDeletingMemoId, setIsDeletingMemoId] = useState<string | null>(null);
+  const [hasResolvedDraftRestore, setHasResolvedDraftRestore] = useState(false);
 
   const isAuthenticated = status === "authenticated";
   const isAuthLoading = status === "loading";
@@ -121,6 +134,38 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const hasValidSelectedProduct = data.products.some(
     (product) => product.id === data.selectedProductId,
   );
+
+  const persistDraftForAuthRedirect = () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const shouldPersist =
+      hasMeaningfulComparisonData(data) ||
+      savedSnapshot !== null ||
+      activeMemo !== null ||
+      memoTitle.trim().length > 0;
+
+    if (!shouldPersist) {
+      window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
+      return;
+    }
+
+    const draft: PersistedComparisonDraft = {
+      redirectTo,
+      currentStep,
+      data: cloneComparisonData(data),
+      savedSnapshot: savedSnapshot ? cloneComparisonData(savedSnapshot) : null,
+      activeMemo,
+      memoTitle,
+      memoIsPublic,
+    };
+
+    window.sessionStorage.setItem(
+      PERSISTED_DRAFT_STORAGE_KEY,
+      JSON.stringify(draft),
+    );
+  };
 
   const canProceed = () => {
     switch (currentStep) {
@@ -166,12 +211,57 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   };
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const rawDraft = window.sessionStorage.getItem(PERSISTED_DRAFT_STORAGE_KEY);
+
+    if (!rawDraft) {
+      setHasResolvedDraftRestore(true);
+      return;
+    }
+
+    try {
+      const draft = JSON.parse(rawDraft) as Partial<PersistedComparisonDraft>;
+
+      if (
+        draft.redirectTo !== redirectTo ||
+        !draft.data ||
+        typeof draft.currentStep !== "number"
+      ) {
+        setHasResolvedDraftRestore(true);
+        return;
+      }
+
+      setData(cloneComparisonData(draft.data));
+      setSavedSnapshot(
+        draft.savedSnapshot ? cloneComparisonData(draft.savedSnapshot) : null,
+      );
+      setActiveMemo(draft.activeMemo ?? null);
+      setCurrentStep(Math.min(Math.max(draft.currentStep, 1), STEPS.length));
+      setMemoTitle(draft.memoTitle ?? "");
+      setMemoIsPublic(Boolean(draft.memoIsPublic));
+      window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
+      toast.success("ログイン後に編集中の内容を復元しました。");
+    } catch {
+      window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
+    } finally {
+      setHasResolvedDraftRestore(true);
+    }
+  }, [redirectTo]);
+
+  useEffect(() => {
     if (isLibraryDialogOpen && isAuthenticated) {
       void refreshSavedMemos();
     }
   }, [isAuthenticated, isLibraryDialogOpen]);
 
   useEffect(() => {
+    if (!hasResolvedDraftRestore) {
+      return;
+    }
+
     if (!initialMemoId) {
       return;
     }
@@ -188,7 +278,13 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     ) {
       void loadMemoById(initialMemoId, { skipConfirm: true });
     }
-  }, [activeMemo?.id, initialMemoId, isLoadingMemoId, status]);
+  }, [
+    activeMemo?.id,
+    hasResolvedDraftRestore,
+    initialMemoId,
+    isLoadingMemoId,
+    status,
+  ]);
 
   const handleNext = () => {
     if (currentStep < STEPS.length && canProceed()) {
@@ -222,6 +318,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   };
 
   const handleSignIn = async () => {
+    persistDraftForAuthRedirect();
     await signIn("google", { redirectTo });
   };
 
