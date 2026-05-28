@@ -14,9 +14,9 @@ export const siteConfig = {
     "購入検討",
     "比較表",
     "レビュー整理",
-  ] as string[],
+  ],
   socialImageAlt: "オレの比較メモの紹介画像",
-} as const;
+};
 
 const defaultSiteUrl =
   process.env.NODE_ENV === "production"
