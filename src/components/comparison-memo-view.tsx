@@ -84,6 +84,7 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
     memo.data.decisionPoints,
     memo,
   );
+  const topScore = productTotals[0]?.totalScore ?? 0;
   const selectedProduct = memo.data.products.find(
     (product) => product.id === memo.data.selectedProductId,
   );
@@ -177,7 +178,7 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
-                        {index === 0 ? (
+                        {index === 0 && topScore > 0 ? (
                           <TrophyIcon className="h-4 w-4 text-success" />
                         ) : (
                           <span className="text-sm font-bold">{index + 1}</span>

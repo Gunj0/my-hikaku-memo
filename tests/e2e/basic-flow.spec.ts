@@ -150,6 +150,31 @@ test("候補製品を削除すると最終ステップは保存できない", as
   await expect(saveButton).toBeDisabled();
 });
 
+test("ログイン遷移イベントで編集中の内容を退避する", async ({ page }) => {
+  await page.goto("/memos/new");
+
+  await page.getByLabel("その他のカテゴリ").fill("ミラーレスカメラ");
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event("gadget-comparison:before-sign-in"));
+  });
+
+  const persistedDraft = await page.evaluate((storageKey) => {
+    const rawDraft = window.sessionStorage.getItem(storageKey);
+
+    return rawDraft ? JSON.parse(rawDraft) : null;
+  }, persistedDraftStorageKey);
+
+  expect(persistedDraft).toMatchObject({
+    redirectTo: "/memos/new",
+    currentStep: 1,
+    memoIsPublic: false,
+    data: {
+      category: "ミラーレスカメラ",
+    },
+  });
+});
+
 test("ログイン復帰時に編集中の内容を復元する", async ({ page }) => {
   await page.addInitScript(
     ({ key, value }) => {

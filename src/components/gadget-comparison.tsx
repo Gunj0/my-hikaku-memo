@@ -71,6 +71,7 @@ type PersistedComparisonDraft = {
 };
 
 const PERSISTED_DRAFT_STORAGE_KEY = "gadget-comparison-auth-draft";
+const COMPARISON_AUTH_REDIRECT_EVENT = "gadget-comparison:before-sign-in";
 
 function cloneComparisonData(data: ComparisonData): ComparisonData {
   return structuredClone(data);
@@ -250,6 +251,36 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setHasResolvedDraftRestore(true);
     }
   }, [redirectTo]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handlePersistDraftRequest = () => {
+      persistDraftForAuthRedirect();
+    };
+
+    window.addEventListener(
+      COMPARISON_AUTH_REDIRECT_EVENT,
+      handlePersistDraftRequest,
+    );
+
+    return () => {
+      window.removeEventListener(
+        COMPARISON_AUTH_REDIRECT_EVENT,
+        handlePersistDraftRequest,
+      );
+    };
+  }, [
+    activeMemo,
+    currentStep,
+    data,
+    memoIsPublic,
+    memoTitle,
+    redirectTo,
+    savedSnapshot,
+  ]);
 
   useEffect(() => {
     if (isLibraryDialogOpen && isAuthenticated) {

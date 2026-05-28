@@ -14,6 +14,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
+const COMPARISON_AUTH_REDIRECT_EVENT = "gadget-comparison:before-sign-in";
+
 function getDisplayName(name: string | null | undefined) {
   return name?.trim() || "ユーザー";
 }
@@ -39,6 +41,10 @@ export function AppHeader() {
   ];
 
   const handleSignIn = async () => {
+    if (typeof window !== "undefined" && pathname === "/memos/new") {
+      window.dispatchEvent(new Event(COMPARISON_AUTH_REDIRECT_EVENT));
+    }
+
     await signIn("google", { redirectTo: currentPath });
   };
 
