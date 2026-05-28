@@ -50,6 +50,15 @@ const savedMemoResponse = {
 
 const persistedDraftStorageKey = "gadget-comparison-auth-draft";
 
+test("ホーム初期表示でヘッダーを表示する", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByText("オレの比較メモ")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Googleでログイン" }),
+  ).toBeVisible();
+});
+
 test("ステップは未入力でも常に自由に移動できる", async ({ page }) => {
   await page.goto("/");
 
