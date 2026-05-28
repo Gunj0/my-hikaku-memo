@@ -4,6 +4,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
 import { ensureDatabaseSetup } from "@/lib/server/database";
+import { ensureUserProfileRecord } from "@/lib/server/user-profiles";
 
 export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
   const { env } = getCloudflareContext();
@@ -17,10 +18,66 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
 
   await ensureDatabaseSetup(database);
 
+  const adapter = D1Adapter(database);
+  const createUser = adapter.createUser;
+  const updateUser = adapter.updateUser;
+
+  if (!createUser || !updateUser) {
+    throw new Error("Auth adapter is missing required user methods.");
+  }
+
+  type AuthAdapter = typeof adapter;
+  type CreateUserInput = Parameters<NonNullable<AuthAdapter["createUser"]>>[0];
+  type UpdateUserInput = Parameters<NonNullable<AuthAdapter["updateUser"]>>[0];
+
   return {
     trustHost: true,
     secret: authEnv.AUTH_SECRET,
-    adapter: D1Adapter(database),
+    adapter: {
+      ...adapter,
+      async createUser(user: CreateUserInput) {
+        const created = await createUser(user);
+        const profile = await ensureUserProfileRecord(database, created.id);
+
+        if (!profile) {
+          return {
+            ...created,
+            image: null,
+          };
+        }
+
+        return updateUser({
+          ...created,
+          name: profile.name,
+          image: null,
+        });
+      },
+      async updateUser(user: UpdateUserInput) {
+        const updated = await updateUser({
+          ...user,
+          image: null,
+        });
+
+        if (!updated) {
+          return updated;
+        }
+
+        const profile = await ensureUserProfileRecord(database, updated.id);
+
+        if (!profile) {
+          return {
+            ...updated,
+            image: null,
+          };
+        }
+
+        return updateUser({
+          ...updated,
+          name: profile.name,
+          image: null,
+        });
+      },
+    },
     session: {
       strategy: "database",
     },
@@ -33,7 +90,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
     callbacks: {
       async session({ session, user }) {
         if (session.user) {
+          const profile = await ensureUserProfileRecord(database, user.id);
+
           session.user.id = user.id;
+          session.user.name = profile?.name ?? session.user.name;
+          session.user.image = profile?.image ?? session.user.image;
         }
 
         return session;

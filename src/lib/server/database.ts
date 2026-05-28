@@ -29,6 +29,7 @@ const authTableStatements = [
     "email" text DEFAULT NULL,
     "emailVerified" datetime DEFAULT NULL,
     "image" text DEFAULT NULL,
+    "profile_initialized" integer NOT NULL DEFAULT 0,
     PRIMARY KEY (id)
   )`,
   `CREATE TABLE IF NOT EXISTS "verification_tokens" (
@@ -77,6 +78,22 @@ async function ensureMemoVisibilityColumn(database: D1Database) {
   }
 }
 
+async function ensureUserProfileInitializedColumn(database: D1Database) {
+  const columns = await database
+    .prepare('PRAGMA table_info("users")')
+    .all<TableInfoRow>();
+
+  if (
+    !columns.results.some((column) => column.name === "profile_initialized")
+  ) {
+    await database
+      .prepare(
+        `ALTER TABLE users ADD COLUMN profile_initialized INTEGER NOT NULL DEFAULT 0`,
+      )
+      .run();
+  }
+}
+
 let setupPromise: Promise<void> | null = null;
 
 export function ensureDatabaseSetup(database: D1Database) {
@@ -91,6 +108,7 @@ export function ensureDatabaseSetup(database: D1Database) {
       }
 
       await ensureMemoVisibilityColumn(database);
+      await ensureUserProfileInitializedColumn(database);
     })().catch((error) => {
       setupPromise = null;
       throw error;

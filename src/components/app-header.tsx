@@ -11,7 +11,16 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+
+function getDisplayName(name: string | null | undefined) {
+  return name?.trim() || "ユーザー";
+}
+
+function getInitials(name: string | null | undefined) {
+  return getDisplayName(name).slice(0, 2).toUpperCase();
+}
 
 export function AppHeader() {
   const { data: session, status } = useSession();
@@ -72,16 +81,32 @@ export function AppHeader() {
             })}
           </nav>
           {isAuthenticated ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void handleSignOut()}
-              disabled={isLoading}
-              className="shrink-0"
-            >
-              <LogOutIcon className="h-4 w-4" />
-              ログアウト
-            </Button>
+            <>
+              <Link
+                href="/memos"
+                className="items-center gap-2 rounded-md bg-card/70 px-2.5 py-1.5 text-left md:flex"
+              >
+                <Avatar className="size-8 border border-border/70">
+                  <AvatarImage
+                    src={session?.user?.image ?? undefined}
+                    alt={getDisplayName(session?.user?.name)}
+                  />
+                  <AvatarFallback>
+                    {getInitials(session?.user?.name)}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void handleSignOut()}
+                disabled={isLoading}
+                className="shrink-0"
+              >
+                <LogOutIcon className="h-4 w-4" />
+                ログアウト
+              </Button>
+            </>
           ) : (
             <Button
               variant="outline"

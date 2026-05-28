@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { auth } from "@/auth";
+import { ProfileSettingsCard } from "@/components/profile-settings-card";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,6 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { listComparisonMemos } from "@/lib/server/comparison-memos";
+import {
+  USER_PROFILE_NAME_MAX_LENGTH,
+  ensureUserProfile,
+} from "@/lib/server/user-profiles";
 import { ArrowRightIcon, EyeIcon, PlusCircleIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -56,6 +61,7 @@ export default async function MemosPage() {
   }
 
   const memos = await listComparisonMemos(userId);
+  const profile = await ensureUserProfile(userId);
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
@@ -76,6 +82,14 @@ export default async function MemosPage() {
           </Link>
         </Button>
       </section>
+
+      {profile ? (
+        <ProfileSettingsCard
+          initialName={profile.name}
+          image={profile.image}
+          maxLength={USER_PROFILE_NAME_MAX_LENGTH}
+        />
+      ) : null}
 
       {memos.length === 0 ? (
         <Card className="border-dashed border-border/80 bg-card/60">

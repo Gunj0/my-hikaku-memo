@@ -6,6 +6,11 @@ import {
   type ComparisonMemoPayload,
 } from "@/lib/comparison-schemas";
 import { ensureDatabaseSetup } from "@/lib/server/database";
+import {
+  ensureUserProfile,
+  getDefaultUserName,
+  getUserAvatarDataUri,
+} from "@/lib/server/user-profiles";
 import type {
   ComparisonMemo,
   ComparisonMemoAuthor,
@@ -27,7 +32,7 @@ type ComparisonMemoRow = {
 
 type PublicComparisonMemoRow = ComparisonMemoRow & {
   user_name: string | null;
-  user_image: string | null;
+  user_profile_initialized: number | null;
 };
 
 async function getDatabase() {
@@ -44,10 +49,15 @@ function toIsoString(timestamp: number) {
 }
 
 function mapAuthor(row: PublicComparisonMemoRow): ComparisonMemoAuthor {
+  const normalizedName = row.user_name?.trim();
+
   return {
     id: row.user_id,
-    name: row.user_name,
-    image: row.user_image,
+    name:
+      row.user_profile_initialized === 1 && normalizedName
+        ? normalizedName
+        : getDefaultUserName(row.user_id),
+    image: getUserAvatarDataUri(row.user_id),
   };
 }
 
@@ -143,7 +153,7 @@ export async function listRandomComparisonMemos(
     .prepare(
       `
         SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
-               u.name AS user_name, u.image AS user_image
+           u.name AS user_name, u.profile_initialized AS user_profile_initialized
         FROM comparison_memos AS m
         LEFT JOIN users AS u ON u.id = m.user_id
         WHERE m.is_public = 1 AND (?1 IS NULL OR m.user_id != ?1)
@@ -166,7 +176,7 @@ export async function getPublicComparisonMemo(
     .prepare(
       `
         SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
-               u.name AS user_name, u.image AS user_image
+           u.name AS user_name, u.profile_initialized AS user_profile_initialized
         FROM comparison_memos AS m
         LEFT JOIN users AS u ON u.id = m.user_id
         WHERE m.id = ?1
@@ -184,6 +194,8 @@ export async function createComparisonMemo(
   userId: string,
   payload: ComparisonMemoPayload,
 ) {
+  await ensureUserProfile(userId);
+
   const database = await getDatabase();
   const normalized = normalizePayload(payload);
   const now = Date.now();
