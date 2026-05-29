@@ -10,14 +10,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { buildMetadata, getRequestSiteUrl } from "@/lib/seo";
 import { listComparisonMemos } from "@/lib/server/comparison-memos";
 import {
   USER_PROFILE_NAME_MAX_LENGTH,
   ensureUserProfile,
 } from "@/lib/server/user-profiles";
 import { ArrowRightIcon, EyeIcon, PlusCircleIcon } from "lucide-react";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const siteUrl = await getRequestSiteUrl();
+
+  return buildMetadata({
+    title: "作成済みメモ一覧 | オレの比較メモ",
+    description:
+      "保存済みの比較メモを確認し、編集や公開設定の変更を行う管理画面です。",
+    path: "/memos",
+    noIndex: true,
+    siteUrl,
+  });
+}
 
 function getVisibilityLabel(isPublic: boolean) {
   return isPublic ? "公開" : "非公開";

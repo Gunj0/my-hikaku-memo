@@ -34,6 +34,7 @@ pnpm install
 AUTH_SECRET=your-auth-secret
 AUTH_GOOGLE_ID=your-google-client-id
 AUTH_GOOGLE_SECRET=your-google-client-secret
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 .dev.vars
@@ -43,7 +44,12 @@ NEXTJS_ENV=development
 AUTH_SECRET=your-auth-secret
 AUTH_GOOGLE_ID=your-google-client-id
 AUTH_GOOGLE_SECRET=your-google-client-secret
+NEXT_PUBLIC_SITE_URL=http://localhost:8787
 ```
+
+- NEXT_PUBLIC_SITE_URL は canonical、Open Graph、Twitter Card、robots.txt、sitemap.xml、構造化データの生成基準 URL として利用します。
+- Cloudflare preview / deploy では Worker ランタイムの NEXT_PUBLIC_SITE_URL を優先し、未設定時のみリクエスト URL をフォールバックとして利用します。
+- 本番環境では必ず公開 URL を NEXT_PUBLIC_SITE_URL に設定してください。
 
 ### Google OAuth 設定
 

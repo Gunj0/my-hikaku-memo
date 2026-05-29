@@ -17,8 +17,35 @@ import {
   PlusCircleIcon,
   RefreshCwIcon,
 } from "lucide-react";
+import type { Metadata } from "next";
+
+import {
+  buildMetadata,
+  getAbsoluteUrl,
+  getDefaultOgImageUrl,
+  getRequestSiteUrl,
+} from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const siteUrl = await getRequestSiteUrl();
+
+  return buildMetadata({
+    title: "オレの比較メモ | ガジェットや家電の比較メモを公開・共有",
+    description:
+      "ガジェットや家電の比較ポイント、評価、最終判断をまとめて残せる比較メモアプリ。公開メモを閲覧しながら自分の比較メモもすぐ作成できます。",
+    path: "/",
+    keywords: [
+      "比較メモ アプリ",
+      "ガジェット 比較 メモ",
+      "家電 比較 メモ",
+      "購入 比較",
+      "公開メモ",
+    ],
+    siteUrl,
+  });
+}
 
 function getAuthorLabel(name: string | null) {
   return name?.trim() || "匿名ユーザー";
@@ -31,9 +58,47 @@ function getInitials(name: string | null) {
 export default async function Home() {
   const session = await auth();
   const publicMemos = await listRandomComparisonMemos(6, session?.user?.id);
+  const siteUrl = await getRequestSiteUrl();
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "オレの比較メモ",
+    url: getAbsoluteUrl("/", siteUrl),
+    inLanguage: "ja-JP",
+    description:
+      "ガジェットや家電の比較ポイント、評価、最終判断をまとめて残せる比較メモアプリ。",
+    image: [getDefaultOgImageUrl(siteUrl)],
+  };
+  const softwareApplicationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "オレの比較メモ",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    inLanguage: "ja-JP",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "JPY",
+    },
+    url: getAbsoluteUrl("/", siteUrl),
+    image: [getDefaultOgImageUrl(siteUrl)],
+    description:
+      "比較ポイントと最終判断を整理し、公開メモとして共有できる Web アプリ。",
+  };
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 md:py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(softwareApplicationJsonLd),
+        }}
+      />
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,1fr)]">
         <Card className="overflow-hidden border-border/80 bg-card/78">
           <CardHeader className="space-y-4 pb-4">

@@ -35,6 +35,11 @@ type PublicComparisonMemoRow = ComparisonMemoRow & {
   user_profile_initialized: number | null;
 };
 
+type PublicComparisonMemoSitemapRow = {
+  id: string;
+  updated_at: number;
+};
+
 async function getDatabase() {
   const { env } = getCloudflareContext();
   const database = (env as CloudflareEnv & { DB: D1Database }).DB;
@@ -165,6 +170,58 @@ export async function listRandomComparisonMemos(
     .all<PublicComparisonMemoRow>();
 
   return result.results.map(mapPublicSummary);
+}
+
+export async function listPublicComparisonMemos(limit?: number) {
+  const database = await getDatabase();
+  const query =
+    typeof limit === "number"
+      ? database
+          .prepare(
+            `
+              SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
+                 u.name AS user_name, u.profile_initialized AS user_profile_initialized
+              FROM comparison_memos AS m
+              LEFT JOIN users AS u ON u.id = m.user_id
+              WHERE m.is_public = 1
+              ORDER BY m.updated_at DESC
+              LIMIT ?1
+            `,
+          )
+          .bind(limit)
+      : database.prepare(
+          `
+            SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
+               u.name AS user_name, u.profile_initialized AS user_profile_initialized
+            FROM comparison_memos AS m
+            LEFT JOIN users AS u ON u.id = m.user_id
+            WHERE m.is_public = 1
+            ORDER BY m.updated_at DESC
+          `,
+        );
+
+  const result = await query.all<PublicComparisonMemoRow>();
+
+  return result.results.map(mapPublicSummary);
+}
+
+export async function listPublicComparisonMemoSitemapEntries() {
+  const database = await getDatabase();
+  const result = await database
+    .prepare(
+      `
+        SELECT id, updated_at
+        FROM comparison_memos
+        WHERE is_public = 1
+        ORDER BY updated_at DESC
+      `,
+    )
+    .all<PublicComparisonMemoSitemapRow>();
+
+  return result.results.map((row) => ({
+    id: row.id,
+    updatedAt: toIsoString(row.updated_at),
+  }));
 }
 
 export async function getPublicComparisonMemo(

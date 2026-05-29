@@ -683,7 +683,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                   公開設定
                 </label>
                 <p className="text-sm text-muted-foreground">
-                  非公開のメモは自分の一覧と編集ルートからのみ確認できます。
+                  非公開のメモは自分のみ閲覧できます
                 </p>
                 <p className="text-xs text-muted-foreground">
                   現在: {memoIsPublic ? "公開" : "非公開"}
