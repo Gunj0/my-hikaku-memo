@@ -93,3 +93,26 @@ pnpm create cloudflare@latest my-next-app --framework=next
 ```bash
 pnpm dlx shadcn@latest init -t next
 ```
+
+```package.json
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.16.0",
+    "radix-ui": "^1.4.3",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0"
+  }
+```
+
+以下ファイルが追加された
+
+```text
+
+├── components.json
+├── src
+│   └── lib
+│       └── utils.ts
+│   └── components
+│       └── ここにコンポーネントが追加される
+```
