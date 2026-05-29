@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
 
-import { Suspense } from "react";
 import "./globals.css";
 
 const plexMono = IBM_Plex_Mono({
@@ -57,9 +56,7 @@ export default async function RootLayout({
         className={`${plexMono.variable} ${jetBrainsMono.variable} font-sans antialiased min-h-dvh`}
       >
         <AuthSessionProvider session={session}>
-          <Suspense fallback={null}>
-            <AppHeader />
-          </Suspense>
+          <AppHeader />
           {children}
           <Toaster richColors position="top-right" />
         </AuthSessionProvider>

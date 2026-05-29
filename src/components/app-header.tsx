@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,24 +25,23 @@ function getInitials(name: string | null | undefined) {
 
 export function AppHeader() {
   const { data: session, status } = useSession();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const isAuthenticated = status === "authenticated";
   const isLoading = status === "loading";
-  const currentPath = (() => {
-    const query = searchParams.toString();
-
-    return query ? `${pathname}?${query}` : pathname;
-  })();
   const navItems: { href: string; label: string; icon: LucideIcon }[] = [
     { href: "/memos/new", label: "新規作成", icon: PlusCircleIcon },
     { href: "/memos", label: "マイメモ", icon: BookMarkedIcon },
   ];
 
   const handleSignIn = async () => {
-    if (typeof window !== "undefined" && pathname === "/memos/new") {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (window.location.pathname === "/memos/new") {
       window.dispatchEvent(new Event(COMPARISON_AUTH_REDIRECT_EVENT));
     }
+
+    const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 
     await signIn("google", { redirectTo: currentPath });
   };
