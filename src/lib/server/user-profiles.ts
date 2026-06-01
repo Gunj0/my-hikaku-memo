@@ -17,11 +17,11 @@ export type UserProfile = {
 export const USER_PROFILE_NAME_MAX_LENGTH = 12;
 
 const AVATAR_PALETTES = [
-  { start: "#0f766e", end: "#0f172a", accent: "#99f6e4" },
-  { start: "#1d4ed8", end: "#1e293b", accent: "#bfdbfe" },
-  { start: "#b45309", end: "#292524", accent: "#fde68a" },
-  { start: "#be123c", end: "#312e81", accent: "#fecdd3" },
-  { start: "#166534", end: "#14532d", accent: "#bbf7d0" },
+  { start: "#0f766e", end: "#0f766e", accent: "#0f766e" },
+  { start: "#1d4ed8", end: "#1d4ed8", accent: "#1d4ed8" },
+  { start: "#b45309", end: "#b45309", accent: "#b45309" },
+  { start: "#be123c", end: "#be123c", accent: "#be123c" },
+  { start: "#166534", end: "#166534", accent: "#166534" },
 ];
 
 function hashString(value: string) {

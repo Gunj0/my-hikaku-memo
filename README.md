@@ -113,7 +113,7 @@ pnpm exec playwright show-report
 pnpm build
 ```
 
-### Cloudflare 向けプレビューと配備
+### Cloudflare 向けプレビューとデプロイ
 
 ```bash
 pnpm preview
@@ -122,7 +122,7 @@ pnpm deploy
 
 ### 保守
 
-wrangler.jsonc を更新した後は型定義を再生成します。
+wrangler.jsonc を更新した後は型定義を再生成してください。
 
 ```bash
 pnpm run cf-typegen
