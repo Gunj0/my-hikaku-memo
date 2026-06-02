@@ -107,8 +107,8 @@ export default async function Home() {
                 あなただけの「比較メモ」を残そう
               </CardTitle>
               <CardDescription className="max-w-2xl text-md leading-6 text-muted-foreground">
-                <p>そのガジェット、その家電、なんで選んだっけ？を</p>
-                <p>ちゃんと残すためのアプリ</p>
+                <p>なんで選んだっけ？をちゃんと残すためのアプリ</p>
+                <p>次のガジェット、家電を選ぶときの参考に</p>
               </CardDescription>
             </div>
 
@@ -163,9 +163,9 @@ export default async function Home() {
       </section>
 
       <section className="space-y-4">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div className="flex gap-2 flex-row items-end justify-between">
           <div>
-            <h2 className="text-xl font-semibold">誰かのメモ</h2>
+            <h2 className="text-xl font-semibold">みんなの比較メモ</h2>
           </div>
           <Button asChild variant="ghost" size="sm">
             <Link href="/">

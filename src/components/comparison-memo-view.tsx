@@ -157,9 +157,6 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
         <Card className="border-border/80 bg-card/72">
           <CardHeader>
             <CardTitle className="text-xl">比較結果</CardTitle>
-            <CardDescription>
-              重要な比較ポイントに対する加重スコアです。
-            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {productTotals.length === 0 ? (

@@ -12,7 +12,7 @@ import {
   getRequestSiteUrl,
 } from "@/lib/seo";
 import { getPublicComparisonMemo } from "@/lib/server/comparison-memos";
-import { ArrowRightIcon, PencilIcon } from "lucide-react";
+import { ArrowLeftIcon, PencilIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -107,15 +107,6 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
         />
       ) : null}
       <section className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-[11px] tracking-[0.22em] text-primary uppercase">
-            memo viewer
-          </p>
-          <h1 className="text-2xl font-semibold">比較メモの閲覧</h1>
-          <p className="text-sm text-muted-foreground">
-            {memo.isPublic ? "この画面は閲覧専用です" : "このメモは非公開です"}
-          </p>
-        </div>
         <div className="flex flex-wrap gap-3">
           {memo.isOwner ? (
             <Button asChild>
@@ -127,8 +118,8 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
           ) : null}
           <Button asChild variant="outline">
             <Link href="/memos">
+              <ArrowLeftIcon className="h-4 w-4" />
               一覧へ戻る
-              <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </Button>
         </div>

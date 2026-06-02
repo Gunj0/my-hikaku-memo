@@ -50,7 +50,7 @@ export function AppHeader() {
 
   return (
     <header className="border-b border-border/80 bg-background/88 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3">
+      <div className="mx-auto flex items-center justify-between gap-2 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2 md:gap-6">
           <div className="min-w-0 shrink-0">
             <Link href="/">
