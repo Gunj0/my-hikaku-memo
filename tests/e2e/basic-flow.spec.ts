@@ -82,6 +82,45 @@ test("ステップは未入力でも常に自由に移動できる", async ({ pa
   ).toBeVisible();
 });
 
+test("評価テーブルの表示で hydration error を出さない", async ({ page }) => {
+  const consoleMessages: string[] = [];
+
+  page.on("console", (message) => {
+    consoleMessages.push(message.text());
+  });
+
+  await page.addInitScript(
+    ({ key, value }) => {
+      window.sessionStorage.setItem(key, JSON.stringify(value));
+    },
+    {
+      key: persistedDraftStorageKey,
+      value: {
+        redirectTo: "/memos/new",
+        currentStep: 4,
+        data: savedMemoResponse.memo.data,
+        savedSnapshot: null,
+        activeMemo: null,
+        memoTitle: "",
+        memoIsPublic: false,
+      },
+    },
+  );
+
+  await page.goto("/memos/new");
+
+  await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
+  await expect(page.getByRole("table")).toBeVisible();
+
+  const hydrationErrors = consoleMessages.filter((message) =>
+    /hydration|cannot be a child of <table>|cannot contain a nested <div>/i.test(
+      message,
+    ),
+  );
+
+  expect(hydrationErrors).toEqual([]);
+});
+
 test("保存済みメモのリセットは保存時点の状態へ戻る", async ({ page }) => {
   await page.addInitScript(
     ({ key, value }) => {

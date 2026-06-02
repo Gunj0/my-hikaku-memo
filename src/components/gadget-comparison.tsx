@@ -599,6 +599,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
             products={data.products}
             decisionPoints={data.decisionPoints}
             scores={data.scores}
+            onProductsChange={updateProducts}
+            onDecisionPointsChange={(points) =>
+              updateData("decisionPoints", points)
+            }
             onScoresChange={(scores) => updateData("scores", scores)}
           />
         );
