@@ -269,9 +269,12 @@ function SortableProductHeader({ product }: SortableProductHeaderProps) {
         transform: CSS.Transform.toString(transform),
         transition,
       }}
-      className={cn("min-w-50 text-center", isDragging && "bg-card")}
+      className={cn(
+        "w-56 min-w-50 max-w-56 align-top text-center whitespace-normal",
+        isDragging && "bg-card",
+      )}
     >
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-start justify-center gap-2 min-w-0">
         <Button
           type="button"
           variant="ghost"
@@ -283,7 +286,9 @@ function SortableProductHeader({ product }: SortableProductHeaderProps) {
         >
           <GripVerticalIcon className="w-4 h-4 rotate-90" />
         </Button>
-        <span>{product.name}</span>
+        <span className="line-clamp-3 min-w-0 break-all text-left leading-5 wrap-anywhere">
+          {product.name}
+        </span>
       </div>
     </TableHead>
   );
@@ -319,11 +324,11 @@ function SortablePointRow({
     >
       <TableCell
         className={cn(
-          "sticky left-0 z-20 min-w-37.5 border-r font-medium bg-background group-hover:bg-muted/50",
+          "sticky left-0 z-20 w-56 min-w-37.5 max-w-56 border-r bg-background font-medium whitespace-normal group-hover:bg-muted/50",
           isDragging && "bg-card",
         )}
       >
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-start gap-2 min-w-0">
           <Button
             type="button"
             variant="ghost"
@@ -335,7 +340,9 @@ function SortablePointRow({
           >
             <GripVerticalIcon className="w-4 h-4" />
           </Button>
-          <span className="truncate">{point.name}</span>
+          <span className="line-clamp-2 min-w-0 break-all leading-5 wrap-anywhere">
+            {point.name}
+          </span>
         </div>
       </TableCell>
       <TableCell className="text-center">
@@ -347,8 +354,11 @@ function SortablePointRow({
       {products.map((product) => {
         const scoreData = getScore(product.id, point.id);
         return (
-          <TableCell key={product.id}>
-            <div className="space-y-2">
+          <TableCell
+            key={product.id}
+            className="w-56 min-w-50 max-w-56 align-top whitespace-normal"
+          >
+            <div className="min-w-0 space-y-2">
               <div className="flex justify-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((score) => (
                   <button
@@ -563,7 +573,7 @@ export function EvaluationStep({
                 strategy={horizontalListSortingStrategy}
               >
                 <TableRow>
-                  <TableHead className="sticky left-0 z-30 min-w-37.5 border-r bg-background">
+                  <TableHead className="sticky left-0 z-30 w-56 min-w-37.5 max-w-56 border-r bg-background whitespace-normal">
                     ポイント
                   </TableHead>
                   <TableHead className="text-center w-20">重要度</TableHead>
