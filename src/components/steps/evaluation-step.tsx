@@ -315,9 +315,14 @@ function SortablePointRow({
         transform: CSS.Transform.toString(transform),
         transition,
       }}
-      className={cn(isDragging && "bg-card opacity-80 shadow-lg")}
+      className={cn("group", isDragging && "bg-card opacity-80 shadow-lg")}
     >
-      <TableCell className="font-medium">
+      <TableCell
+        className={cn(
+          "sticky left-0 z-20 min-w-37.5 border-r font-medium bg-background group-hover:bg-muted/50",
+          isDragging && "bg-card",
+        )}
+      >
         <div className="flex items-center gap-2 min-w-0">
           <Button
             type="button"
@@ -558,7 +563,9 @@ export function EvaluationStep({
                 strategy={horizontalListSortingStrategy}
               >
                 <TableRow>
-                  <TableHead className="min-w-37.5">ポイント</TableHead>
+                  <TableHead className="sticky left-0 z-30 min-w-37.5 border-r bg-background">
+                    ポイント
+                  </TableHead>
                   <TableHead className="text-center w-20">重要度</TableHead>
                   {products.map((product) => (
                     <SortableProductHeader key={product.id} product={product} />
