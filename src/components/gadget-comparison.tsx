@@ -49,7 +49,7 @@ import {
 } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type MemoListResponse = {
@@ -70,11 +70,26 @@ type PersistedComparisonDraft = {
   memoIsPublic: boolean;
 };
 
+type DraftState = {
+  currentStep: number;
+  data: ComparisonData;
+  savedSnapshot: ComparisonData | null;
+  activeMemo: ComparisonMemoSummary | null;
+  memoTitle: string;
+  memoIsPublic: boolean;
+};
+
 const PERSISTED_DRAFT_STORAGE_KEY = "gadget-comparison-auth-draft";
+const LOCAL_DRAFT_STORAGE_KEY_PREFIX = "gadget-comparison-local-draft";
 const COMPARISON_AUTH_REDIRECT_EVENT = "gadget-comparison:before-sign-in";
+const AUTO_SAVE_INTERVAL_MS = 10_000;
 
 function cloneComparisonData(data: ComparisonData): ComparisonData {
   return structuredClone(data);
+}
+
+function getLocalDraftStorageKey(redirectTo: string) {
+  return `${LOCAL_DRAFT_STORAGE_KEY_PREFIX}:${redirectTo}`;
 }
 
 async function readResponse<T>(response: Response): Promise<T> {
@@ -120,6 +135,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const [isLoadingMemoId, setIsLoadingMemoId] = useState<string | null>(null);
   const [isDeletingMemoId, setIsDeletingMemoId] = useState<string | null>(null);
   const [hasResolvedDraftRestore, setHasResolvedDraftRestore] = useState(false);
+  const latestDraftRef = useRef<PersistedComparisonDraft | null>(null);
 
   const isAuthenticated = status === "authenticated";
   const isAuthLoading = status === "loading";
@@ -135,6 +151,8 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const hasValidSelectedProduct = data.products.some(
     (product) => product.id === data.selectedProductId,
   );
+
+  const localDraftStorageKey = getLocalDraftStorageKey(redirectTo);
 
   const persistDraftForAuthRedirect = () => {
     if (typeof window === "undefined") {
@@ -166,6 +184,56 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       PERSISTED_DRAFT_STORAGE_KEY,
       JSON.stringify(draft),
     );
+  };
+
+  const buildDraft = (
+    overrides: Partial<DraftState> = {},
+  ): PersistedComparisonDraft | null => {
+    const nextCurrentStep = overrides.currentStep ?? currentStep;
+    const nextData = overrides.data ?? data;
+    const nextSavedSnapshot = overrides.savedSnapshot ?? savedSnapshot;
+    const nextActiveMemo = overrides.activeMemo ?? activeMemo;
+    const nextMemoTitle = overrides.memoTitle ?? memoTitle;
+    const nextMemoIsPublic = overrides.memoIsPublic ?? memoIsPublic;
+    const shouldPersistLocally =
+      nextCurrentStep !== 1 ||
+      hasMeaningfulComparisonData(nextData) ||
+      nextSavedSnapshot !== null ||
+      nextActiveMemo !== null ||
+      nextMemoTitle.trim().length > 0;
+
+    if (!shouldPersistLocally) {
+      return null;
+    }
+
+    return {
+      redirectTo,
+      currentStep: nextCurrentStep,
+      data: cloneComparisonData(nextData),
+      savedSnapshot: nextSavedSnapshot
+        ? cloneComparisonData(nextSavedSnapshot)
+        : null,
+      activeMemo: nextActiveMemo,
+      memoTitle: nextMemoTitle,
+      memoIsPublic: nextMemoIsPublic,
+    };
+  };
+
+  const persistDraftToLocal = (
+    draftOverride?: PersistedComparisonDraft | null,
+  ) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const draft = draftOverride ?? latestDraftRef.current;
+
+    if (!draft) {
+      window.localStorage.removeItem(localDraftStorageKey);
+      return;
+    }
+
+    window.localStorage.setItem(localDraftStorageKey, JSON.stringify(draft));
   };
 
   const canProceed = () => {
@@ -212,29 +280,69 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   };
 
   useEffect(() => {
+    latestDraftRef.current = buildDraft();
+  }, [
+    activeMemo,
+    currentStep,
+    data,
+    memoIsPublic,
+    memoTitle,
+    redirectTo,
+    savedSnapshot,
+  ]);
+
+  useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
-    const rawDraft = window.sessionStorage.getItem(PERSISTED_DRAFT_STORAGE_KEY);
+    const rawSessionDraft = window.sessionStorage.getItem(
+      PERSISTED_DRAFT_STORAGE_KEY,
+    );
+    const rawLocalDraft = window.localStorage.getItem(localDraftStorageKey);
 
-    if (!rawDraft) {
+    const parseDraft = (
+      rawDraft: string | null,
+    ): PersistedComparisonDraft | null => {
+      if (!rawDraft) {
+        return null;
+      }
+
+      try {
+        const draft = JSON.parse(rawDraft) as Partial<PersistedComparisonDraft>;
+
+        if (
+          draft.redirectTo !== redirectTo ||
+          !draft.data ||
+          typeof draft.currentStep !== "number"
+        ) {
+          return null;
+        }
+
+        return {
+          redirectTo: draft.redirectTo,
+          currentStep: draft.currentStep,
+          data: draft.data,
+          savedSnapshot: draft.savedSnapshot ?? null,
+          activeMemo: draft.activeMemo ?? null,
+          memoTitle: draft.memoTitle ?? "",
+          memoIsPublic: Boolean(draft.memoIsPublic),
+        };
+      } catch {
+        return null;
+      }
+    };
+
+    const sessionDraft = parseDraft(rawSessionDraft);
+    const localDraft = parseDraft(rawLocalDraft);
+    const draft = sessionDraft ?? localDraft;
+
+    if (!draft) {
       setHasResolvedDraftRestore(true);
       return;
     }
 
     try {
-      const draft = JSON.parse(rawDraft) as Partial<PersistedComparisonDraft>;
-
-      if (
-        draft.redirectTo !== redirectTo ||
-        !draft.data ||
-        typeof draft.currentStep !== "number"
-      ) {
-        setHasResolvedDraftRestore(true);
-        return;
-      }
-
       setData(cloneComparisonData(draft.data));
       setSavedSnapshot(
         draft.savedSnapshot ? cloneComparisonData(draft.savedSnapshot) : null,
@@ -243,14 +351,44 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setCurrentStep(Math.min(Math.max(draft.currentStep, 1), STEPS.length));
       setMemoTitle(draft.memoTitle ?? "");
       setMemoIsPublic(Boolean(draft.memoIsPublic));
-      window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
-      toast.success("ログイン後に編集中の内容を復元しました。");
+      if (sessionDraft) {
+        window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
+        window.localStorage.setItem(
+          localDraftStorageKey,
+          JSON.stringify(sessionDraft),
+        );
+        toast.success("ログイン後に編集中の内容を復元しました。");
+      } else {
+        toast.success("自動保存した内容を復元しました。");
+      }
     } catch {
       window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
+      window.localStorage.removeItem(localDraftStorageKey);
     } finally {
       setHasResolvedDraftRestore(true);
     }
-  }, [redirectTo]);
+  }, [localDraftStorageKey, redirectTo]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      persistDraftToLocal();
+    }, AUTO_SAVE_INTERVAL_MS);
+
+    const handlePageHide = () => {
+      persistDraftToLocal();
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("pagehide", handlePageHide);
+    };
+  }, [localDraftStorageKey]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -319,32 +457,56 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
   const handleNext = () => {
     if (currentStep < STEPS.length && canProceed()) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+
+      persistDraftToLocal(buildDraft({ currentStep: nextStep }));
+      setCurrentStep(nextStep);
     }
   };
 
   const handlePrev = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      const nextStep = currentStep - 1;
+
+      persistDraftToLocal(buildDraft({ currentStep: nextStep }));
+      setCurrentStep(nextStep);
     }
   };
 
   const handleStepClick = (step: number) => {
+    persistDraftToLocal(buildDraft({ currentStep: step }));
     setCurrentStep(step);
   };
 
   const handleReset = () => {
-    if (confirm("すべての入力内容がリセットされます。よろしいですか？")) {
+    if (confirm("最後に手動で保存した内容に戻ります。よろしいですか？")) {
       if (activeMemo && savedSnapshot) {
         const restoredData = cloneComparisonData(savedSnapshot);
+        const restoredStep = getInitialStepForComparisonData(restoredData);
 
+        persistDraftToLocal(
+          buildDraft({
+            currentStep: restoredStep,
+            data: restoredData,
+            savedSnapshot: restoredData,
+            activeMemo,
+            memoTitle: activeMemo.title,
+            memoIsPublic: activeMemo.isPublic,
+          }),
+        );
         setData(restoredData);
-        setCurrentStep(getInitialStepForComparisonData(restoredData));
+        setCurrentStep(restoredStep);
+        setMemoTitle(activeMemo.title);
+        setMemoIsPublic(activeMemo.isPublic);
         return;
       }
 
+      persistDraftToLocal(null);
       setData(createInitialComparisonData());
       setCurrentStep(1);
+      setSavedSnapshot(null);
+      setMemoTitle("");
+      setMemoIsPublic(false);
     }
   };
 
@@ -381,18 +543,32 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         cache: "no-store",
       });
       const { memo } = await readResponse<MemoDetailResponse>(response);
-
-      setData(cloneComparisonData(memo.data));
-      setSavedSnapshot(cloneComparisonData(memo.data));
-      setCurrentStep(getInitialStepForComparisonData(memo.data));
-      setActiveMemo({
+      const summary = {
         id: memo.id,
         title: memo.title,
         category: memo.category,
         isPublic: memo.isPublic,
         createdAt: memo.createdAt,
         updatedAt: memo.updatedAt,
-      });
+      } satisfies ComparisonMemoSummary;
+      const restoredData = cloneComparisonData(memo.data);
+      const restoredStep = getInitialStepForComparisonData(memo.data);
+
+      persistDraftToLocal(
+        buildDraft({
+          currentStep: restoredStep,
+          data: restoredData,
+          savedSnapshot: restoredData,
+          activeMemo: summary,
+          memoTitle: memo.title,
+          memoIsPublic: memo.isPublic,
+        }),
+      );
+      setData(restoredData);
+      setSavedSnapshot(cloneComparisonData(memo.data));
+      setCurrentStep(restoredStep);
+      setActiveMemo(summary);
+      setMemoTitle(memo.title);
       setMemoIsPublic(memo.isPublic);
       options?.onLoaded?.();
       toast.success("保存済みメモを読み込みました。");
@@ -470,11 +646,19 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         createdAt: memo.createdAt,
         updatedAt: memo.updatedAt,
       } satisfies ComparisonMemoSummary;
+      const persistedDraft = buildDraft({
+        data: memo.data,
+        savedSnapshot: memo.data,
+        activeMemo: summary,
+        memoTitle: summary.title,
+        memoIsPublic: summary.isPublic,
+      });
 
       setActiveMemo(summary);
       setSavedSnapshot(cloneComparisonData(memo.data));
       setMemoTitle(summary.title);
       setMemoIsPublic(summary.isPublic);
+      persistDraftToLocal(persistedDraft);
       setIsSaveDialogOpen(false);
       await refreshSavedMemos();
       toast.success(

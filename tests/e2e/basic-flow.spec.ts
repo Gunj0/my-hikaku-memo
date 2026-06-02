@@ -49,6 +49,7 @@ const savedMemoResponse = {
 };
 
 const persistedDraftStorageKey = "gadget-comparison-auth-draft";
+const localDraftStorageKey = "gadget-comparison-local-draft:/memos/new";
 
 test("ホーム初期表示でヘッダーを表示する", async ({ page }) => {
   await page.goto("/");
@@ -286,4 +287,42 @@ test("ログイン復帰時に編集中の内容を復元する", async ({ page 
     "ミラーレスカメラ",
   );
   await expect(page.getByLabel("メモ（任意）")).toHaveValue("夜景を撮りたい");
+});
+
+test("次へ押下時に編集中の内容を localStorage へ即時保存する", async ({ page }) => {
+  await page.goto("/memos/new");
+
+  await page.getByLabel("その他のカテゴリ").fill("モバイルバッテリー");
+  await page.getByRole("button", { name: "次へ" }).click();
+
+  const persistedDraft = await page.evaluate((storageKey) => {
+    const rawDraft = window.localStorage.getItem(storageKey);
+
+    return rawDraft ? JSON.parse(rawDraft) : null;
+  }, localDraftStorageKey);
+
+  expect(persistedDraft).toMatchObject({
+    redirectTo: "/memos/new",
+    currentStep: 2,
+    data: {
+      category: "モバイルバッテリー",
+    },
+  });
+});
+
+test("画面リロード時に localStorage の自動保存内容から復元する", async ({ page }) => {
+  await page.goto("/memos/new");
+
+  await page.getByLabel("その他のカテゴリ").fill("ワイヤレスイヤホン");
+  await page.getByRole("button", { name: "次へ" }).click();
+
+  await page.reload();
+
+  await expect(
+    page.getByRole("heading", { name: "比較ポイント" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /カテゴリ/ }).click();
+  await expect(page.getByLabel("その他のカテゴリ")).toHaveValue(
+    "ワイヤレスイヤホン",
+  );
 });
