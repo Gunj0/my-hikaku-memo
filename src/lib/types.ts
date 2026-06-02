@@ -61,14 +61,9 @@ export interface PublicComparisonMemo extends ComparisonMemo {
 
 export const DEFAULT_DECISION_POINTS: Omit<DecisionPoint, "id">[] = [
   { name: "価格", isImportant: true, weight: 3, memo: "" },
-  { name: "メーカー・ブランド", isImportant: false, weight: 2, memo: "" },
-  { name: "サイズ・重量", isImportant: false, weight: 2, memo: "" },
-  { name: "デザイン", isImportant: false, weight: 2, memo: "" },
-  { name: "機能・スペック", isImportant: true, weight: 3, memo: "" },
-  { name: "バッテリー持続時間", isImportant: false, weight: 2, memo: "" },
-  { name: "口コミ・評判", isImportant: false, weight: 2, memo: "" },
-  { name: "保証・サポート", isImportant: false, weight: 2, memo: "" },
-  { name: "納期・在庫", isImportant: false, weight: 1, memo: "" },
+  { name: "メーカー・ブランド", isImportant: false, weight: 3, memo: "" },
+  { name: "サイズ・重量", isImportant: false, weight: 3, memo: "" },
+  { name: "デザイン", isImportant: false, weight: 3, memo: "" },
 ];
 
 export const STEPS = [

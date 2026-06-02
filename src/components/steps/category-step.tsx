@@ -41,13 +41,15 @@ export function CategoryStep({
 }: CategoryStepProps) {
   const isCustomCategory =
     category && !PRESET_CATEGORIES.some((c) => c.name === category);
+  const customCategoryValue = isCustomCategory ? category : "";
+  const hasCustomCategoryValue = customCategoryValue.trim().length > 0;
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold mb-2">カテゴリ</h2>
         <p className="text-muted-foreground text-sm">
-          比較したい製品のカテゴリを選択または入力してください
+          まずは比較したい製品のカテゴリを選択、または入力してください
         </p>
       </div>
 
@@ -75,9 +77,13 @@ export function CategoryStep({
           <Input
             id="custom-category"
             placeholder="カテゴリ名を入力..."
-            value={isCustomCategory ? category : ""}
+            value={customCategoryValue}
             onChange={(e) => onCategoryChange(e.target.value)}
-            className="flex-1"
+            className={cn(
+              "flex-1 border-foreground/50",
+              hasCustomCategoryValue &&
+                "border-primary bg-primary/5 ring-2 ring-primary/35",
+            )}
           />
         </div>
       </div>
