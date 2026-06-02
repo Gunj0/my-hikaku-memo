@@ -47,17 +47,14 @@ export default async function MemosPage() {
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-8">
         <Card className="border-border/80 bg-card/78">
           <CardHeader>
-            <p className="text-[11px] tracking-[0.22em] text-primary uppercase">
-              my memos
-            </p>
-            <CardTitle className="text-2xl">作成済みメモ一覧</CardTitle>
+            <CardTitle className="text-2xl">あなたの比較メモ一覧</CardTitle>
             <CardDescription>
               自分の保存済みメモを見るには Google
               ログインが必要です。ログイン後にこの画面へ戻ると一覧が表示されます。
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            <Button asChild>
+            <Button asChild variant="success">
               <Link href="/memos/new">
                 <PlusCircleIcon className="h-4 w-4" />
                 新しいメモを作る
@@ -82,15 +79,9 @@ export default async function MemosPage() {
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
       <section className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-[11px] tracking-[0.22em] text-primary uppercase">
-            my memos
-          </p>
-          <h1 className="text-2xl font-semibold">作成済みメモ一覧</h1>
-          <p className="text-sm text-muted-foreground">
-            保存した比較メモを再開したり、公開設定を切り替えながら閲覧モードで内容を確認できます。
-          </p>
+          <h1 className="text-2xl font-semibold">あなたの比較メモ一覧</h1>
         </div>
-        <Button asChild>
+        <Button asChild variant="success">
           <Link href="/memos/new">
             <PlusCircleIcon className="h-4 w-4" />
             新しいメモを作る

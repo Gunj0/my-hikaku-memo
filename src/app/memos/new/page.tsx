@@ -7,8 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return buildMetadata({
     title: "新しい比較メモを作成 | オレの比較メモ",
-    description:
-      "比較対象、重視ポイント、評価を入力して新しい比較メモを作成する画面です。",
+    description: "ガジェットや家電の新しい比較メモを作成する画面です。",
     path: "/memos/new",
     noIndex: true,
     siteUrl,
