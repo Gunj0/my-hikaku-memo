@@ -526,9 +526,9 @@ export function EvaluationStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-2">評価を入力</h2>
+        <h2 className="text-xl font-semibold mb-2">評価を入力する</h2>
         <p className="text-muted-foreground text-sm">
-          各製品の重視ポイントに対する評価を入力してください
+          各候補の比較ポイントに対する評価を入力しましょう
         </p>
       </div>
 

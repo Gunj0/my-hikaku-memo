@@ -283,10 +283,10 @@ export function PointsStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-2">比較ポイント</h2>
+        <h2 className="text-xl font-semibold mb-2">比較ポイントを洗い出す</h2>
         <p className="text-muted-foreground text-sm">
-          あなたが重視するポイントを書き出しましょう（ヒント: 「製品カテゴリ」
-          「選ぶポイント」で検索 ）
+          あなたが重視するポイントを書き出しましょう（ヒント: 「カテゴリ
+          選ぶポイント」で検索 ）
         </p>
       </div>
 

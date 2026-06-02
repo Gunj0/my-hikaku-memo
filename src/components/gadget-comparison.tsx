@@ -393,7 +393,9 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         const nextQuery = nextSearchParams.toString();
         const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
         const currentQuery = searchParams.toString();
-        const currentUrl = currentQuery ? `${pathname}?${currentQuery}` : pathname;
+        const currentUrl = currentQuery
+          ? `${pathname}?${currentQuery}`
+          : pathname;
 
         if (nextUrl !== currentUrl) {
           router.replace(nextUrl, { scroll: false });
@@ -415,7 +417,14 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     } finally {
       setHasResolvedDraftRestore(true);
     }
-  }, [initialMemoId, localDraftStorageKey, pathname, redirectTo, router, searchParams]);
+  }, [
+    initialMemoId,
+    localDraftStorageKey,
+    pathname,
+    redirectTo,
+    router,
+    searchParams,
+  ]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1109,43 +1118,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         </header>
 
         <main className="flex-1">
-          <div className="mx-auto grid max-w-6xl gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-start">
+          <div className="mx-auto grid max-w-6xl gap-4 px-4 py-4 lg:items-start">
             <section className="min-w-0 rounded-lg border border-border/80 bg-card/74 p-4 shadow-[0_0_0_1px_rgb(255_255_255/0.02),0_20px_40px_rgb(0_0_0/0.2)] md:p-5">
               {renderStep()}
             </section>
-
-            <aside className="hidden lg:block">
-              <div className="sticky top-32 space-y-3 rounded-lg border border-border/80 bg-card/74 p-3 text-xs text-muted-foreground shadow-[0_0_0_1px_rgb(255_255_255/0.02)]">
-                <div>
-                  <div className="mt-2 space-y-2">
-                    <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
-                      <span>カテゴリ</span>
-                      <span className="text-right text-foreground">
-                        {data.category.trim() || "未設定"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
-                      <span>重要ポイント</span>
-                      <span className="text-foreground">
-                        {importantPointsCount}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
-                      <span>候補製品</span>
-                      <span className="text-foreground">
-                        {data.products.length}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-3">
-                      <span>最終判断</span>
-                      <span className="text-foreground">
-                        {hasValidSelectedProduct ? "確定" : "保留"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </aside>
           </div>
         </main>
 

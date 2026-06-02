@@ -263,7 +263,7 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
 
       <Card className="border-border/80 bg-card/72">
         <CardHeader>
-          <CardTitle className="text-xl">候補製品と評価表</CardTitle>
+          <CardTitle className="text-xl">候補と評価表</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">

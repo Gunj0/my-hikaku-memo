@@ -79,7 +79,9 @@ test("ステップは未入力でも常に自由に移動できる", async ({ pa
   await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
 
   await page.getByRole("button", { name: /カテゴリ/ }).click();
-  await expect(page.getByRole("heading", { name: "カテゴリ" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "カテゴリを入力" }),
+  ).toBeVisible();
 
   await nextButton.click();
   await expect(
@@ -177,7 +179,7 @@ test("保存済みメモのリセットは保存時点の状態へ戻る", async
   await expect(categoryInput).toHaveValue("保存済みスマホ");
 });
 
-test("候補製品を削除すると最終ステップは保存できない", async ({ page }) => {
+test("候補を削除すると最終ステップは保存できない", async ({ page }) => {
   await page.goto("/memos/new");
 
   await page.getByRole("button", { name: /候補/ }).click();
@@ -307,7 +309,7 @@ test("ログイン復帰時に編集中の内容を復元する", async ({ page 
   await page.goto("/memos/new");
 
   await expect(
-    page.getByRole("heading", { name: "候補製品を洗い出す" }),
+    page.getByRole("heading", { name: "候補を洗い出す" }),
   ).toBeVisible();
   await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
     "店頭で触って決める",
@@ -404,16 +406,16 @@ test("保存済みメモ復元時は memoId 付き URL に同期し、リロー�
   );
 
   await page.goto("/memos/new");
-  await expect.poll(() => page.url()).toContain(
-    `/memos/new?memoId=${savedMemoResponse.memo.id}`,
-  );
+  await expect
+    .poll(() => page.url())
+    .toContain(`/memos/new?memoId=${savedMemoResponse.memo.id}`);
   await page.getByRole("button", { name: "あとで" }).click();
 
   await page.reload();
   await page.getByRole("button", { name: "あとで" }).click();
 
   await expect(
-    page.getByRole("heading", { name: "候補製品を洗い出す" }),
+    page.getByRole("heading", { name: "候補を洗い出す" }),
   ).toBeVisible();
   await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
     "URL 同期後も復元したいメモ",
@@ -545,7 +547,7 @@ test("memoId 一致時のみ localStorage の自動保存内容から復元す�
   await page.getByRole("button", { name: "あとで" }).click();
 
   await expect(
-    page.getByRole("heading", { name: "候補製品を洗い出す" }),
+    page.getByRole("heading", { name: "候補を洗い出す" }),
   ).toBeVisible();
   await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
     "local draft から復元",

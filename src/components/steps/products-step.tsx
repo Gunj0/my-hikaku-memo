@@ -163,9 +163,10 @@ export function ProductsStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold mb-2">候補製品を洗い出す</h2>
+        <h2 className="text-xl font-semibold mb-2">候補を洗い出す</h2>
         <p className="text-muted-foreground text-sm">
-          比較したい製品を追加してください（2件以上）
+          比較したい候補を追加しましょう（ヒント: 「カテゴリ ランキング」で検索
+          ）
         </p>
       </div>
 
@@ -227,7 +228,7 @@ export function ProductsStep({
         <Label htmlFor="products-memo">全体メモ（任意）</Label>
         <Textarea
           id="products-memo"
-          placeholder="候補製品に関する補足メモ..."
+          placeholder="候補に関する補足メモ..."
           value={productsMemo}
           onChange={(e) => onMemoChange(e.target.value)}
           className="min-h-25 resize-none"
