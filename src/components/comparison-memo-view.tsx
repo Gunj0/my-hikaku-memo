@@ -95,15 +95,12 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
         <CardHeader className="gap-4 md:flex-row md:items-start md:justify-between">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-              <span className="rounded-full border border-border/70 px-2 py-0.5">
-                read only
-              </span>
               <span className="rounded-full border border-border/70 px-2 py-0.5 text-foreground">
                 {memo.isPublic ? "公開" : "非公開"}
               </span>
               {memo.isOwner ? (
                 <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-foreground">
-                  your memo
+                  あなたの比較メモ
                 </span>
               ) : null}
             </div>
@@ -237,9 +234,6 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
       <Card className="border-border/80 bg-card/72">
         <CardHeader>
           <CardTitle className="text-xl">比較ポイント一覧</CardTitle>
-          <CardDescription>
-            重要ポイントには重みが設定されています。
-          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {memo.data.decisionPoints.map((point) => (

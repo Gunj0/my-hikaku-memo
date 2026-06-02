@@ -149,7 +149,7 @@ export default async function MemosPage() {
               <CardContent className="flex flex-wrap gap-3">
                 <Button asChild>
                   <Link href={`/memos/new?memoId=${memo.id}`}>
-                    編集を再開
+                    編集する
                     <ArrowRightIcon className="h-4 w-4" />
                   </Link>
                 </Button>

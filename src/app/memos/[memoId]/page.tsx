@@ -121,7 +121,7 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
             <Button asChild>
               <Link href={`/memos/new?memoId=${memo.id}`}>
                 <PencilIcon className="h-4 w-4" />
-                編集を再開
+                編集する
               </Link>
             </Button>
           ) : null}

@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BookMarkedIcon,
   LogInIcon,
   LogOutIcon,
   PlusCircleIcon,
@@ -28,8 +27,7 @@ export function AppHeader() {
   const isAuthenticated = status === "authenticated";
   const isLoading = status === "loading";
   const navItems: { href: string; label: string; icon: LucideIcon }[] = [
-    { href: "/memos/new", label: "新規作成", icon: PlusCircleIcon },
-    { href: "/memos", label: "マイメモ", icon: BookMarkedIcon },
+    { href: "/memos/new", label: "新規メモ", icon: PlusCircleIcon },
   ];
 
   const handleSignIn = async () => {

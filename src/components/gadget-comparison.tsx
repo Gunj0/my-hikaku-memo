@@ -48,7 +48,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -61,6 +61,7 @@ type MemoDetailResponse = {
 };
 
 type PersistedComparisonDraft = {
+  memoId: string | null;
   redirectTo: string;
   currentStep: number;
   data: ComparisonData;
@@ -81,6 +82,7 @@ type DraftState = {
 
 const PERSISTED_DRAFT_STORAGE_KEY = "gadget-comparison-auth-draft";
 const LOCAL_DRAFT_STORAGE_KEY_PREFIX = "gadget-comparison-local-draft";
+const NEW_COMPARISON_DRAFT_ID = "__new__";
 const COMPARISON_AUTH_REDIRECT_EVENT = "gadget-comparison:before-sign-in";
 const AUTO_SAVE_INTERVAL_MS = 10_000;
 
@@ -88,8 +90,8 @@ function cloneComparisonData(data: ComparisonData): ComparisonData {
   return structuredClone(data);
 }
 
-function getLocalDraftStorageKey(redirectTo: string) {
-  return `${LOCAL_DRAFT_STORAGE_KEY_PREFIX}:${redirectTo}`;
+function getLocalDraftStorageKey(memoId: string | null) {
+  return `${LOCAL_DRAFT_STORAGE_KEY_PREFIX}:${memoId ?? NEW_COMPARISON_DRAFT_ID}`;
 }
 
 async function readResponse<T>(response: Response): Promise<T> {
@@ -113,6 +115,7 @@ type GadgetComparisonProps = {
 export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const { status } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [data, setData] = useState<ComparisonData>(() =>
@@ -152,7 +155,28 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     (product) => product.id === data.selectedProductId,
   );
 
-  const localDraftStorageKey = getLocalDraftStorageKey(redirectTo);
+  const currentMemoId = activeMemo?.id ?? initialMemoId ?? null;
+  const localDraftMemoId = currentMemoId;
+  const localDraftStorageKey = getLocalDraftStorageKey(localDraftMemoId);
+
+  const replaceEditorUrl = (memoId: string | null) => {
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+
+    if (memoId) {
+      nextSearchParams.set("memoId", memoId);
+    } else {
+      nextSearchParams.delete("memoId");
+    }
+
+    const nextQuery = nextSearchParams.toString();
+    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+    const currentQuery = searchParams.toString();
+    const currentUrl = currentQuery ? `${pathname}?${currentQuery}` : pathname;
+
+    if (nextUrl !== currentUrl) {
+      router.replace(nextUrl, { scroll: false });
+    }
+  };
 
   const persistDraftForAuthRedirect = () => {
     if (typeof window === "undefined") {
@@ -171,6 +195,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     }
 
     const draft: PersistedComparisonDraft = {
+      memoId: currentMemoId,
       redirectTo,
       currentStep,
       data: cloneComparisonData(data),
@@ -189,24 +214,26 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const buildDraft = (
     overrides: Partial<DraftState> = {},
   ): PersistedComparisonDraft | null => {
+    const nextMemoId = overrides.activeMemo?.id ?? currentMemoId;
     const nextCurrentStep = overrides.currentStep ?? currentStep;
     const nextData = overrides.data ?? data;
     const nextSavedSnapshot = overrides.savedSnapshot ?? savedSnapshot;
     const nextActiveMemo = overrides.activeMemo ?? activeMemo;
     const nextMemoTitle = overrides.memoTitle ?? memoTitle;
     const nextMemoIsPublic = overrides.memoIsPublic ?? memoIsPublic;
-    const shouldPersistLocally =
+    const hasDraftContent =
       nextCurrentStep !== 1 ||
       hasMeaningfulComparisonData(nextData) ||
       nextSavedSnapshot !== null ||
       nextActiveMemo !== null ||
       nextMemoTitle.trim().length > 0;
 
-    if (!shouldPersistLocally) {
+    if (!hasDraftContent) {
       return null;
     }
 
     return {
+      memoId: nextMemoId,
       redirectTo,
       currentStep: nextCurrentStep,
       data: cloneComparisonData(nextData),
@@ -227,13 +254,16 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     }
 
     const draft = draftOverride ?? latestDraftRef.current;
+    const storageKey = draft
+      ? getLocalDraftStorageKey(draft.memoId)
+      : localDraftStorageKey;
 
     if (!draft) {
       window.localStorage.removeItem(localDraftStorageKey);
       return;
     }
 
-    window.localStorage.setItem(localDraftStorageKey, JSON.stringify(draft));
+    window.localStorage.setItem(storageKey, JSON.stringify(draft));
   };
 
   const canProceed = () => {
@@ -303,6 +333,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
     const parseDraft = (
       rawDraft: string | null,
+      expectedMemoId?: string | null,
     ): PersistedComparisonDraft | null => {
       if (!rawDraft) {
         return null;
@@ -314,12 +345,15 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         if (
           draft.redirectTo !== redirectTo ||
           !draft.data ||
-          typeof draft.currentStep !== "number"
+          typeof draft.currentStep !== "number" ||
+          (expectedMemoId !== undefined &&
+            (draft.memoId ?? null) !== expectedMemoId)
         ) {
           return null;
         }
 
         return {
+          memoId: draft.memoId ?? null,
           redirectTo: draft.redirectTo,
           currentStep: draft.currentStep,
           data: draft.data,
@@ -334,7 +368,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     };
 
     const sessionDraft = parseDraft(rawSessionDraft);
-    const localDraft = parseDraft(rawLocalDraft);
+    const localDraft = parseDraft(rawLocalDraft, initialMemoId ?? null);
     const draft = sessionDraft ?? localDraft;
 
     if (!draft) {
@@ -351,10 +385,24 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setCurrentStep(Math.min(Math.max(draft.currentStep, 1), STEPS.length));
       setMemoTitle(draft.memoTitle ?? "");
       setMemoIsPublic(Boolean(draft.memoIsPublic));
+      if (draft.memoId) {
+        const nextSearchParams = new URLSearchParams(searchParams.toString());
+
+        nextSearchParams.set("memoId", draft.memoId);
+
+        const nextQuery = nextSearchParams.toString();
+        const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+        const currentQuery = searchParams.toString();
+        const currentUrl = currentQuery ? `${pathname}?${currentQuery}` : pathname;
+
+        if (nextUrl !== currentUrl) {
+          router.replace(nextUrl, { scroll: false });
+        }
+      }
       if (sessionDraft) {
         window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
         window.localStorage.setItem(
-          localDraftStorageKey,
+          getLocalDraftStorageKey(sessionDraft.memoId),
           JSON.stringify(sessionDraft),
         );
         toast.success("ログイン後に編集中の内容を復元しました。");
@@ -367,7 +415,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     } finally {
       setHasResolvedDraftRestore(true);
     }
-  }, [localDraftStorageKey, redirectTo]);
+  }, [initialMemoId, localDraftStorageKey, pathname, redirectTo, router, searchParams]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -570,6 +618,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setActiveMemo(summary);
       setMemoTitle(memo.title);
       setMemoIsPublic(memo.isPublic);
+      replaceEditorUrl(summary.id);
       options?.onLoaded?.();
       toast.success("保存済みメモを読み込みました。");
     } catch (error) {
@@ -617,6 +666,9 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       return saveMemo("create");
     }
 
+    const previousLocalDraftStorageKey = localDraftStorageKey;
+    const wasCreatingNewMemo = !activeMemo;
+
     setIsSaving(true);
 
     try {
@@ -659,6 +711,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setMemoTitle(summary.title);
       setMemoIsPublic(summary.isPublic);
       persistDraftToLocal(persistedDraft);
+      replaceEditorUrl(summary.id);
+      if (wasCreatingNewMemo) {
+        window.localStorage.removeItem(previousLocalDraftStorageKey);
+      }
       setIsSaveDialogOpen(false);
       await refreshSavedMemos();
       toast.success(
@@ -709,7 +765,9 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       );
 
       if (activeMemo?.id === memoSummary.id) {
+        window.localStorage.removeItem(getLocalDraftStorageKey(memoSummary.id));
         setActiveMemo(null);
+        replaceEditorUrl(null);
       }
 
       toast.success("保存済みメモを削除しました。");
@@ -919,10 +977,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       <Dialog open={isLibraryDialogOpen} onOpenChange={setIsLibraryDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>保存済みメモ</DialogTitle>
-            <DialogDescription>
-              ログイン中のアカウントに保存された比較メモを管理します。
-            </DialogDescription>
+            <DialogTitle>あなたの比較メモ一覧から複製する</DialogTitle>
           </DialogHeader>
 
           <div className="max-h-[60vh] overflow-y-auto pr-1">
@@ -1007,13 +1062,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                   <div className="space-y-1">
                     <p className="text-sm text-foreground">
-                      {activeMemo ? `編集: ${activeMemo.title}` : "新規メモ"}
+                      {activeMemo
+                        ? `${activeMemo.isPublic ? "公開中" : "非公開"}: ${activeMemo.title}`
+                        : "新規メモ"}
                     </p>
-                    {activeMemo ? (
-                      <p className="text-xs text-muted-foreground">
-                        公開設定: {activeMemo.isPublic ? "公開" : "非公開"}
-                      </p>
-                    ) : null}
                   </div>
                 </div>
               </div>
@@ -1035,7 +1087,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                   disabled={isAuthLoading}
                 >
                   <BookMarkedIcon className="w-4 h-4 mr-1" />
-                  メモ一覧
+                  複製する
                 </Button>
                 <Button
                   variant="success"
@@ -1065,45 +1117,32 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
             <aside className="hidden lg:block">
               <div className="sticky top-32 space-y-3 rounded-lg border border-border/80 bg-card/74 p-3 text-xs text-muted-foreground shadow-[0_0_0_1px_rgb(255_255_255/0.02)]">
                 <div>
-                  <p className="text-[10px] tracking-[0.18em] uppercase">
-                    runtime
-                  </p>
                   <div className="mt-2 space-y-2">
                     <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
-                      <span>category</span>
+                      <span>カテゴリ</span>
                       <span className="text-right text-foreground">
-                        {data.category.trim() || "unset"}
+                        {data.category.trim() || "未設定"}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
-                      <span>important</span>
+                      <span>重要ポイント</span>
                       <span className="text-foreground">
                         {importantPointsCount}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-2">
-                      <span>products</span>
+                      <span>候補製品</span>
                       <span className="text-foreground">
                         {data.products.length}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-3">
-                      <span>decision</span>
+                      <span>最終判断</span>
                       <span className="text-foreground">
-                        {hasValidSelectedProduct ? "locked" : "pending"}
+                        {hasValidSelectedProduct ? "確定" : "保留"}
                       </span>
                     </div>
                   </div>
-                </div>
-                <div className="rounded-md border border-border/70 bg-background/50 p-3">
-                  <p className="text-[10px] tracking-[0.18em] uppercase">
-                    hints
-                  </p>
-                  <p className="mt-2 leading-5">
-                    score = rating × weight
-                    <br />
-                    top rank != final decision
-                  </p>
                 </div>
               </div>
             </aside>

@@ -107,7 +107,8 @@ export default async function Home() {
                 あなただけの「比較メモ」を残そう
               </CardTitle>
               <CardDescription className="max-w-2xl text-md leading-6 text-muted-foreground">
-                ガジェットや家電の比較を効率よく記録するためのアプリ
+                <p>そのガジェット、その家電、なんで選んだっけ？を</p>
+                <p>ちゃんと残すためのアプリ</p>
               </CardDescription>
             </div>
 

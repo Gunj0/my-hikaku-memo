@@ -49,7 +49,7 @@ export function CategoryStep({
       <div>
         <h2 className="text-xl font-semibold mb-2">カテゴリ</h2>
         <p className="text-muted-foreground text-sm">
-          まずは比較したい製品のカテゴリを選択、または入力してください
+          まずは比較するカテゴリを選択・入力してください
         </p>
       </div>
 
