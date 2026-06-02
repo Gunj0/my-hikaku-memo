@@ -77,9 +77,6 @@ function SortableProductItem({
         >
           <GripVerticalIcon className="w-4 h-4" />
         </Button>
-        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-sm font-medium">
-          {index + 1}
-        </span>
         <span className="flex-1 font-medium">{product.name}</span>
         <Button
           type="button"
@@ -93,10 +90,10 @@ function SortableProductItem({
         </Button>
       </div>
       <Textarea
-        placeholder="この製品に関するメモ（価格、購入先など）..."
+        placeholder="この製品に関するメモ（URL、有力候補など）..."
         value={product.memo}
         onChange={(e) => onMemoChange(e.target.value)}
-        className="min-h-20 resize-none text-sm"
+        className="min-h-10 resize-none text-sm"
       />
     </div>
   );
@@ -172,30 +169,6 @@ export function ProductsStep({
         </p>
       </div>
 
-      <div className="space-y-3">
-        <Label htmlFor="new-product">製品を追加</Label>
-        <div className="flex gap-2">
-          <Input
-            id="new-product"
-            placeholder="製品名を入力..."
-            value={newProductName}
-            onChange={(e) => setNewProductName(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onCompositionStart={() => {
-              isComposingRef.current = true;
-            }}
-            onCompositionEnd={() => {
-              isComposingRef.current = false;
-            }}
-            className="flex-1"
-          />
-          <Button onClick={addProduct} disabled={!newProductName.trim()}>
-            <PlusIcon className="w-4 h-4 mr-1" />
-            追加
-          </Button>
-        </div>
-      </div>
-
       {products.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
           <PackageIcon className="w-12 h-12 mb-4 opacity-50" />
@@ -225,6 +198,30 @@ export function ProductsStep({
           </SortableContext>
         </DndContext>
       )}
+
+      <div className="space-y-3">
+        <Label htmlFor="new-product">製品を追加</Label>
+        <div className="flex gap-2">
+          <Input
+            id="new-product"
+            placeholder="製品名を入力..."
+            value={newProductName}
+            onChange={(e) => setNewProductName(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onCompositionStart={() => {
+              isComposingRef.current = true;
+            }}
+            onCompositionEnd={() => {
+              isComposingRef.current = false;
+            }}
+            className="flex-1"
+          />
+          <Button onClick={addProduct} disabled={!newProductName.trim()}>
+            <PlusIcon className="w-4 h-4 mr-1" />
+            追加
+          </Button>
+        </div>
+      </div>
 
       <div className="space-y-3">
         <Label htmlFor="products-memo">全体メモ（任意）</Label>

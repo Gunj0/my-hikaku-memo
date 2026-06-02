@@ -78,7 +78,7 @@ test("ステップは未入力でも常に自由に移動できる", async ({ pa
 
   await nextButton.click();
   await expect(
-    page.getByRole("heading", { name: "比較ポイントと優先度" }),
+    page.getByRole("heading", { name: "比較ポイント" }),
   ).toBeVisible();
 });
 
