@@ -5,6 +5,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  COMPARISON_DECISION_POINTS_MAX_COUNT,
+  COMPARISON_MEMO_TEXT_MAX_LENGTH,
+  COMPARISON_SHORT_TEXT_MAX_LENGTH,
+} from "@/lib/comparison-limits";
 import { DecisionPoint } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -186,6 +191,7 @@ function SortablePointItem({
                 placeholder="このポイントに関するメモ..."
                 value={point.memo}
                 onChange={(e) => onUpdate({ memo: e.target.value })}
+                maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
                 className="min-h-20 resize-none text-sm"
               />
             </div>
@@ -212,9 +218,18 @@ export function PointsStep({
       },
     }),
   );
+  const hasReachedPointLimit =
+    decisionPoints.length >= COMPARISON_DECISION_POINTS_MAX_COUNT;
 
   const addPoint = () => {
-    if (!newPointName.trim() || isComposingRef.current) return;
+    if (
+      !newPointName.trim() ||
+      isComposingRef.current ||
+      hasReachedPointLimit
+    ) {
+      return;
+    }
+
     const newPoint: DecisionPoint = {
       id: crypto.randomUUID(),
       name: newPointName.trim(),
@@ -309,6 +324,9 @@ export function PointsStep({
 
       <div className="space-y-3">
         <Label htmlFor="new-point">ポイントを追加</Label>
+        <p className="text-xs text-muted-foreground">
+          {decisionPoints.length}/{COMPARISON_DECISION_POINTS_MAX_COUNT}件
+        </p>
         <div className="flex gap-2">
           <Input
             id="new-point"
@@ -322,9 +340,14 @@ export function PointsStep({
             onCompositionEnd={() => {
               isComposingRef.current = false;
             }}
+            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            disabled={hasReachedPointLimit}
             className="flex-1"
           />
-          <Button onClick={addPoint} disabled={!newPointName.trim()}>
+          <Button
+            onClick={addPoint}
+            disabled={!newPointName.trim() || hasReachedPointLimit}
+          >
             <PlusIcon className="w-4 h-4 mr-1" />
             追加
           </Button>
@@ -338,6 +361,7 @@ export function PointsStep({
           placeholder="比較ポイントに関する補足メモ..."
           value={pointsMemo}
           onChange={(e) => onMemoChange(e.target.value)}
+          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
           className="min-h-25 resize-none"
         />
       </div>

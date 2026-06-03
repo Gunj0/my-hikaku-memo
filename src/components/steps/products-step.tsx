@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  COMPARISON_MEMO_TEXT_MAX_LENGTH,
+  COMPARISON_PRODUCTS_MAX_COUNT,
+  COMPARISON_SHORT_TEXT_MAX_LENGTH,
+} from "@/lib/comparison-limits";
 import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -93,6 +98,7 @@ function SortableProductItem({
         placeholder="この製品に関するメモ（URL、有力候補など）..."
         value={product.memo}
         onChange={(e) => onMemoChange(e.target.value)}
+        maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
         className="min-h-10 resize-none text-sm"
       />
     </div>
@@ -114,9 +120,18 @@ export function ProductsStep({
       },
     }),
   );
+  const hasReachedProductLimit =
+    products.length >= COMPARISON_PRODUCTS_MAX_COUNT;
 
   const addProduct = () => {
-    if (!newProductName.trim() || isComposingRef.current) return;
+    if (
+      !newProductName.trim() ||
+      isComposingRef.current ||
+      hasReachedProductLimit
+    ) {
+      return;
+    }
+
     const newProduct: Product = {
       id: crypto.randomUUID(),
       name: newProductName.trim(),
@@ -201,11 +216,14 @@ export function ProductsStep({
       )}
 
       <div className="space-y-3">
-        <Label htmlFor="new-product">製品を追加</Label>
+        <Label htmlFor="new-product">候補を追加</Label>
+        <p className="text-xs text-muted-foreground">
+          {products.length}/{COMPARISON_PRODUCTS_MAX_COUNT}件
+        </p>
         <div className="flex gap-2">
           <Input
             id="new-product"
-            placeholder="製品名を入力..."
+            placeholder="候補を入力..."
             value={newProductName}
             onChange={(e) => setNewProductName(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -215,9 +233,14 @@ export function ProductsStep({
             onCompositionEnd={() => {
               isComposingRef.current = false;
             }}
+            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            disabled={hasReachedProductLimit}
             className="flex-1"
           />
-          <Button onClick={addProduct} disabled={!newProductName.trim()}>
+          <Button
+            onClick={addProduct}
+            disabled={!newProductName.trim() || hasReachedProductLimit}
+          >
             <PlusIcon className="w-4 h-4 mr-1" />
             追加
           </Button>
@@ -231,6 +254,7 @@ export function ProductsStep({
           placeholder="候補に関する補足メモ..."
           value={productsMemo}
           onChange={(e) => onMemoChange(e.target.value)}
+          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
           className="min-h-25 resize-none"
         />
       </div>

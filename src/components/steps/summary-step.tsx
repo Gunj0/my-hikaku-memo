@@ -77,7 +77,7 @@ export function SummaryStep({
         <div>
           <h2 className="text-xl font-semibold mb-2">集計結果</h2>
           <p className="text-muted-foreground text-sm">
-            製品と評価を先に入力してください
+            候補と評価を先に入力してください
           </p>
         </div>
       </div>

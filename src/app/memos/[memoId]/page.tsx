@@ -10,6 +10,7 @@ import {
   buildMetadata,
   getAbsoluteUrl,
   getRequestSiteUrl,
+  serializeJsonLd,
 } from "@/lib/seo";
 import { getPublicComparisonMemo } from "@/lib/server/comparison-memos";
 import { ArrowLeftIcon, PencilIcon } from "lucide-react";
@@ -102,7 +103,7 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(articleJsonLd),
+            __html: serializeJsonLd(articleJsonLd),
           }}
         />
       ) : null}

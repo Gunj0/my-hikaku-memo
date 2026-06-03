@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { serializeJsonLd } from "@/lib/seo";
 
 type LegalPageLayoutProps = {
   title: string;
@@ -28,7 +29,7 @@ export function LegalPageLayout({
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 md:py-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       <Card className="border-border/80 bg-card/76">

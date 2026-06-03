@@ -33,7 +33,16 @@ function getRuntimeEnvSiteUrl() {
   }
 }
 
-function buildSiteUrlFromHeaders(headerStore: Awaited<ReturnType<typeof headers>>) {
+function getConfiguredSiteUrl() {
+  return (
+    getRuntimeEnvSiteUrl() ??
+    normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL)
+  );
+}
+
+function buildSiteUrlFromHeaders(
+  headerStore: Awaited<ReturnType<typeof headers>>,
+) {
   const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
 
   if (!host) {
@@ -59,26 +68,43 @@ function isLoopbackSiteUrl(siteUrl: string) {
   }
 }
 
+function assertSafeConfiguredSiteUrl(siteUrl?: string) {
+  if (process.env.NODE_ENV !== "production") {
+    return;
+  }
+
+  if (!siteUrl || isLoopbackSiteUrl(siteUrl)) {
+    throw new Error(
+      "NEXT_PUBLIC_SITE_URL または SITE_URL に本番公開 URL を設定してください。",
+    );
+  }
+}
+
 export function getSiteUrl() {
-  return (
-    getRuntimeEnvSiteUrl() ??
-    normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL)
-  );
+  const configuredSiteUrl = getConfiguredSiteUrl();
+
+  assertSafeConfiguredSiteUrl(configuredSiteUrl);
+
+  return configuredSiteUrl;
 }
 
 export async function getRequestSiteUrl() {
-  const configuredSiteUrl = getRuntimeEnvSiteUrl();
+  const configuredSiteUrl = getConfiguredSiteUrl();
+
+  assertSafeConfiguredSiteUrl(configuredSiteUrl);
+
+  if (configuredSiteUrl && !isLoopbackSiteUrl(configuredSiteUrl)) {
+    return configuredSiteUrl;
+  }
 
   try {
-    const headerStore = await headers();
-    const siteUrl = buildSiteUrlFromHeaders(headerStore);
+    if (process.env.NODE_ENV !== "production") {
+      const headerStore = await headers();
+      const siteUrl = buildSiteUrlFromHeaders(headerStore);
 
-    if (configuredSiteUrl && !isLoopbackSiteUrl(configuredSiteUrl)) {
-      return configuredSiteUrl;
-    }
-
-    if (siteUrl) {
-      return siteUrl;
+      if (siteUrl && isLoopbackSiteUrl(siteUrl)) {
+        return siteUrl;
+      }
     }
   } catch {
     // headers() is unavailable during static evaluation.
@@ -88,7 +114,7 @@ export async function getRequestSiteUrl() {
     return configuredSiteUrl;
   }
 
-  return normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL);
+  return DEFAULT_SITE_URL;
 }
 
 export function getAbsoluteUrl(path = "/", siteUrl = getSiteUrl()) {
@@ -97,6 +123,14 @@ export function getAbsoluteUrl(path = "/", siteUrl = getSiteUrl()) {
 
 export function getDefaultOgImageUrl(siteUrl = getSiteUrl()) {
   return getAbsoluteUrl(DEFAULT_OG_IMAGE, siteUrl);
+}
+export function serializeJsonLd(jsonLd: Record<string, unknown>) {
+  return JSON.stringify(jsonLd)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
 }
 
 type BuildMetadataInput = {

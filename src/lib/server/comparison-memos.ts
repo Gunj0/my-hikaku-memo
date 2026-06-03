@@ -30,6 +30,13 @@ type ComparisonMemoRow = {
   updated_at: number;
 };
 
+type ComparisonMemoSummaryRow = Omit<ComparisonMemoRow, "data">;
+
+type PublicComparisonMemoSummaryRow = ComparisonMemoSummaryRow & {
+  user_name: string | null;
+  user_profile_initialized: number | null;
+};
+
 type PublicComparisonMemoRow = ComparisonMemoRow & {
   user_name: string | null;
   user_profile_initialized: number | null;
@@ -53,7 +60,12 @@ function toIsoString(timestamp: number) {
   return new Date(timestamp).toISOString();
 }
 
-function mapAuthor(row: PublicComparisonMemoRow): ComparisonMemoAuthor {
+function mapAuthor(
+  row: Pick<
+    PublicComparisonMemoSummaryRow,
+    "user_id" | "user_name" | "user_profile_initialized"
+  >,
+): ComparisonMemoAuthor {
   const normalizedName = row.user_name?.trim();
 
   return {
@@ -66,7 +78,7 @@ function mapAuthor(row: PublicComparisonMemoRow): ComparisonMemoAuthor {
   };
 }
 
-function mapSummary(row: ComparisonMemoRow): ComparisonMemoSummary {
+function mapSummary(row: ComparisonMemoSummaryRow): ComparisonMemoSummary {
   return {
     id: row.id,
     title: row.title,
@@ -85,7 +97,7 @@ function mapMemo(row: ComparisonMemoRow): ComparisonMemo {
 }
 
 function mapPublicSummary(
-  row: PublicComparisonMemoRow,
+  row: PublicComparisonMemoSummaryRow,
 ): PublicComparisonMemoSummary {
   return {
     ...mapSummary(row),
@@ -157,7 +169,7 @@ export async function listRandomComparisonMemos(
   const result = await database
     .prepare(
       `
-        SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
+        SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.created_at, m.updated_at,
            u.name AS user_name, u.profile_initialized AS user_profile_initialized
         FROM comparison_memos AS m
         LEFT JOIN users AS u ON u.id = m.user_id
@@ -167,7 +179,7 @@ export async function listRandomComparisonMemos(
       `,
     )
     .bind(excludeUserId ?? null, limit)
-    .all<PublicComparisonMemoRow>();
+    .all<PublicComparisonMemoSummaryRow>();
 
   return result.results.map(mapPublicSummary);
 }
@@ -179,7 +191,7 @@ export async function listPublicComparisonMemos(limit?: number) {
       ? database
           .prepare(
             `
-              SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
+              SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.created_at, m.updated_at,
                  u.name AS user_name, u.profile_initialized AS user_profile_initialized
               FROM comparison_memos AS m
               LEFT JOIN users AS u ON u.id = m.user_id
@@ -191,7 +203,7 @@ export async function listPublicComparisonMemos(limit?: number) {
           .bind(limit)
       : database.prepare(
           `
-            SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
+            SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.created_at, m.updated_at,
                u.name AS user_name, u.profile_initialized AS user_profile_initialized
             FROM comparison_memos AS m
             LEFT JOIN users AS u ON u.id = m.user_id
@@ -200,7 +212,7 @@ export async function listPublicComparisonMemos(limit?: number) {
           `,
         );
 
-  const result = await query.all<PublicComparisonMemoRow>();
+  const result = await query.all<PublicComparisonMemoSummaryRow>();
 
   return result.results.map(mapPublicSummary);
 }

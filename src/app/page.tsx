@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { auth } from "@/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -10,6 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  buildMetadata,
+  getAbsoluteUrl,
+  getDefaultOgImageUrl,
+  getRequestSiteUrl,
+  serializeJsonLd,
+} from "@/lib/seo";
 import { listRandomComparisonMemos } from "@/lib/server/comparison-memos";
 import {
   BookMarkedIcon,
@@ -18,13 +23,7 @@ import {
   RefreshCwIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
-
-import {
-  buildMetadata,
-  getAbsoluteUrl,
-  getDefaultOgImageUrl,
-  getRequestSiteUrl,
-} from "@/lib/seo";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -91,12 +90,12 @@ export default async function Home() {
     <main className="mx-auto flex w-full flex-col gap-6 px-4 py-6 md:py-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(softwareApplicationJsonLd),
+          __html: serializeJsonLd(softwareApplicationJsonLd),
         }}
       />
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,1fr)]">

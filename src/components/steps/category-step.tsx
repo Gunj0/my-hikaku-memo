@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  COMPARISON_MEMO_TEXT_MAX_LENGTH,
+  COMPARISON_SHORT_TEXT_MAX_LENGTH,
+} from "@/lib/comparison-limits";
 import { cn } from "@/lib/utils";
 import {
   CameraIcon,
@@ -79,6 +83,7 @@ export function CategoryStep({
             placeholder="カテゴリ名を入力..."
             value={customCategoryValue}
             onChange={(e) => onCategoryChange(e.target.value)}
+            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
             className={cn(
               "flex-1 border-foreground/50",
               hasCustomCategoryValue &&
@@ -95,6 +100,7 @@ export function CategoryStep({
           placeholder="購入の背景、予算感、利用シーンなど自由にメモ..."
           value={categoryMemo}
           onChange={(e) => onMemoChange(e.target.value)}
+          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
           className="min-h-30 resize-none"
         />
       </div>

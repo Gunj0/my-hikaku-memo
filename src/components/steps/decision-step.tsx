@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { COMPARISON_MEMO_TEXT_MAX_LENGTH } from "@/lib/comparison-limits";
 import { DecisionPoint, Product, ProductScore } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CheckCircle2Icon, PartyPopperIcon, TrophyIcon } from "lucide-react";
@@ -73,7 +74,7 @@ export function DecisionStep({
         <div>
           <h2 className="text-xl font-semibold mb-2">最終決定</h2>
           <p className="text-muted-foreground text-sm">
-            製品を先に追加してください
+            候補を先に追加してください
           </p>
         </div>
       </div>
@@ -161,6 +162,7 @@ export function DecisionStep({
           placeholder="この製品を選んだ理由、購入予定日、注意点など..."
           value={decisionMemo}
           onChange={(e) => onMemoChange(e.target.value)}
+          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
           className="min-h-37.5 resize-none"
         />
       </div>

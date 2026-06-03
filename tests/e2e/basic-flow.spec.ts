@@ -50,15 +50,22 @@ const savedMemoResponse = {
 
 const persistedDraftStorageKey = "gadget-comparison-auth-draft";
 const newComparisonDraftId = "__new__";
+const guestDraftOwnerScope = "guest";
+const userDraftOwnerScope = "user:test-user";
 
-function getLocalDraftStorageKey(memoId: string | null) {
-  return `gadget-comparison-local-draft:${memoId ?? newComparisonDraftId}`;
+function getLocalDraftStorageKey(
+  memoId: string | null,
+  ownerScope = guestDraftOwnerScope,
+) {
+  return `gadget-comparison-local-draft:${ownerScope}:${memoId ?? newComparisonDraftId}`;
 }
 
 test("ホーム初期表示でヘッダーを表示する", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByText("オレの比較メモ")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /My Hikaku Memo オレの比較メモ β/ }),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Googleでログイン" }),
   ).toBeVisible();
@@ -103,6 +110,7 @@ test("評価テーブルの表示で hydration error を出さない", async ({ 
     {
       key: persistedDraftStorageKey,
       value: {
+        ownerScope: guestDraftOwnerScope,
         redirectTo: "/memos/new",
         currentStep: 4,
         data: savedMemoResponse.memo.data,
@@ -136,6 +144,7 @@ test("保存済みメモのリセットは保存時点の状態へ戻る", async
     {
       key: persistedDraftStorageKey,
       value: {
+        ownerScope: guestDraftOwnerScope,
         redirectTo: "/memos/new",
         currentStep: 4,
         data: {
@@ -160,7 +169,6 @@ test("保存済みメモのリセットは保存時点の状態へ戻る", async
   await page.goto("/memos/new");
 
   await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
-  await expect(page.getByText("保存済みスマホ比較")).toBeVisible();
 
   await page.getByRole("button", { name: /カテゴリ/ }).click();
   const categoryInput = page.getByLabel("その他のカテゴリ");
@@ -179,12 +187,60 @@ test("保存済みメモのリセットは保存時点の状態へ戻る", async
   await expect(categoryInput).toHaveValue("保存済みスマホ");
 });
 
+test("入力欄は保存上限を超える文字を保持しない", async ({ page }) => {
+  await page.goto("/memos/new");
+
+  await page.getByLabel("その他のカテゴリ").fill("a".repeat(130));
+  await expect(page.getByLabel("その他のカテゴリ")).toHaveValue(
+    "a".repeat(120),
+  );
+
+  await page.getByLabel("メモ（任意）").fill("b".repeat(5_100));
+  await expect
+    .poll(
+      async () => (await page.getByLabel("メモ（任意）").inputValue()).length,
+    )
+    .toBe(5_000);
+
+  await page.getByRole("button", { name: /候補/ }).click();
+  await page.getByLabel("候補を追加").fill("c".repeat(130));
+  await expect(page.getByLabel("候補を追加")).toHaveValue("c".repeat(120));
+});
+
+test("比較ポイントと候補は30件までしか追加できない", async ({ page }) => {
+  await page.goto("/memos/new");
+  const initialPointCount = 4;
+  const maxPointCount = 30;
+
+  await page.getByRole("button", { name: "次へ" }).click();
+
+  for (let index = 1; index <= maxPointCount - initialPointCount; index += 1) {
+    await page.getByLabel("ポイントを追加").fill(`ポイント${index}`);
+    await page.getByRole("button", { name: "追加" }).click();
+  }
+
+  await expect(page.getByRole("checkbox")).toHaveCount(maxPointCount);
+  await expect(page.getByLabel("ポイントを追加")).toBeDisabled();
+  await expect(page.getByRole("button", { name: "追加" })).toBeDisabled();
+
+  await page.getByRole("button", { name: /候補/ }).click();
+
+  for (let index = 1; index <= 30; index += 1) {
+    await page.getByLabel("候補を追加").fill(`候補${index}`);
+    await page.getByRole("button", { name: "追加" }).click();
+  }
+
+  await expect(page.getByRole("button", { name: /を削除$/ })).toHaveCount(30);
+  await expect(page.getByLabel("候補を追加")).toBeDisabled();
+  await expect(page.getByRole("button", { name: "追加" })).toBeDisabled();
+});
+
 test("候補を削除すると最終ステップは保存できない", async ({ page }) => {
   await page.goto("/memos/new");
 
   await page.getByRole("button", { name: /候補/ }).click();
 
-  const productInput = page.getByLabel("製品を追加");
+  const productInput = page.getByLabel("候補を追加");
   await productInput.fill("iPhone 16");
   await page.getByRole("button", { name: "追加" }).click();
   await productInput.fill("Pixel 10");
@@ -221,6 +277,7 @@ test("ログイン遷移イベントで編集中の内容を退避する", async
   }, persistedDraftStorageKey);
 
   expect(persistedDraft).toMatchObject({
+    ownerScope: guestDraftOwnerScope,
     redirectTo: "/memos/new",
     currentStep: 1,
     memoIsPublic: false,
@@ -249,6 +306,7 @@ test("memoId 付き編集URLのログイン遷移イベントは memoId を保�
   }, persistedDraftStorageKey);
 
   expect(persistedDraft).toMatchObject({
+    ownerScope: guestDraftOwnerScope,
     memoId: savedMemoResponse.memo.id,
     redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
     currentStep: 1,
@@ -266,6 +324,7 @@ test("ログイン復帰時に編集中の内容を復元する", async ({ page 
     {
       key: persistedDraftStorageKey,
       value: {
+        ownerScope: guestDraftOwnerScope,
         redirectTo: "/memos/new",
         currentStep: 3,
         data: {
@@ -333,6 +392,7 @@ test("memoId 付き編集では編集中の内容を localStorage へ即時保�
     {
       key: persistedDraftStorageKey,
       value: {
+        ownerScope: guestDraftOwnerScope,
         memoId: savedMemoResponse.memo.id,
         redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
         currentStep: 1,
@@ -364,6 +424,7 @@ test("memoId 付き編集では編集中の内容を localStorage へ即時保�
   }, getLocalDraftStorageKey(savedMemoResponse.memo.id));
 
   expect(persistedDraft).toMatchObject({
+    ownerScope: guestDraftOwnerScope,
     memoId: savedMemoResponse.memo.id,
     redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
     currentStep: 2,
@@ -383,6 +444,7 @@ test("保存済みメモ復元時は memoId 付き URL に同期し、リロー�
     {
       key: persistedDraftStorageKey,
       value: {
+        ownerScope: guestDraftOwnerScope,
         memoId: savedMemoResponse.memo.id,
         redirectTo: "/memos/new",
         currentStep: 3,
@@ -437,6 +499,7 @@ test("新規作成画面では編集中の内容を localStorage へ即時保存
   }, getLocalDraftStorageKey(null));
 
   expect(persistedDraft).toMatchObject({
+    ownerScope: guestDraftOwnerScope,
     memoId: null,
     redirectTo: "/memos/new",
     currentStep: 2,
@@ -460,6 +523,7 @@ test("新規作成画面では新規作成用ドラフトを復元し、他メ�
         {
           key: getLocalDraftStorageKey(savedMemoResponse.memo.id),
           value: {
+            ownerScope: guestDraftOwnerScope,
             memoId: savedMemoResponse.memo.id,
             redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
             currentStep: 2,
@@ -483,6 +547,7 @@ test("新規作成画面では新規作成用ドラフトを復元し、他メ�
         {
           key: getLocalDraftStorageKey(null),
           value: {
+            ownerScope: guestDraftOwnerScope,
             memoId: null,
             redirectTo: "/memos/new",
             currentStep: 2,
@@ -521,6 +586,7 @@ test("memoId 一致時のみ localStorage の自動保存内容から復元す�
     {
       key: getLocalDraftStorageKey(savedMemoResponse.memo.id),
       value: {
+        ownerScope: guestDraftOwnerScope,
         memoId: savedMemoResponse.memo.id,
         redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
         currentStep: 3,
@@ -552,4 +618,49 @@ test("memoId 一致時のみ localStorage の自動保存内容から復元す�
   await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
     "local draft から復元",
   );
+});
+
+test("guest は user スコープの localStorage ドラフトを復元しない", async ({
+  page,
+}) => {
+  await page.addInitScript(
+    ({ key, value }) => {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    },
+    {
+      key: getLocalDraftStorageKey(
+        savedMemoResponse.memo.id,
+        userDraftOwnerScope,
+      ),
+      value: {
+        ownerScope: userDraftOwnerScope,
+        memoId: savedMemoResponse.memo.id,
+        redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
+        currentStep: 3,
+        data: {
+          ...savedMemoResponse.memo.data,
+          category: "復元されてはいけない user ドラフト",
+        },
+        savedSnapshot: savedMemoResponse.memo.data,
+        activeMemo: {
+          id: savedMemoResponse.memo.id,
+          title: savedMemoResponse.memo.title,
+          category: savedMemoResponse.memo.category,
+          isPublic: savedMemoResponse.memo.isPublic,
+          createdAt: savedMemoResponse.memo.createdAt,
+          updatedAt: savedMemoResponse.memo.updatedAt,
+        },
+        memoTitle: savedMemoResponse.memo.title,
+        memoIsPublic: savedMemoResponse.memo.isPublic,
+      },
+    },
+  );
+
+  await page.goto(`/memos/new?memoId=${savedMemoResponse.memo.id}`);
+  await page.getByRole("button", { name: "あとで" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "カテゴリを入力" }),
+  ).toBeVisible();
+  await expect(page.getByLabel("その他のカテゴリ")).toHaveValue("");
 });

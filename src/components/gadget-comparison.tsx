@@ -27,6 +27,11 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import {
+  clampComparisonShortText,
+  COMPARISON_SHORT_TEXT_MAX_LENGTH,
+  normalizeComparisonDataToLimits,
+} from "@/lib/comparison-limits";
+import {
   buildComparisonMemoTitle,
   createInitialComparisonData,
   getInitialStepForComparisonData,
@@ -60,7 +65,10 @@ type MemoDetailResponse = {
   memo: ComparisonMemo;
 };
 
+type DraftOwnerScope = `user:${string}` | "guest";
+
 type PersistedComparisonDraft = {
+  ownerScope: DraftOwnerScope;
   memoId: string | null;
   redirectTo: string;
   currentStep: number;
@@ -85,13 +93,21 @@ const LOCAL_DRAFT_STORAGE_KEY_PREFIX = "gadget-comparison-local-draft";
 const NEW_COMPARISON_DRAFT_ID = "__new__";
 const COMPARISON_AUTH_REDIRECT_EVENT = "gadget-comparison:before-sign-in";
 const AUTO_SAVE_INTERVAL_MS = 10_000;
+const GUEST_DRAFT_OWNER_SCOPE = "guest" satisfies DraftOwnerScope;
 
 function cloneComparisonData(data: ComparisonData): ComparisonData {
   return structuredClone(data);
 }
 
-function getLocalDraftStorageKey(memoId: string | null) {
-  return `${LOCAL_DRAFT_STORAGE_KEY_PREFIX}:${memoId ?? NEW_COMPARISON_DRAFT_ID}`;
+function getDraftOwnerScope(userId?: string | null): DraftOwnerScope {
+  return userId ? `user:${userId}` : GUEST_DRAFT_OWNER_SCOPE;
+}
+
+function getLocalDraftStorageKey(
+  memoId: string | null,
+  ownerScope: DraftOwnerScope,
+) {
+  return `${LOCAL_DRAFT_STORAGE_KEY_PREFIX}:${ownerScope}:${memoId ?? NEW_COMPARISON_DRAFT_ID}`;
 }
 
 async function readResponse<T>(response: Response): Promise<T> {
@@ -113,7 +129,7 @@ type GadgetComparisonProps = {
 };
 
 export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -157,7 +173,11 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
   const currentMemoId = activeMemo?.id ?? initialMemoId ?? null;
   const localDraftMemoId = currentMemoId;
-  const localDraftStorageKey = getLocalDraftStorageKey(localDraftMemoId);
+  const currentDraftOwnerScope =
+    status === "loading" ? null : getDraftOwnerScope(session?.user?.id);
+  const localDraftStorageKey = currentDraftOwnerScope
+    ? getLocalDraftStorageKey(localDraftMemoId, currentDraftOwnerScope)
+    : null;
 
   const replaceEditorUrl = (memoId: string | null) => {
     const nextSearchParams = new URLSearchParams(searchParams.toString());
@@ -183,27 +203,12 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       return;
     }
 
-    const shouldPersist =
-      hasMeaningfulComparisonData(data) ||
-      savedSnapshot !== null ||
-      activeMemo !== null ||
-      memoTitle.trim().length > 0;
+    const draft = buildDraft();
 
-    if (!shouldPersist) {
+    if (!draft) {
       window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
       return;
     }
-
-    const draft: PersistedComparisonDraft = {
-      memoId: currentMemoId,
-      redirectTo,
-      currentStep,
-      data: cloneComparisonData(data),
-      savedSnapshot: savedSnapshot ? cloneComparisonData(savedSnapshot) : null,
-      activeMemo,
-      memoTitle,
-      memoIsPublic,
-    };
 
     window.sessionStorage.setItem(
       PERSISTED_DRAFT_STORAGE_KEY,
@@ -216,10 +221,15 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   ): PersistedComparisonDraft | null => {
     const nextMemoId = overrides.activeMemo?.id ?? currentMemoId;
     const nextCurrentStep = overrides.currentStep ?? currentStep;
-    const nextData = overrides.data ?? data;
-    const nextSavedSnapshot = overrides.savedSnapshot ?? savedSnapshot;
+    const nextData = normalizeComparisonDataToLimits(overrides.data ?? data);
+    const nextSavedSnapshotSource = overrides.savedSnapshot ?? savedSnapshot;
+    const nextSavedSnapshot = nextSavedSnapshotSource
+      ? normalizeComparisonDataToLimits(nextSavedSnapshotSource)
+      : null;
     const nextActiveMemo = overrides.activeMemo ?? activeMemo;
-    const nextMemoTitle = overrides.memoTitle ?? memoTitle;
+    const nextMemoTitle = clampComparisonShortText(
+      overrides.memoTitle ?? memoTitle,
+    );
     const nextMemoIsPublic = overrides.memoIsPublic ?? memoIsPublic;
     const hasDraftContent =
       nextCurrentStep !== 1 ||
@@ -233,6 +243,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     }
 
     return {
+      ownerScope: currentDraftOwnerScope ?? GUEST_DRAFT_OWNER_SCOPE,
       memoId: nextMemoId,
       redirectTo,
       currentStep: nextCurrentStep,
@@ -249,13 +260,17 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const persistDraftToLocal = (
     draftOverride?: PersistedComparisonDraft | null,
   ) => {
-    if (typeof window === "undefined") {
+    if (
+      typeof window === "undefined" ||
+      !currentDraftOwnerScope ||
+      !localDraftStorageKey
+    ) {
       return;
     }
 
     const draft = draftOverride ?? latestDraftRef.current;
     const storageKey = draft
-      ? getLocalDraftStorageKey(draft.memoId)
+      ? getLocalDraftStorageKey(draft.memoId, currentDraftOwnerScope)
       : localDraftStorageKey;
 
     if (!draft) {
@@ -263,7 +278,13 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       return;
     }
 
-    window.localStorage.setItem(storageKey, JSON.stringify(draft));
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        ...draft,
+        ownerScope: currentDraftOwnerScope,
+      } satisfies PersistedComparisonDraft),
+    );
   };
 
   const canProceed = () => {
@@ -322,7 +343,12 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   ]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (
+      typeof window === "undefined" ||
+      status === "loading" ||
+      !currentDraftOwnerScope ||
+      !localDraftStorageKey
+    ) {
       return;
     }
 
@@ -333,7 +359,11 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
     const parseDraft = (
       rawDraft: string | null,
-      expectedMemoId?: string | null,
+      options?: {
+        expectedMemoId?: string | null;
+        expectedOwnerScope?: DraftOwnerScope;
+        allowMissingOwnerScope?: boolean;
+      },
     ): PersistedComparisonDraft | null => {
       if (!rawDraft) {
         return null;
@@ -346,13 +376,25 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
           draft.redirectTo !== redirectTo ||
           !draft.data ||
           typeof draft.currentStep !== "number" ||
-          (expectedMemoId !== undefined &&
-            (draft.memoId ?? null) !== expectedMemoId)
+          (options?.expectedMemoId !== undefined &&
+            (draft.memoId ?? null) !== options.expectedMemoId)
+        ) {
+          return null;
+        }
+
+        if (
+          options?.expectedOwnerScope &&
+          draft.ownerScope !== options.expectedOwnerScope &&
+          !(options.allowMissingOwnerScope && draft.ownerScope === undefined)
         ) {
           return null;
         }
 
         return {
+          ownerScope:
+            draft.ownerScope === undefined
+              ? GUEST_DRAFT_OWNER_SCOPE
+              : draft.ownerScope,
           memoId: draft.memoId ?? null,
           redirectTo: draft.redirectTo,
           currentStep: draft.currentStep,
@@ -368,7 +410,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     };
 
     const sessionDraft = parseDraft(rawSessionDraft);
-    const localDraft = parseDraft(rawLocalDraft, initialMemoId ?? null);
+    const localDraft = parseDraft(rawLocalDraft, {
+      expectedMemoId: initialMemoId ?? null,
+      expectedOwnerScope: currentDraftOwnerScope,
+    });
     const draft = sessionDraft ?? localDraft;
 
     if (!draft) {
@@ -377,13 +422,20 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     }
 
     try {
-      setData(cloneComparisonData(draft.data));
+      const normalizedDraftData = normalizeComparisonDataToLimits(draft.data);
+      const normalizedSavedSnapshot = draft.savedSnapshot
+        ? normalizeComparisonDataToLimits(draft.savedSnapshot)
+        : null;
+
+      setData(cloneComparisonData(normalizedDraftData));
       setSavedSnapshot(
-        draft.savedSnapshot ? cloneComparisonData(draft.savedSnapshot) : null,
+        normalizedSavedSnapshot
+          ? cloneComparisonData(normalizedSavedSnapshot)
+          : null,
       );
       setActiveMemo(draft.activeMemo ?? null);
       setCurrentStep(Math.min(Math.max(draft.currentStep, 1), STEPS.length));
-      setMemoTitle(draft.memoTitle ?? "");
+      setMemoTitle(clampComparisonShortText(draft.memoTitle ?? ""));
       setMemoIsPublic(Boolean(draft.memoIsPublic));
       if (draft.memoId) {
         const nextSearchParams = new URLSearchParams(searchParams.toString());
@@ -404,8 +456,14 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       if (sessionDraft) {
         window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
         window.localStorage.setItem(
-          getLocalDraftStorageKey(sessionDraft.memoId),
-          JSON.stringify(sessionDraft),
+          getLocalDraftStorageKey(sessionDraft.memoId, currentDraftOwnerScope),
+          JSON.stringify({
+            ...sessionDraft,
+            data: normalizedDraftData,
+            ownerScope: currentDraftOwnerScope,
+            savedSnapshot: normalizedSavedSnapshot,
+            memoTitle: clampComparisonShortText(sessionDraft.memoTitle),
+          } satisfies PersistedComparisonDraft),
         );
         toast.success("ログイン後に編集中の内容を復元しました。");
       } else {
@@ -418,16 +476,22 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setHasResolvedDraftRestore(true);
     }
   }, [
+    currentDraftOwnerScope,
     initialMemoId,
     localDraftStorageKey,
     pathname,
     redirectTo,
     router,
     searchParams,
+    status,
   ]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (
+      typeof window === "undefined" ||
+      !currentDraftOwnerScope ||
+      !localDraftStorageKey
+    ) {
       return;
     }
 
@@ -445,7 +509,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       window.clearInterval(intervalId);
       window.removeEventListener("pagehide", handlePageHide);
     };
-  }, [localDraftStorageKey]);
+  }, [currentDraftOwnerScope, localDraftStorageKey]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -651,7 +715,11 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       return;
     }
 
-    setMemoTitle(activeMemo?.title ?? buildComparisonMemoTitle(data));
+    setMemoTitle(
+      clampComparisonShortText(
+        activeMemo?.title ?? buildComparisonMemoTitle(data),
+      ),
+    );
     setMemoIsPublic(activeMemo?.isPublic ?? false);
     setIsSaveDialogOpen(true);
   };
@@ -681,7 +749,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     setIsSaving(true);
 
     try {
-      const title = memoTitle.trim() || buildComparisonMemoTitle(data);
+      const normalizedData = normalizeComparisonDataToLimits(data);
+      const title =
+        clampComparisonShortText(memoTitle).trim() ||
+        clampComparisonShortText(buildComparisonMemoTitle(normalizedData));
       const response = await fetch(
         mode === "update" && activeMemo
           ? `/api/memos/${activeMemo.id}`
@@ -693,7 +764,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
           },
           body: JSON.stringify({
             title,
-            data,
+            data: normalizedData,
             isPublic: memoIsPublic,
           }),
         },
@@ -721,7 +792,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setMemoIsPublic(summary.isPublic);
       persistDraftToLocal(persistedDraft);
       replaceEditorUrl(summary.id);
-      if (wasCreatingNewMemo) {
+      if (wasCreatingNewMemo && previousLocalDraftStorageKey) {
         window.localStorage.removeItem(previousLocalDraftStorageKey);
       }
       setIsSaveDialogOpen(false);
@@ -774,7 +845,11 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       );
 
       if (activeMemo?.id === memoSummary.id) {
-        window.localStorage.removeItem(getLocalDraftStorageKey(memoSummary.id));
+        if (currentDraftOwnerScope) {
+          window.localStorage.removeItem(
+            getLocalDraftStorageKey(memoSummary.id, currentDraftOwnerScope),
+          );
+        }
         setActiveMemo(null);
         replaceEditorUrl(null);
       }
@@ -799,19 +874,21 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     key: K,
     value: ComparisonData[K],
   ) => {
-    setData((prev) => ({ ...prev, [key]: value }));
+    setData((prev) =>
+      normalizeComparisonDataToLimits({ ...prev, [key]: value }),
+    );
   };
 
   const updateProducts = (products: ComparisonData["products"]) => {
     setData((prev) => {
       const hasDeletion = products.length < prev.products.length;
 
-      return {
+      return normalizeComparisonDataToLimits({
         ...prev,
         products,
         selectedProductId:
           hasDeletion && prev.selectedProductId ? null : prev.selectedProductId,
-      };
+      });
     });
   };
 
@@ -887,10 +964,9 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>保存機能の利用にはログインが必要です</DialogTitle>
+            <DialogTitle>保存するためにはログインが必要です</DialogTitle>
             <DialogDescription>
-              比較フローの閲覧と編集はそのまま続けられます。保存済みメモの作成、読込、削除を利用するときだけ
-              Google ログインしてください。
+              作成途中のメモ内容は、ログイン後に復元されます。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -924,9 +1000,11 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
               <Input
                 id="memo-title"
                 value={memoTitle}
-                onChange={(event) => setMemoTitle(event.target.value)}
+                onChange={(event) =>
+                  setMemoTitle(clampComparisonShortText(event.target.value))
+                }
                 placeholder="例: ノートPC買い替え比較"
-                maxLength={120}
+                maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
               />
             </div>
             <div className="flex items-start justify-between gap-4 rounded-lg border border-border/70 bg-background/40 p-3">

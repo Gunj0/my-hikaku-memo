@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { COMPARISON_MEMO_TEXT_MAX_LENGTH } from "@/lib/comparison-limits";
 import { DecisionPoint, Product, ProductScore } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -169,6 +170,7 @@ function SortableMobilePointSection({
         placeholder="メモ..."
         value={scoreData?.memo || ""}
         onChange={(e) => onMemoChange(e.target.value)}
+        maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
         className="min-h-15 resize-none text-sm"
       />
     </div>
@@ -384,6 +386,7 @@ function SortablePointRow({
                 onChange={(e) =>
                   onMemoChange(product.id, point.id, e.target.value)
                 }
+                maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
                 className="min-h-12.5 resize-none text-xs"
               />
             </div>
@@ -516,7 +519,7 @@ export function EvaluationStep({
         <div>
           <h2 className="text-xl font-semibold mb-2">評価を入力</h2>
           <p className="text-muted-foreground text-sm">
-            製品と重視ポイントを先に設定してください
+            候補と比較ポイントを先に入力してください
           </p>
         </div>
       </div>
