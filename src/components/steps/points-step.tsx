@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { DecisionPoint, DEFAULT_DECISION_POINTS } from "@/lib/types";
+import { DecisionPoint } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
   closestCenter,
@@ -26,7 +26,6 @@ import {
   ChevronDownIcon,
   GripVerticalIcon,
   PlusIcon,
-  RotateCcwIcon,
   StarIcon,
   XIcon,
 } from "lucide-react";
@@ -78,7 +77,7 @@ function SortablePointItem({
         isDragging && "z-10 opacity-80 shadow-lg",
       )}
     >
-      <div className="p-3 sm:p-4">
+      <div className="">
         <div className="flex items-center gap-3">
           <Button
             type="button"
@@ -259,16 +258,6 @@ export function PointsStep({
     onPointsChange(arrayMove(decisionPoints, oldIndex, newIndex));
   };
 
-  const resetToDefault = () => {
-    onPointsChange(
-      DEFAULT_DECISION_POINTS.map((point) => ({
-        ...point,
-        id: crypto.randomUUID(),
-      })),
-    );
-    setExpandedId(null);
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !isComposingRef.current) {
       e.preventDefault();
@@ -288,22 +277,6 @@ export function PointsStep({
           あなたが重視するポイントを書き出しましょう（ヒント: 「カテゴリ
           選ぶポイント」で検索 ）
         </p>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="flex gap-4 text-sm text-muted-foreground">
-          <span>{decisionPoints.length} 件のポイント</span>
-          <span className="text-primary">{importantCount} 件を重視</span>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={resetToDefault}
-          className="text-xs"
-        >
-          <RotateCcwIcon className="w-3 h-3 mr-1" />
-          初期値に戻す
-        </Button>
       </div>
 
       <DndContext

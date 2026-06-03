@@ -11,6 +11,7 @@ import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const COMPARISON_AUTH_REDIRECT_EVENT = "gadget-comparison:before-sign-in";
 
@@ -54,11 +55,14 @@ export function AppHeader() {
         <div className="flex min-w-0 items-center gap-2 md:gap-6">
           <div className="min-w-0 shrink-0">
             <Link href="/">
-              <p className="text-[10px] tracking-[0.20em] text-muted-foreground">
-                My Hikaku Memo
-              </p>
               <p className="inline-flex items-center gap-2 text-base font-semibold tracking-wider text-foreground">
-                オレの比較メモ
+                <Image
+                  src="/icon.svg"
+                  alt="My Hikaku Memo"
+                  width={32}
+                  height={32}
+                />
+                オレの比較メモ β
               </p>
             </Link>
           </div>

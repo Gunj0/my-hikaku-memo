@@ -61,7 +61,7 @@ function SortableProductItem({
         transition,
       }}
       className={cn(
-        "p-4 bg-card border border-border rounded-lg space-y-3",
+        "bg-card border border-border rounded-lg space-y-3",
         isDragging && "z-10 opacity-80 shadow-lg",
       )}
     >

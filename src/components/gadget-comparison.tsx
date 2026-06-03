@@ -1065,20 +1065,8 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
       <div className="min-h-dvh flex flex-col">
         <header className="sticky top-0 z-40 border-b border-border/80 bg-background/82 backdrop-blur-md">
-          <div className="mx-auto max-w-6xl px-4 py-3">
+          <div className="mx-auto px-4 py-3">
             <div className="mb-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-              <div className="rounded-lg border border-border/80 bg-card/72 px-3 py-3 shadow-[0_0_0_1px_rgb(255_255_255/0.02)]">
-                <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm text-foreground">
-                      {activeMemo
-                        ? `${activeMemo.isPublic ? "公開中" : "非公開"}: ${activeMemo.title}`
-                        : "新規メモ"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               <div className="flex flex-wrap items-center gap-2 justify-end">
                 <Button
                   variant="ghost"
@@ -1118,7 +1106,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         </header>
 
         <main className="flex-1">
-          <div className="mx-auto grid max-w-6xl gap-4 px-4 py-4 lg:items-start">
+          <div className="mx-auto grid gap-4 px-4 py-4 lg:items-start">
             <section className="min-w-0 rounded-lg border border-border/80 bg-card/74 p-4 shadow-[0_0_0_1px_rgb(255_255_255/0.02),0_20px_40px_rgb(0_0_0/0.2)] md:p-5">
               {renderStep()}
             </section>

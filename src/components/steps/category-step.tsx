@@ -53,7 +53,7 @@ export function CategoryStep({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
         {PRESET_CATEGORIES.map(({ name, icon: Icon }) => (
           <Button
             key={name}
