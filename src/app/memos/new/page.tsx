@@ -1,6 +1,8 @@
+import { auth } from "@/auth";
 import { GadgetComparison } from "@/components/gadget-comparison";
 import { buildMetadata, getRequestSiteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = await getRequestSiteUrl();
@@ -21,8 +23,13 @@ type NewMemoPageProps = {
 };
 
 export default async function NewMemoPage({ searchParams }: NewMemoPageProps) {
+  const session = await auth();
   const { memoId } = await searchParams;
   const initialMemoId = Array.isArray(memoId) ? memoId[0] : memoId;
+
+  if (!session?.user?.id && initialMemoId) {
+    redirect("/memos/new");
+  }
 
   return <GadgetComparison initialMemoId={initialMemoId} />;
 }

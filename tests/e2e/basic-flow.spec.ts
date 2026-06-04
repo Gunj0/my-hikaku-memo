@@ -136,7 +136,7 @@ test("評価テーブルの表示で hydration error を出さない", async ({ 
   expect(hydrationErrors).toEqual([]);
 });
 
-test("保存済みメモのリセットは保存時点の状態へ戻る", async ({ page }) => {
+test("guest の保存済みメモ由来 draft をリセットすると初期状態に戻る", async ({ page }) => {
   await page.addInitScript(
     ({ key, value }) => {
       window.sessionStorage.setItem(key, JSON.stringify(value));
@@ -182,9 +182,10 @@ test("保存済みメモのリセットは保存時点の状態へ戻る", async
   });
   await page.getByRole("button", { name: "元に戻す" }).click();
 
-  await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
-  await page.getByRole("button", { name: /カテゴリ/ }).click();
-  await expect(categoryInput).toHaveValue("保存済みスマホ");
+  await expect(
+    page.getByRole("heading", { name: "カテゴリを入力する" }),
+  ).toBeVisible();
+  await expect(categoryInput).toHaveValue("");
 });
 
 test("入力欄は保存上限を超える文字を保持しない", async ({ page }) => {
@@ -287,33 +288,15 @@ test("ログイン遷移イベントで編集中の内容を退避する", async
   });
 });
 
-test("memoId 付き編集URLのログイン遷移イベントは memoId を保持して退避する", async ({
+test("未ログインで memoId 付き URL を開くと新規作成画面へ戻る", async ({
   page,
 }) => {
   await page.goto(`/memos/new?memoId=${savedMemoResponse.memo.id}`);
-  await page.getByRole("button", { name: "あとで" }).click();
-
-  await page.getByLabel("その他のカテゴリ").fill("未ログイン編集中カテゴリ");
-
-  await page.evaluate(() => {
-    window.dispatchEvent(new Event("gadget-comparison:before-sign-in"));
-  });
-
-  const persistedDraft = await page.evaluate((storageKey) => {
-    const rawDraft = window.sessionStorage.getItem(storageKey);
-
-    return rawDraft ? JSON.parse(rawDraft) : null;
-  }, persistedDraftStorageKey);
-
-  expect(persistedDraft).toMatchObject({
-    ownerScope: guestDraftOwnerScope,
-    memoId: savedMemoResponse.memo.id,
-    redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
-    currentStep: 1,
-    data: {
-      category: "未ログイン編集中カテゴリ",
-    },
-  });
+  await expect(page).toHaveURL("/memos/new");
+  await expect(
+    page.getByRole("heading", { name: "カテゴリを入力する" }),
+  ).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
 test("ログイン復帰時に編集中の内容を復元する", async ({ page }) => {
@@ -382,7 +365,7 @@ test("ログイン復帰時に編集中の内容を復元する", async ({ page 
   await expect(page.getByLabel("メモ（任意）")).toHaveValue("夜景を撮りたい");
 });
 
-test("memoId 付き編集では編集中の内容を localStorage へ即時保存する", async ({
+test("guest の memoId 付き session draft は新規作成として保存し直す", async ({
   page,
 }) => {
   await page.addInitScript(
@@ -394,7 +377,7 @@ test("memoId 付き編集では編集中の内容を localStorage へ即時保�
       value: {
         ownerScope: guestDraftOwnerScope,
         memoId: savedMemoResponse.memo.id,
-        redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
+        redirectTo: "/memos/new",
         currentStep: 1,
         data: savedMemoResponse.memo.data,
         savedSnapshot: savedMemoResponse.memo.data,
@@ -412,8 +395,12 @@ test("memoId 付き編集では編集中の内容を localStorage へ即時保�
     },
   );
 
-  await page.goto(`/memos/new?memoId=${savedMemoResponse.memo.id}`);
-  await page.getByRole("button", { name: "あとで" }).click();
+  await page.goto("/memos/new");
+
+  await expect(page).toHaveURL("/memos/new");
+  await expect(page.getByLabel("その他のカテゴリ")).toHaveValue(
+    savedMemoResponse.memo.data.category,
+  );
 
   await page.getByRole("button", { name: "次へ" }).click();
 
@@ -421,20 +408,20 @@ test("memoId 付き編集では編集中の内容を localStorage へ即時保�
     const rawDraft = window.localStorage.getItem(storageKey);
 
     return rawDraft ? JSON.parse(rawDraft) : null;
-  }, getLocalDraftStorageKey(savedMemoResponse.memo.id));
+  }, getLocalDraftStorageKey(null));
 
   expect(persistedDraft).toMatchObject({
     ownerScope: guestDraftOwnerScope,
-    memoId: savedMemoResponse.memo.id,
-    redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
+    memoId: null,
+    redirectTo: "/memos/new",
     currentStep: 2,
-    activeMemo: {
-      id: savedMemoResponse.memo.id,
-    },
   });
+
+  expect(persistedDraft?.activeMemo).toBeNull();
+  expect(persistedDraft?.savedSnapshot).toBeNull();
 });
 
-test("保存済みメモ復元時は memoId 付き URL に同期し、リロード後も復元する", async ({
+test("guest の memoId 付き session draft は URL に memoId を復元しない", async ({
   page,
 }) => {
   await page.addInitScript(
@@ -468,13 +455,7 @@ test("保存済みメモ復元時は memoId 付き URL に同期し、リロー�
   );
 
   await page.goto("/memos/new");
-  await expect
-    .poll(() => page.url())
-    .toContain(`/memos/new?memoId=${savedMemoResponse.memo.id}`);
-  await page.getByRole("button", { name: "あとで" }).click();
-
-  await page.reload();
-  await page.getByRole("button", { name: "あとで" }).click();
+  await expect(page).toHaveURL("/memos/new");
 
   await expect(
     page.getByRole("heading", { name: "候補を洗い出す" }),
@@ -482,6 +463,9 @@ test("保存済みメモ復元時は memoId 付き URL に同期し、リロー�
   await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
     "URL 同期後も復元したいメモ",
   );
+  await expect(
+    page.getByRole("button", { name: "保存済みスマホ比較" }),
+  ).toHaveCount(0);
 });
 
 test("新規作成画面では編集中の内容を localStorage へ即時保存する", async ({
@@ -576,7 +560,7 @@ test("新規作成画面では新規作成用ドラフトを復元し、他メ�
   );
 });
 
-test("memoId 一致時のみ localStorage の自動保存内容から復元する", async ({
+test("未ログインでは memoId キーの localStorage draft を復元しない", async ({
   page,
 }) => {
   await page.addInitScript(
@@ -609,15 +593,12 @@ test("memoId 一致時のみ localStorage の自動保存内容から復元す�
     },
   );
 
-  await page.goto(`/memos/new?memoId=${savedMemoResponse.memo.id}`);
-  await page.getByRole("button", { name: "あとで" }).click();
+  await page.goto("/memos/new");
 
   await expect(
-    page.getByRole("heading", { name: "候補を洗い出す" }),
+    page.getByRole("heading", { name: "カテゴリを入力する" }),
   ).toBeVisible();
-  await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
-    "local draft から復元",
-  );
+  await expect(page.getByLabel("その他のカテゴリ")).toHaveValue("");
 });
 
 test("guest は user スコープの localStorage ドラフトを復元しない", async ({
@@ -656,11 +637,10 @@ test("guest は user スコープの localStorage ドラフトを復元しない
     },
   );
 
-  await page.goto(`/memos/new?memoId=${savedMemoResponse.memo.id}`);
-  await page.getByRole("button", { name: "あとで" }).click();
+  await page.goto("/memos/new");
 
   await expect(
-    page.getByRole("heading", { name: "カテゴリを入力" }),
+    page.getByRole("heading", { name: "カテゴリを入力する" }),
   ).toBeVisible();
   await expect(page.getByLabel("その他のカテゴリ")).toHaveValue("");
 });

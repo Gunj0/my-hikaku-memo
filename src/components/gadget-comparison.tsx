@@ -110,6 +110,28 @@ function getLocalDraftStorageKey(
   return `${LOCAL_DRAFT_STORAGE_KEY_PREFIX}:${ownerScope}:${memoId ?? NEW_COMPARISON_DRAFT_ID}`;
 }
 
+function sanitizeDraftForGuest(
+  draft: PersistedComparisonDraft | null,
+  redirectTo: string,
+  ownerScope: DraftOwnerScope | null,
+) {
+  if (
+    !draft ||
+    ownerScope !== GUEST_DRAFT_OWNER_SCOPE ||
+    (!draft.memoId && !draft.activeMemo && !draft.savedSnapshot)
+  ) {
+    return draft;
+  }
+
+  return {
+    ...draft,
+    memoId: null,
+    redirectTo,
+    savedSnapshot: null,
+    activeMemo: null,
+  } satisfies PersistedComparisonDraft;
+}
+
 async function readResponse<T>(response: Response): Promise<T> {
   const json = await response.json().catch(() => null);
 
@@ -409,11 +431,19 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       }
     };
 
-    const sessionDraft = parseDraft(rawSessionDraft);
-    const localDraft = parseDraft(rawLocalDraft, {
-      expectedMemoId: initialMemoId ?? null,
-      expectedOwnerScope: currentDraftOwnerScope,
-    });
+    const sessionDraft = sanitizeDraftForGuest(
+      parseDraft(rawSessionDraft),
+      redirectTo,
+      currentDraftOwnerScope,
+    );
+    const localDraft = sanitizeDraftForGuest(
+      parseDraft(rawLocalDraft, {
+        expectedMemoId: initialMemoId ?? null,
+        expectedOwnerScope: currentDraftOwnerScope,
+      }),
+      redirectTo,
+      currentDraftOwnerScope,
+    );
     const draft = sessionDraft ?? localDraft;
 
     if (!draft) {

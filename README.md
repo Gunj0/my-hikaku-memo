@@ -48,8 +48,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:8787
 ```
 
 - NEXT_PUBLIC_SITE_URL は canonical、Open Graph、Twitter Card、robots.txt、sitemap.xml、構造化データの生成基準 URL として利用します。
-- Cloudflare preview / deploy では Worker ランタイムの NEXT_PUBLIC_SITE_URL を優先し、未設定時のみリクエスト URL をフォールバックとして利用します。
-- 本番環境では必ず公開 URL を NEXT_PUBLIC_SITE_URL に設定してください。
+- ローカル開発では loopback URL に限ってリクエスト URL を補助的に利用します。
+- Cloudflare preview / deploy では Worker ランタイムの NEXT_PUBLIC_SITE_URL または SITE_URL に公開 URL を必ず設定してください。
+- 本番環境では loopback URL や未設定状態のまま metadata 系を生成しないため、公開 URL 未設定の deploy は失敗します。
 
 ### Google OAuth 設定
 

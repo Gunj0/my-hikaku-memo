@@ -1,0 +1,40 @@
+{
+  "ownerScope": "guest",
+  "memoId": "saved-memo",
+  "redirectTo": "/memos/new?memoId=saved-memo",
+  "currentStep": 1,
+  "data": {
+    "category": "未ログイン編集中カテゴリ",
+    "categoryMemo": "",
+    "decisionPoints": [
+      {
+        "id": "point-price",
+        "name": "価格",
+        "isImportant": true,
+        "weight": 3,
+        "memo": ""
+      }
+    ],
+    "pointsMemo": "",
+    "products": [
+      {
+        "id": "draft-product",
+        "name": "Draft Product",
+        "memo": ""
+      },
+      {
+        "id": "draft-product-2",
+        "name": "Draft Product 2",
+        "memo": ""
+      }
+    ],
+    "productsMemo": "",
+    "scores": [],
+    "selectedProductId": null,
+    "decisionMemo": ""
+  },
+  "savedSnapshot": null,
+  "activeMemo": null,
+  "memoTitle": "",
+  "memoIsPublic": false
+}
