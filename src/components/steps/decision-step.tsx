@@ -81,10 +81,10 @@ export function DecisionStep({
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="max-w-6xl mx-auto">
         <h2 className="text-xl font-semibold mb-2">最終決定</h2>
         <p className="text-muted-foreground text-sm">
-          評点を踏まえて、購入する製品を決定してください
+          集計結果をふまえて、最終候補を候補を決定しましょう
         </p>
       </div>
 

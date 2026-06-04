@@ -13,7 +13,7 @@ export function StepIndicator({
   onStepClick,
 }: StepIndicatorProps) {
   return (
-    <nav className="w-full" aria-label="進捗状況">
+    <nav className="max-w-6xl mx-auto" aria-label="進捗状況">
       <div className="flex gap-2 overflow-x-auto rounded-lg border border-border/80 bg-card/72 p-2 scrollbar-hide">
         {STEPS.map((step) => {
           const isComplete = currentStep > step.id;
@@ -24,7 +24,7 @@ export function StepIndicator({
               key={step.id}
               onClick={() => onStepClick?.(step.id)}
               className={cn(
-                "flex min-w-fit items-center gap-2 rounded-md border px-3 py-2 whitespace-nowrap text-xs tracking-[0.08em] transition-colors",
+                "flex w-xl items-center gap-2 rounded-md border px-3 py-2 whitespace-nowrap text-xs tracking-[0.08em] transition-colors",
                 isCurrent && "border-primary/60 bg-primary/16 text-foreground",
                 isComplete &&
                   "border-border/70 bg-secondary/82 text-secondary-foreground",

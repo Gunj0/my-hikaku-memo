@@ -1172,7 +1172,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
       <div className="min-h-dvh flex flex-col">
         <header className="sticky top-0 z-40 border-b border-border/80 bg-background/82 backdrop-blur-md">
-          <div className="mx-auto px-4 py-3">
+          <div className="max-w-6xl mx-auto px-4 py-3">
             <div className="mb-3 grid gap-3 grid-cols-[minmax(0,1fr)_auto] lg:items-start">
               <div className="flex items-center gap-2">
                 <Button
@@ -1182,7 +1182,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                 >
                   <Link href="/memos" className="flex items-center">
                     <ArrowLeftIcon className="w-4 h-4 mr-1" />
-                    戻る
+                    メモ一覧
                   </Link>
                 </Button>
               </div>
