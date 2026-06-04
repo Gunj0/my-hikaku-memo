@@ -87,7 +87,7 @@ export default async function Home() {
   };
 
   return (
-    <main className="mx-auto flex w-full flex-col gap-6 px-4 py-6 md:py-8">
+    <main className="mx-auto max-w-6xl flex w-full flex-col gap-6 px-4 py-6 md:py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }}
@@ -274,22 +274,22 @@ export default async function Home() {
         </Card>
       </section>
 
-      <footer className="border-t border-border/80 pt-6 text-sm text-muted-foreground">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
+      <footer className="border-t border-border/80 py-6 text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 md:flex-row items-center md:justify-between max-w-3xl mx-auto">
+          <div className="flex flex-row items-center gap-4">
             <p className="font-medium text-foreground/85">
-              &copy; {new Date().getFullYear()} オレの比較メモ
+              &copy;オレの比較メモ
             </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <a
               href="https://x.com/gunj0dev"
               target="_blank"
               rel="noreferrer"
               className="font-medium text-foreground transition-colors hover:text-primary"
             >
-              Gunj0
+              Developed by <span className="font-bold">Gunj0</span>
             </a>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Link href="/terms">利用規約</Link>
             <Link href="/privacy">プライバシーポリシー</Link>
             <Link href="/commercial-disclosure">特商法表記</Link>

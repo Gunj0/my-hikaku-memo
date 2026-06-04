@@ -44,6 +44,7 @@ import type {
 } from "@/lib/types";
 import { STEPS } from "@/lib/types";
 import {
+  ArrowLeftIcon,
   BookMarkedIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -53,6 +54,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -1174,7 +1176,19 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       <div className="min-h-dvh flex flex-col">
         <header className="sticky top-0 z-40 border-b border-border/80 bg-background/82 backdrop-blur-md">
           <div className="mx-auto px-4 py-3">
-            <div className="mb-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+            <div className="mb-3 grid gap-3 grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground"
+                >
+                  <Link href="/memos" className="flex items-center">
+                    <ArrowLeftIcon className="w-4 h-4 mr-1" />
+                    戻る
+                  </Link>
+                </Button>
+              </div>
               <div className="flex flex-wrap items-center gap-2 justify-end">
                 <Button
                   variant="ghost"

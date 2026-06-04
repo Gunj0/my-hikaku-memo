@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { auth } from "@/auth";
 import { ProfileSettingsCard } from "@/components/profile-settings-card";
+import { SignOutButton } from "@/components/sign-out-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +17,12 @@ import {
   USER_PROFILE_NAME_MAX_LENGTH,
   ensureUserProfile,
 } from "@/lib/server/user-profiles";
-import { ArrowRightIcon, EyeIcon, PlusCircleIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  EyeIcon,
+  LogOutIcon,
+  PlusCircleIcon,
+} from "lucide-react";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -81,12 +87,18 @@ export default async function MemosPage() {
         <div>
           <h1 className="text-2xl font-semibold">あなたの比較メモ一覧</h1>
         </div>
-        <Button asChild variant="success">
-          <Link href="/memos/new">
-            <PlusCircleIcon className="h-4 w-4" />
-            新しいメモを作る
-          </Link>
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button asChild variant="success">
+            <Link href="/memos/new">
+              <PlusCircleIcon className="h-4 w-4" />
+              新しいメモを作る
+            </Link>
+          </Button>
+          <SignOutButton variant="outline" size="default">
+            <LogOutIcon className="h-4 w-4" />
+            ログアウト
+          </SignOutButton>
+        </div>
       </section>
 
       {profile ? (
@@ -131,11 +143,6 @@ export default async function MemosPage() {
                   <CardDescription className="mt-2">
                     カテゴリ: {memo.category || "未設定"}
                   </CardDescription>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {memo.isPublic
-                      ? "公開中のため、他ユーザーは閲覧専用で確認できます。"
-                      : "非公開のため、自分以外のユーザーには表示されません。"}
-                  </p>
                 </div>
                 <div className="text-xs leading-6 text-muted-foreground">
                   <div>
