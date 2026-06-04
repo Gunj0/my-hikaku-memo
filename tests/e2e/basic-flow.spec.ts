@@ -136,7 +136,9 @@ test("評価テーブルの表示で hydration error を出さない", async ({ 
   expect(hydrationErrors).toEqual([]);
 });
 
-test("guest の保存済みメモ由来 draft をリセットすると初期状態に戻る", async ({ page }) => {
+test("guest の保存済みメモ由来 draft をリセットすると初期状態に戻る", async ({
+  page,
+}) => {
   await page.addInitScript(
     ({ key, value }) => {
       window.sessionStorage.setItem(key, JSON.stringify(value));
