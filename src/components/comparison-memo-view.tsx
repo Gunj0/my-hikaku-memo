@@ -1,3 +1,4 @@
+import { DecisionPointImportanceIcon } from "@/components/decision-point-importance-icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -14,8 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { DecisionPoint, Product, PublicComparisonMemo } from "@/lib/types";
-import { BadgeCheckIcon, StarIcon, TrophyIcon } from "lucide-react";
+import {
+  type DecisionPoint,
+  type Product,
+  type PublicComparisonMemo,
+} from "@/lib/types";
+import { BadgeCheckIcon, TrophyIcon } from "lucide-react";
 
 type ComparisonMemoViewProps = {
   memo: PublicComparisonMemo;
@@ -53,14 +58,12 @@ function getProductTotals(
   decisionPoints: DecisionPoint[],
   memo: PublicComparisonMemo,
 ) {
-  const importantPoints = decisionPoints.filter((point) => point.isImportant);
-
   return products
     .map((product) => {
       let totalScore = 0;
       let maxPossible = 0;
 
-      importantPoints.forEach((point) => {
+      decisionPoints.forEach((point) => {
         totalScore += getScore(memo, product.id, point.id) * point.weight;
         maxPossible += 5 * point.weight;
       });
@@ -76,9 +79,7 @@ function getProductTotals(
 }
 
 export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
-  const importantPoints = memo.data.decisionPoints.filter(
-    (point) => point.isImportant,
-  );
+  const evaluationPoints = memo.data.decisionPoints;
   const productTotals = getProductTotals(
     memo.data.products,
     memo.data.decisionPoints,
@@ -201,7 +202,7 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             <div className="rounded-lg border border-border/70 bg-background/40 p-3">
-              重要ポイント数: {importantPoints.length}
+              比較ポイント数: {evaluationPoints.length}
             </div>
             <div className="rounded-lg border border-border/70 bg-background/40 p-3">
               比較候補数: {memo.data.products.length}
@@ -240,14 +241,13 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="font-medium">{point.name}</p>
-                <span className="inline-flex items-center gap-1 text-sm text-primary">
-                  <StarIcon className="h-4 w-4 fill-primary" />
-                  {point.weight}
+                <span className="inline-flex items-center justify-center rounded-full bg-primary/10 p-1 text-primary">
+                  <DecisionPointImportanceIcon
+                    weight={point.weight}
+                    className="h-4 w-4"
+                  />
                 </span>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {point.isImportant ? "重要ポイント" : "参考ポイント"}
-              </p>
               {point.memo.trim() ? (
                 <p className="mt-3 text-sm leading-6 text-muted-foreground">
                   {point.memo}
@@ -281,18 +281,16 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
             ))}
           </div>
 
-          {importantPoints.length > 0 && memo.data.products.length > 0 ? (
+          {evaluationPoints.length > 0 && memo.data.products.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[140px]">
-                      比較ポイント
-                    </TableHead>
+                    <TableHead className="min-w-35">比較ポイント</TableHead>
                     {memo.data.products.map((product) => (
                       <TableHead
                         key={product.id}
-                        className="min-w-[110px] text-center"
+                        className="min-w-27.5 text-center"
                       >
                         {product.name}
                       </TableHead>
@@ -300,7 +298,7 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {importantPoints.map((point) => (
+                  {evaluationPoints.map((point) => (
                     <TableRow key={point.id}>
                       <TableCell className="font-medium">
                         {point.name}

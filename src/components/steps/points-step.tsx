@@ -1,7 +1,7 @@
 "use client";
 
+import { DecisionPointImportanceIcon } from "@/components/decision-point-importance-icon";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +10,7 @@ import {
   COMPARISON_MEMO_TEXT_MAX_LENGTH,
   COMPARISON_SHORT_TEXT_MAX_LENGTH,
 } from "@/lib/comparison-limits";
-import { DecisionPoint } from "@/lib/types";
+import { DECISION_POINT_IMPORTANCE_OPTIONS, DecisionPoint } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
   closestCenter,
@@ -27,13 +27,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  ChevronDownIcon,
-  GripVerticalIcon,
-  PlusIcon,
-  StarIcon,
-  XIcon,
-} from "lucide-react";
+import { GripVerticalIcon, PlusIcon, XIcon } from "lucide-react";
 import { useRef, useState } from "react";
 
 interface PointsStepProps {
@@ -45,16 +39,12 @@ interface PointsStepProps {
 
 interface SortablePointItemProps {
   point: DecisionPoint;
-  isExpanded: boolean;
-  onToggleExpanded: () => void;
   onRemove: () => void;
   onUpdate: (updates: Partial<DecisionPoint>) => void;
 }
 
 function SortablePointItem({
   point,
-  isExpanded,
-  onToggleExpanded,
   onRemove,
   onUpdate,
 }: SortablePointItemProps) {
@@ -75,129 +65,82 @@ function SortablePointItem({
         transition,
       }}
       className={cn(
-        "rounded-lg border transition-colors",
-        point.isImportant
-          ? "border-primary bg-primary/5"
-          : "border-border bg-card",
+        "rounded-lg border border-border bg-card space-y-3",
         isDragging && "z-10 opacity-80 shadow-lg",
       )}
     >
-      <div className="">
-        <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="cursor-grab touch-none text-muted-foreground active:cursor-grabbing"
-            aria-label={`${point.name}をドラッグして並び替え`}
-            {...attributes}
-            {...listeners}
-          >
-            <GripVerticalIcon className="w-4 h-4" />
-          </Button>
-          <Checkbox
-            id={`important-${point.id}`}
-            checked={point.isImportant}
-            onCheckedChange={(checked) => onUpdate({ isImportant: !!checked })}
-          />
-          <Label
-            htmlFor={`important-${point.id}`}
-            className="flex-1 text-sm sm:text-base font-medium cursor-pointer"
-          >
-            {point.name}
-          </Label>
+      <div className="flex items-center gap-3">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="cursor-grab touch-none text-muted-foreground active:cursor-grabbing"
+          aria-label={`${point.name}をドラッグして並び替え`}
+          {...attributes}
+          {...listeners}
+        >
+          <GripVerticalIcon className="w-4 h-4" />
+        </Button>
 
-          {point.isImportant && (
-            <div className="hidden sm:flex gap-0.5">
-              {[1, 2, 3, 4, 5].map((weight) => (
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 sm:flex-nowrap">
+          <div
+            className="flex shrink-0 items-center gap-1 rounded-md border border-input bg-background p-1"
+            role="group"
+            aria-label={`${point.name}の重要度`}
+          >
+            {DECISION_POINT_IMPORTANCE_OPTIONS.map((option) => {
+              const isSelected = option.value === point.weight;
+
+              return (
                 <button
-                  key={weight}
+                  key={option.value}
                   type="button"
-                  onClick={() => onUpdate({ weight })}
-                  className="p-0.5 transition-colors"
-                  aria-label={`重要度 ${weight}`}
+                  onClick={() => onUpdate({ weight: option.value })}
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-sm transition-colors",
+                    isSelected
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                  title={option.message}
+                  aria-label={option.message}
                 >
-                  <StarIcon
+                  <DecisionPointImportanceIcon
+                    weight={option.value}
                     className={cn(
-                      "w-5 h-5 transition-colors",
-                      weight <= point.weight
-                        ? "fill-primary text-primary"
-                        : "text-muted-foreground/30",
+                      "h-4 w-4",
+                      isSelected && "text-primary-foreground",
                     )}
                   />
                 </button>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
 
-          <button
-            type="button"
-            onClick={onToggleExpanded}
-            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-            aria-label={isExpanded ? "閉じる" : "詳細を開く"}
-          >
-            <ChevronDownIcon
-              className={cn(
-                "w-5 h-5 transition-transform",
-                isExpanded && "rotate-180",
-              )}
-            />
-          </button>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-            onClick={onRemove}
-          >
-            <XIcon className="w-4 h-4" />
-          </Button>
+          <span className="min-w-0 flex-1 text-sm font-medium sm:text-base">
+            {point.name}
+          </span>
         </div>
 
-        {isExpanded && (
-          <div className="mt-4 space-y-4 pl-10">
-            {point.isImportant && (
-              <div className="sm:hidden space-y-2">
-                <span className="text-xs text-muted-foreground">重要度</span>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((weight) => (
-                    <button
-                      key={weight}
-                      type="button"
-                      onClick={() => onUpdate({ weight })}
-                      className="p-1 transition-colors"
-                      aria-label={`重要度 ${weight}`}
-                    >
-                      <StarIcon
-                        className={cn(
-                          "w-6 h-6 transition-colors",
-                          weight <= point.weight
-                            ? "fill-primary text-primary"
-                            : "text-muted-foreground/30",
-                        )}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">
-                メモ（任意）
-              </Label>
-              <Textarea
-                placeholder="このポイントに関するメモ..."
-                value={point.memo}
-                onChange={(e) => onUpdate({ memo: e.target.value })}
-                maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-                className="min-h-20 resize-none text-sm"
-              />
-            </div>
-          </div>
-        )}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+          onClick={onRemove}
+          aria-label={`${point.name}を削除`}
+        >
+          <XIcon className="w-4 h-4" />
+        </Button>
       </div>
+
+      <Textarea
+        placeholder="このポイントに関するメモ..."
+        value={point.memo}
+        onChange={(e) => onUpdate({ memo: e.target.value })}
+        maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+        className="min-h-10 resize-none text-sm"
+      />
     </div>
   );
 }
@@ -209,7 +152,6 @@ export function PointsStep({
   onMemoChange,
 }: PointsStepProps) {
   const [newPointName, setNewPointName] = useState("");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const isComposingRef = useRef(false);
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -233,8 +175,7 @@ export function PointsStep({
     const newPoint: DecisionPoint = {
       id: crypto.randomUUID(),
       name: newPointName.trim(),
-      isImportant: false,
-      weight: 2,
+      weight: 3,
       memo: "",
     };
     onPointsChange([...decisionPoints, newPoint]);
@@ -243,9 +184,6 @@ export function PointsStep({
 
   const removePoint = (id: string) => {
     onPointsChange(decisionPoints.filter((point) => point.id !== id));
-    if (expandedId === id) {
-      setExpandedId(null);
-    }
   };
 
   const updatePoint = (id: string, updates: Partial<DecisionPoint>) => {
@@ -280,12 +218,8 @@ export function PointsStep({
     }
   };
 
-  const importantCount = decisionPoints.filter(
-    (point) => point.isImportant,
-  ).length;
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <div>
         <h2 className="text-xl font-semibold mb-2">比較ポイントを洗い出す</h2>
         <p className="text-muted-foreground text-sm">
@@ -308,12 +242,6 @@ export function PointsStep({
               <SortablePointItem
                 key={point.id}
                 point={point}
-                isExpanded={expandedId === point.id}
-                onToggleExpanded={() =>
-                  setExpandedId((current) =>
-                    current === point.id ? null : point.id,
-                  )
-                }
                 onRemove={() => removePoint(point.id)}
                 onUpdate={(updates) => updatePoint(point.id, updates)}
               />

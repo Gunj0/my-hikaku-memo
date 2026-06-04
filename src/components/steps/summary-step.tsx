@@ -1,5 +1,6 @@
 "use client";
 
+import { DecisionPointImportanceIcon } from "@/components/decision-point-importance-icon";
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { DecisionPoint, Product, ProductScore } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { StarIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
+import { TrendingUpIcon, TrophyIcon } from "lucide-react";
 
 interface SummaryStepProps {
   products: Product[];
@@ -31,8 +32,6 @@ export function SummaryStep({
   decisionPoints,
   scores,
 }: SummaryStepProps) {
-  const importantPoints = decisionPoints.filter((p) => p.isImportant);
-
   const getScore = (productId: string, pointId: string): number => {
     return (
       scores.find((s) => s.productId === productId && s.pointId === pointId)
@@ -52,7 +51,7 @@ export function SummaryStep({
     let totalScore = 0;
     let maxPossible = 0;
 
-    importantPoints.forEach((point) => {
+    decisionPoints.forEach((point) => {
       totalScore += calculateWeightedScore(product.id, point);
       maxPossible += 5 * point.weight;
     });
@@ -71,7 +70,7 @@ export function SummaryStep({
 
   const topScore = productTotals[0]?.totalScore || 0;
 
-  if (products.length === 0 || importantPoints.length === 0) {
+  if (products.length === 0 || decisionPoints.length === 0) {
     return (
       <div className="space-y-6">
         <div>
@@ -161,26 +160,25 @@ export function SummaryStep({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="min-w-[150px]">ポイント</TableHead>
+              <TableHead className="min-w-37.5">ポイント</TableHead>
               <TableHead className="text-center w-20">重要度</TableHead>
               {productTotals.map(({ product }) => (
-                <TableHead
-                  key={product.id}
-                  className="text-center min-w-[100px]"
-                >
+                <TableHead key={product.id} className="text-center min-w-25">
                   {product.name}
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {importantPoints.map((point) => (
+            {decisionPoints.map((point) => (
               <TableRow key={point.id}>
                 <TableCell className="font-medium">{point.name}</TableCell>
                 <TableCell className="text-center">
-                  <span className="inline-flex items-center gap-1 text-primary">
-                    <StarIcon className="w-4 h-4 fill-primary" />
-                    {point.weight}
+                  <span className="inline-flex items-center justify-center rounded-full bg-primary/10 p-1 text-primary">
+                    <DecisionPointImportanceIcon
+                      weight={point.weight}
+                      className="h-4 w-4"
+                    />
                   </span>
                 </TableCell>
                 {productTotals.map(({ product }) => {
@@ -220,7 +218,7 @@ export function SummaryStep({
           <div className="text-sm text-muted-foreground">
             <p>スコアは「評価点 × 重要度」の合計で計算されています。</p>
             <p className="mt-1">
-              最高スコアの製品が最もあなたの重視ポイントにマッチしています。
+              最高スコアの製品が最もあなたの比較ポイントにマッチしています。
             </p>
           </div>
         </div>

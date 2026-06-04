@@ -1,5 +1,6 @@
 "use client";
 
+import { DecisionPointImportanceIcon } from "@/components/decision-point-importance-icon";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -49,7 +50,7 @@ interface SortableMobilePointSectionProps {
 
 interface SortableMobileProductCardProps {
   product: Product;
-  importantPoints: DecisionPoint[];
+  decisionPoints: DecisionPoint[];
   pointSensors: ReturnType<typeof useSensors>;
   onPointDragEnd: (event: DragEndEvent) => void;
   getScore: (productId: string, pointId: string) => ProductScore | undefined;
@@ -69,36 +70,19 @@ interface SortablePointRowProps {
   onMemoChange: (productId: string, pointId: string, memo: string) => void;
 }
 
-function reorderImportantDecisionPoints(
+function reorderDecisionPoints(
   decisionPoints: DecisionPoint[],
   activeId: string,
   overId: string,
 ) {
-  const importantPoints = decisionPoints.filter((point) => point.isImportant);
-  const oldIndex = importantPoints.findIndex((point) => point.id === activeId);
-  const newIndex = importantPoints.findIndex((point) => point.id === overId);
+  const oldIndex = decisionPoints.findIndex((point) => point.id === activeId);
+  const newIndex = decisionPoints.findIndex((point) => point.id === overId);
 
   if (oldIndex < 0 || newIndex < 0) {
     return decisionPoints;
   }
 
-  const reorderedImportantPoints = arrayMove(
-    importantPoints,
-    oldIndex,
-    newIndex,
-  );
-  let reorderedIndex = 0;
-
-  return decisionPoints.map((point) => {
-    if (!point.isImportant) {
-      return point;
-    }
-
-    const nextPoint = reorderedImportantPoints[reorderedIndex];
-    reorderedIndex += 1;
-
-    return nextPoint ?? point;
-  });
+  return arrayMove(decisionPoints, oldIndex, newIndex);
 }
 
 function SortableMobilePointSection({
@@ -143,8 +127,8 @@ function SortableMobilePointSection({
           </Button>
           <span className="text-sm font-medium truncate">{point.name}</span>
         </div>
-        <span className="text-xs text-muted-foreground shrink-0">
-          重要度: {point.weight}
+        <span className="inline-flex shrink-0 items-center text-muted-foreground">
+          <DecisionPointImportanceIcon weight={point.weight} />
         </span>
       </div>
       <div className="flex gap-1">
@@ -179,7 +163,7 @@ function SortableMobilePointSection({
 
 function SortableMobileProductCard({
   product,
-  importantPoints,
+  decisionPoints,
   pointSensors,
   onPointDragEnd,
   getScore,
@@ -227,11 +211,11 @@ function SortableMobileProductCard({
         onDragEnd={onPointDragEnd}
       >
         <SortableContext
-          items={importantPoints.map((point) => point.id)}
+          items={decisionPoints.map((point) => point.id)}
           strategy={verticalListSortingStrategy}
         >
           <div className="divide-y divide-border">
-            {importantPoints.map((point) => (
+            {decisionPoints.map((point) => (
               <SortableMobilePointSection
                 key={point.id}
                 point={point}
@@ -348,9 +332,11 @@ function SortablePointRow({
         </div>
       </TableCell>
       <TableCell className="text-center">
-        <span className="inline-flex items-center gap-1 text-primary">
-          <StarIcon className="w-4 h-4 fill-primary" />
-          {point.weight}
+        <span className="inline-flex items-center justify-center rounded-full bg-primary/10 p-1 text-primary">
+          <DecisionPointImportanceIcon
+            weight={point.weight}
+            className="h-4 w-4"
+          />
         </span>
       </TableCell>
       {products.map((product) => {
@@ -405,7 +391,6 @@ export function EvaluationStep({
   onDecisionPointsChange,
   onScoresChange,
 }: EvaluationStepProps) {
-  const importantPoints = decisionPoints.filter((point) => point.isImportant);
   const productSensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -481,11 +466,7 @@ export function EvaluationStep({
     }
 
     onDecisionPointsChange(
-      reorderImportantDecisionPoints(
-        decisionPoints,
-        String(active.id),
-        String(over.id),
-      ),
+      reorderDecisionPoints(decisionPoints, String(active.id), String(over.id)),
     );
   };
 
@@ -513,7 +494,7 @@ export function EvaluationStep({
     }
   };
 
-  if (products.length === 0 || importantPoints.length === 0) {
+  if (products.length === 0 || decisionPoints.length === 0) {
     return (
       <div className="space-y-6">
         <div>
@@ -528,10 +509,10 @@ export function EvaluationStep({
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="max-w-6xl mx-auto">
         <h2 className="text-xl font-semibold mb-2">評価を入力する</h2>
         <p className="text-muted-foreground text-sm">
-          各候補の比較ポイントに対する評価を入力しましょう
+          候補ごとに評価を入力しましょう
         </p>
       </div>
 
@@ -550,7 +531,7 @@ export function EvaluationStep({
                 <SortableMobileProductCard
                   key={product.id}
                   product={product}
-                  importantPoints={importantPoints}
+                  decisionPoints={decisionPoints}
                   pointSensors={pointSensors}
                   onPointDragEnd={handlePointsDragEnd}
                   getScore={getScore}
@@ -588,10 +569,10 @@ export function EvaluationStep({
             </TableHeader>
             <TableBody>
               <SortableContext
-                items={importantPoints.map((point) => point.id)}
+                items={decisionPoints.map((point) => point.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {importantPoints.map((point) => (
+                {decisionPoints.map((point) => (
                   <SortablePointRow
                     key={point.id}
                     point={point}

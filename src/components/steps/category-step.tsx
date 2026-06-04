@@ -49,7 +49,7 @@ export function CategoryStep({
   const hasCustomCategoryValue = customCategoryValue.trim().length > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <div>
         <h2 className="text-xl font-semibold mb-2">カテゴリを入力する</h2>
         <p className="text-muted-foreground text-sm">

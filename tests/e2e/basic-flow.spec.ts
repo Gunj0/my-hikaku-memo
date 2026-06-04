@@ -15,14 +15,12 @@ const savedMemoResponse = {
         {
           id: "point-price",
           name: "価格",
-          isImportant: true,
           weight: 3,
           memo: "",
         },
         {
           id: "point-spec",
           name: "機能・スペック",
-          isImportant: true,
           weight: 3,
           memo: "",
         },
@@ -66,6 +64,12 @@ test("ホーム初期表示でヘッダーを表示する", async ({ page }) => 
   await expect(
     page.getByRole("link", { name: /My Hikaku Memo オレの比較メモ β/ }),
   ).toBeVisible();
+
+  const signInTrigger = page.getByRole("button", { name: "ログイン" });
+  await expect(signInTrigger).toBeVisible();
+
+  await signInTrigger.click();
+
   await expect(
     page.getByRole("button", { name: "Googleでログイン" }),
   ).toBeVisible();
@@ -222,7 +226,9 @@ test("比較ポイントと候補は30件までしか追加できない", async 
     await page.getByRole("button", { name: "追加" }).click();
   }
 
-  await expect(page.getByRole("checkbox")).toHaveCount(maxPointCount);
+  await expect(page.getByRole("button", { name: /を削除$/ })).toHaveCount(
+    maxPointCount,
+  );
   await expect(page.getByLabel("ポイントを追加")).toBeDisabled();
   await expect(page.getByRole("button", { name: "追加" })).toBeDisabled();
 
@@ -319,7 +325,6 @@ test("ログイン復帰時に編集中の内容を復元する", async ({ page 
             {
               id: "point-price",
               name: "価格",
-              isImportant: true,
               weight: 3,
               memo: "",
             },

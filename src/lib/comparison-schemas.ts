@@ -8,12 +8,17 @@ import {
   COMPARISON_SCORES_MAX_COUNT,
   COMPARISON_SHORT_TEXT_MAX_LENGTH,
 } from "@/lib/comparison-limits";
+import { normalizeDecisionPointWeight } from "@/lib/types";
 
 export const decisionPointSchema = z.object({
   id: z.string().min(1).max(COMPARISON_ID_MAX_LENGTH),
   name: z.string().max(COMPARISON_SHORT_TEXT_MAX_LENGTH),
-  isImportant: z.boolean(),
-  weight: z.number().int().min(1).max(5),
+  weight: z
+    .number()
+    .int()
+    .min(1)
+    .max(5)
+    .transform(normalizeDecisionPointWeight),
   memo: z.string().max(COMPARISON_MEMO_TEXT_MAX_LENGTH),
 });
 

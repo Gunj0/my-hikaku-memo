@@ -34,8 +34,6 @@ export function DecisionStep({
   onSelectProduct,
   onMemoChange,
 }: DecisionStepProps) {
-  const importantPoints = decisionPoints.filter((p) => p.isImportant);
-
   const getScore = (productId: string, pointId: string): number => {
     return (
       scores.find((s) => s.productId === productId && s.pointId === pointId)
@@ -47,7 +45,7 @@ export function DecisionStep({
     let totalScore = 0;
     let maxPossible = 0;
 
-    importantPoints.forEach((point) => {
+    decisionPoints.forEach((point) => {
       const rawScore = getScore(product.id, point.id);
       totalScore += rawScore * point.weight;
       maxPossible += 5 * point.weight;

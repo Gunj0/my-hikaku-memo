@@ -1,4 +1,4 @@
-import type { ComparisonData } from "@/lib/types";
+import { normalizeDecisionPointWeight, type ComparisonData } from "@/lib/types";
 
 export const COMPARISON_ID_MAX_LENGTH = 128;
 export const COMPARISON_SHORT_TEXT_MAX_LENGTH = 120;
@@ -23,6 +23,7 @@ export function normalizeComparisonDataToLimits(
     .slice(0, COMPARISON_DECISION_POINTS_MAX_COUNT)
     .map((point) => ({
       ...point,
+      weight: normalizeDecisionPointWeight(point.weight),
       name: clampComparisonShortText(point.name),
       memo: clampComparisonMemoText(point.memo),
     }));

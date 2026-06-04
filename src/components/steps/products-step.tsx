@@ -176,7 +176,7 @@ export function ProductsStep({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <div>
         <h2 className="text-xl font-semibold mb-2">候補を洗い出す</h2>
         <p className="text-muted-foreground text-sm">

@@ -182,9 +182,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
   const isAuthenticated = status === "authenticated";
   const isAuthLoading = status === "loading";
-  const importantPointsCount = data.decisionPoints.filter(
-    (point) => point.isImportant,
-  ).length;
   const progressPercent = Math.round((currentStep / STEPS.length) * 100);
   const redirectTo = (() => {
     const query = searchParams.toString();

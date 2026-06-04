@@ -46,7 +46,6 @@ function hasCustomizedDecisionPoints(decisionPoints: DecisionPoint[]) {
     return (
       !defaultPoint ||
       point.name !== defaultPoint.name ||
-      point.isImportant !== defaultPoint.isImportant ||
       point.weight !== defaultPoint.weight ||
       point.memo !== defaultPoint.memo
     );
@@ -69,9 +68,7 @@ export function hasMeaningfulComparisonData(data: ComparisonData) {
 
 export function getInitialStepForComparisonData(data: ComparisonData) {
   const hasStepOne = data.category.trim().length > 0;
-  const hasStepTwo =
-    data.decisionPoints.length > 0 &&
-    data.decisionPoints.some((point) => point.isImportant);
+  const hasStepTwo = data.decisionPoints.length > 0;
   const hasStepThree = data.products.length >= 2;
 
   if (!hasStepOne) {

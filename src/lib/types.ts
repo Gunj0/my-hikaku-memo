@@ -1,9 +1,48 @@
 export interface DecisionPoint {
   id: string;
   name: string;
-  isImportant: boolean;
-  weight: number; // 1-5
+  weight: number; // 1-4
   memo: string;
+}
+
+export type DecisionPointImportanceIconName =
+  | "circle-alert"
+  | "circle"
+  | "triangle"
+  | "x";
+
+export const DECISION_POINT_IMPORTANCE_OPTIONS = [
+  { value: 4, icon: "circle-alert", message: "最も重要" },
+  { value: 3, icon: "circle", message: "重要" },
+  { value: 2, icon: "triangle", message: "どちらでもいい" },
+  { value: 1, icon: "x", message: "いらない" },
+] as const;
+
+export type DecisionPointWeight =
+  (typeof DECISION_POINT_IMPORTANCE_OPTIONS)[number]["value"];
+
+export function normalizeDecisionPointWeight(
+  weight: number,
+): DecisionPointWeight {
+  if (weight >= 4) {
+    return 4;
+  }
+
+  if (weight === 3) {
+    return 3;
+  }
+
+  if (weight === 2) {
+    return 2;
+  }
+
+  return 1;
+}
+
+export function getDecisionPointImportanceOption(weight: number) {
+  return DECISION_POINT_IMPORTANCE_OPTIONS.find(
+    (option) => option.value === normalizeDecisionPointWeight(weight),
+  );
 }
 
 export interface Product {
@@ -60,10 +99,10 @@ export interface PublicComparisonMemo extends ComparisonMemo {
 }
 
 export const DEFAULT_DECISION_POINTS: Omit<DecisionPoint, "id">[] = [
-  { name: "価格", isImportant: true, weight: 3, memo: "" },
-  { name: "メーカー・ブランド", isImportant: false, weight: 3, memo: "" },
-  { name: "サイズ・重量", isImportant: false, weight: 3, memo: "" },
-  { name: "デザイン", isImportant: false, weight: 3, memo: "" },
+  { name: "価格", weight: 3, memo: "" },
+  { name: "メーカー・ブランド", weight: 3, memo: "" },
+  { name: "サイズ・重量", weight: 3, memo: "" },
+  { name: "デザイン", weight: 3, memo: "" },
 ];
 
 export const STEPS = [
