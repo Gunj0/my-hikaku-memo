@@ -83,11 +83,11 @@ export function getInitialStepForComparisonData(data: ComparisonData) {
     return 3;
   }
 
-  if (data.selectedProductId || data.decisionMemo.trim().length > 0) {
-    return 6;
-  }
-
-  if (data.scores.length > 0) {
+  if (
+    data.scores.length > 0 ||
+    data.selectedProductId ||
+    data.decisionMemo.trim().length > 0
+  ) {
     return 5;
   }
 

@@ -6,7 +6,6 @@ import { DecisionStep } from "@/components/steps/decision-step";
 import { EvaluationStep } from "@/components/steps/evaluation-step";
 import { PointsStep } from "@/components/steps/points-step";
 import { ProductsStep } from "@/components/steps/products-step";
-import { SummaryStep } from "@/components/steps/summary-step";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -965,14 +964,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         );
       case 5:
         return (
-          <SummaryStep
-            products={data.products}
-            decisionPoints={data.decisionPoints}
-            scores={data.scores}
-          />
-        );
-      case 6:
-        return (
           <DecisionStep
             products={data.products}
             decisionPoints={data.decisionPoints}
@@ -1171,8 +1162,8 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       </Dialog>
 
       <div className="min-h-dvh flex flex-col">
-        <header className="sticky top-0 z-40 border-b border-border/80 bg-background/82 backdrop-blur-md">
-          <div className="max-w-6xl mx-auto px-4 py-3">
+        <header className="sticky top-0 z-40 border-b border-border/80 bg-background/82 backdrop-blur-md mx-4">
+          <div className="max-w-6xl mx-auto py-3">
             <div className="mb-3 grid gap-3 grid-cols-[minmax(0,1fr)_auto] lg:items-start">
               <div className="flex items-center gap-2">
                 <Button

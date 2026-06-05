@@ -6,6 +6,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -415,6 +416,13 @@ export function EvaluationStep({
     );
   };
 
+  const getProductTotalScore = (productId: string): number => {
+    return decisionPoints.reduce((total, point) => {
+      const score = getScore(productId, point.id)?.score || 0;
+      return total + score * point.weight;
+    }, 0);
+  };
+
   const updateScore = (productId: string, pointId: string, score: number) => {
     const existingIndex = scores.findIndex(
       (item) => item.productId === productId && item.pointId === pointId,
@@ -584,6 +592,22 @@ export function EvaluationStep({
                 ))}
               </SortableContext>
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell className="sticky left-0 z-20 w-56 min-w-37.5 max-w-56 border-r bg-background font-semibold whitespace-normal">
+                  合計点
+                </TableCell>
+                <TableCell className="bg-background" />
+                {products.map((product) => (
+                  <TableCell
+                    key={product.id}
+                    className="w-56 min-w-50 max-w-56 bg-background text-center font-semibold"
+                  >
+                    {getProductTotalScore(product.id)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableFooter>
           </Table>
         </DndContext>
       </div>

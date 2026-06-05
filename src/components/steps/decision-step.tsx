@@ -84,7 +84,7 @@ export function DecisionStep({
       <div className="max-w-6xl mx-auto">
         <h2 className="text-xl font-semibold mb-2">最終決定</h2>
         <p className="text-muted-foreground text-sm">
-          集計結果をふまえて、最終候補を候補を決定しましょう
+          評価結果をふまえて、最終候補を決定しましょう
         </p>
       </div>
 

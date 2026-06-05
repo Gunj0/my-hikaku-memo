@@ -54,12 +54,13 @@ export function AppHeader() {
         <div className="flex min-w-0 items-center gap-2 md:gap-6">
           <div className="min-w-0 shrink-0">
             <Link href="/">
-              <p className="inline-flex items-center gap-2 text-base font-semibold tracking-wider text-foreground">
+              <p className="flex items-center gap-2 text-base font-semibold tracking-wider text-foreground">
                 <Image
                   src="/icon.svg"
                   alt="My Hikaku Memo"
-                  width={32}
-                  height={32}
+                  width={128}
+                  height={128}
+                  className="text-center h-7 w-7"
                 />
                 オレの比較メモ β
               </p>
@@ -79,7 +80,7 @@ export function AppHeader() {
                       key={item.href}
                       href={item.href}
                       aria-label={item.label}
-                      className="inline-flex items-center gap-1 rounded-sm border px-2 py-1 transition-colors hover:text-foreground"
+                      className="inline-flex items-center gap-1 rounded-sm px-2 py-1 transition-colors hover:text-foreground"
                     >
                       <Icon className="h-4 w-4 shrink-0 text-success-foreground" />
                       <span className="hidden md:inline">{item.label}</span>
@@ -89,7 +90,7 @@ export function AppHeader() {
               </nav>
               <Link
                 href="/memos"
-                className="items-center gap-2 rounded-md bg-card/70 px-2.5 py-1.5 text-left md:flex"
+                className="items-center gap-2 rounded-md px-2.5 py-1.5 text-left md:flex"
               >
                 <Avatar className="size-8 border border-border/70">
                   <AvatarImage

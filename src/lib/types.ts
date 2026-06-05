@@ -110,6 +110,5 @@ export const STEPS = [
   { id: 2, title: "ポイント", shortTitle: "ポイント" },
   { id: 3, title: "候補", shortTitle: "候補" },
   { id: 4, title: "評価", shortTitle: "評価" },
-  { id: 5, title: "集計", shortTitle: "集計" },
-  { id: 6, title: "結論", shortTitle: "結論" },
+  { id: 5, title: "結論", shortTitle: "結論" },
 ] as const;

@@ -276,7 +276,7 @@ export default async function Home() {
 
       <footer className="border-t border-border/80 py-6 text-sm text-muted-foreground">
         <div className="flex flex-col gap-3 md:flex-row items-center md:justify-between max-w-3xl mx-auto">
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center gap-4 my-2 md:my-0">
             <p className="font-medium text-foreground/85">
               &copy;オレの比較メモ
             </p>

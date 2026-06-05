@@ -207,9 +207,6 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
             <div className="rounded-lg border border-border/70 bg-background/40 p-3">
               比較候補数: {memo.data.products.length}
             </div>
-            <div className="rounded-lg border border-border/70 bg-background/40 p-3">
-              評価入力数: {memo.data.scores.length}
-            </div>
             {memo.data.categoryMemo.trim() ? (
               <div className="rounded-lg border border-border/70 bg-background/40 p-3 leading-6">
                 カテゴリメモ: {memo.data.categoryMemo}
