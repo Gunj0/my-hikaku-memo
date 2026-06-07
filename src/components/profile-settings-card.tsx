@@ -4,11 +4,11 @@ import { PencilLineIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
 
 type ProfileSettingsCardProps = {
@@ -30,22 +30,29 @@ export function ProfileSettingsCard({
   const { update } = useSession();
   const [name, setName] = useState(initialName);
   const [isSaving, setIsSaving] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    tone: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const trimmedName = name.trim().replace(/\s+/g, " ");
+    setStatusMessage(null);
 
     if (!trimmedName) {
-      toast.error("ユーザー名を入力してください。");
+      setNameError("ユーザー名を入力してください。");
       return;
     }
 
     if (trimmedName.length > maxLength) {
-      toast.error(`ユーザー名は${maxLength}文字以内で入力してください。`);
+      setNameError(`ユーザー名は${maxLength}文字以内で入力してください。`);
       return;
     }
 
+    setNameError(null);
     setIsSaving(true);
 
     try {
@@ -72,13 +79,18 @@ export function ProfileSettingsCard({
       setName(result.name);
       await update({ name: result.name, image: result.image });
       router.refresh();
-      toast.success("ユーザー名を更新しました。");
+      setStatusMessage({
+        tone: "success",
+        message: "ユーザー名を更新しました。",
+      });
     } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "ユーザー名を更新できませんでした。",
-      );
+      setStatusMessage({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "ユーザー名を更新できませんでした。",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -102,10 +114,20 @@ export function ProfileSettingsCard({
                   id="profile-name"
                   value={name}
                   maxLength={maxLength}
-                  onChange={(event) => setName(event.target.value)}
+                  onChange={(event) => {
+                    setName(event.target.value);
+                    setNameError(null);
+                  }}
                   disabled={isSaving}
                 />
-                <p className="text-xs text-muted-foreground"></p>
+                {nameError ? (
+                  <InlineNotice
+                    tone="error"
+                    message={nameError}
+                    onDismiss={() => setNameError(null)}
+                    className="mt-2 px-2 py-1 text-xs leading-5"
+                  />
+                ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Button type="submit" disabled={isSaving}>
@@ -114,6 +136,14 @@ export function ProfileSettingsCard({
                 </Button>
               </div>
             </form>
+            {statusMessage ? (
+              <InlineNotice
+                tone={statusMessage.tone}
+                message={statusMessage.message}
+                onDismiss={() => setStatusMessage(null)}
+                className="mt-2 text-xs leading-5"
+              />
+            ) : null}
           </div>
         </div>
       </CardContent>

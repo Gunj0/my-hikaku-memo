@@ -573,7 +573,7 @@ export function EvaluationStep({
       <div className="max-w-6xl mx-auto">
         <h2 className="text-xl font-semibold mb-2">情報を整理して評価する</h2>
         <p className="text-muted-foreground text-sm">
-          気になる全ての情報をまとめましょう
+          気になる全ての情報をここにまとめましょう
         </p>
       </div>
 

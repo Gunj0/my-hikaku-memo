@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import { AppHeader } from "@/components/app-header";
 import { AuthSessionProvider } from "@/components/auth/session-provider";
-import { Toaster } from "@/components/ui/sonner";
 import { buildMetadata, getRequestSiteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, JetBrains_Mono } from "next/font/google";
@@ -76,7 +75,6 @@ export default async function RootLayout({
         <AuthSessionProvider session={session}>
           <AppHeader />
           {children}
-          <Toaster richColors position="top-right" />
         </AuthSessionProvider>
       </body>
     </html>

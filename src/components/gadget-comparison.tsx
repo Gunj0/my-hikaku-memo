@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
@@ -47,7 +48,6 @@ import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 type MemoDetailResponse = {
   memo: ComparisonMemo;
@@ -74,6 +74,11 @@ type DraftState = {
   activeMemo: ComparisonMemoSummary | null;
   memoTitle: string;
   memoIsPublic: boolean;
+};
+
+type EditorStatus = {
+  tone: "success" | "error";
+  message: string;
 };
 
 const PERSISTED_DRAFT_STORAGE_KEY = "gadget-comparison-auth-draft";
@@ -160,6 +165,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingMemoId, setIsLoadingMemoId] = useState<string | null>(null);
   const [hasResolvedDraftRestore, setHasResolvedDraftRestore] = useState(false);
+  const [editorStatus, setEditorStatus] = useState<EditorStatus | null>(null);
   const latestDraftRef = useRef<PersistedComparisonDraft | null>(null);
 
   const isAuthenticated = status === "authenticated";
@@ -448,9 +454,15 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
             memoTitle: clampComparisonShortText(sessionDraft.memoTitle),
           } satisfies PersistedComparisonDraft),
         );
-        toast.success("ログイン後に編集中の内容を復元しました。");
+        setEditorStatus({
+          tone: "success",
+          message: "ログイン後に編集中の内容を復元しました。",
+        });
       } else {
-        toast.success("自動保存した内容を復元しました。");
+        setEditorStatus({
+          tone: "success",
+          message: "自動保存した内容を復元しました。",
+        });
       }
     } catch {
       window.sessionStorage.removeItem(PERSISTED_DRAFT_STORAGE_KEY);
@@ -634,6 +646,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     }
 
     setIsLoadingMemoId(memoId);
+    setEditorStatus(null);
 
     try {
       const response = await fetch(`/api/memos/${memoId}`, {
@@ -668,13 +681,19 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setMemoTitle(memo.title);
       setMemoIsPublic(memo.isPublic);
       replaceEditorUrl(summary.id);
-      toast.success("保存済みメモを読み込みました。");
+      setEditorStatus({
+        tone: "success",
+        message: "保存済みメモを読み込みました。",
+      });
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
           : "保存済みメモを読み込めませんでした。";
-      toast.error(message);
+      setEditorStatus({
+        tone: "error",
+        message,
+      });
 
       if (message.includes("ログイン")) {
         setIsAuthDialogOpen(true);
@@ -713,6 +732,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     const wasCreatingNewMemo = !activeMemo;
 
     setIsSaving(true);
+    setEditorStatus(null);
 
     try {
       const normalizedData = normalizeComparisonDataToLimits(data);
@@ -762,13 +782,18 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         window.localStorage.removeItem(previousLocalDraftStorageKey);
       }
       setIsSaveDialogOpen(false);
-      toast.success(
-        mode === "update" ? "メモを更新しました。" : "メモを保存しました。",
-      );
+      setEditorStatus({
+        tone: "success",
+        message:
+          mode === "update" ? "メモを更新しました。" : "メモを保存しました。",
+      });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "メモを保存できませんでした。";
-      toast.error(message);
+      setEditorStatus({
+        tone: "error",
+        message,
+      });
 
       if (message.includes("ログイン")) {
         setIsAuthDialogOpen(true);
@@ -778,16 +803,22 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     }
   };
 
+  const clearEditorStatus = () => {
+    setEditorStatus(null);
+  };
+
   const updateData = <K extends keyof ComparisonData>(
     key: K,
     value: ComparisonData[K],
   ) => {
+    clearEditorStatus();
     setData((prev) =>
       normalizeComparisonDataToLimits({ ...prev, [key]: value }),
     );
   };
 
   const updateProducts = (products: ComparisonData["products"]) => {
+    clearEditorStatus();
     setData((prev) => {
       const hasDeletion = products.length < prev.products.length;
 
@@ -900,9 +931,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
               <Input
                 id="memo-title"
                 value={memoTitle}
-                onChange={(event) =>
-                  setMemoTitle(clampComparisonShortText(event.target.value))
-                }
+                onChange={(event) => {
+                  clearEditorStatus();
+                  setMemoTitle(clampComparisonShortText(event.target.value));
+                }}
                 placeholder="例: ノートPC買い替え比較"
                 maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
               />
@@ -925,7 +957,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
               <Switch
                 id="memo-visibility"
                 checked={memoIsPublic}
-                onCheckedChange={setMemoIsPublic}
+                onCheckedChange={(checked) => {
+                  clearEditorStatus();
+                  setMemoIsPublic(checked);
+                }}
               />
             </div>
             <p className="text-sm text-muted-foreground">
@@ -1016,41 +1051,50 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
         <footer className="sticky bottom-0 border-t border-border/80 bg-background/82 backdrop-blur-md">
           <div className="mx-auto max-w-6xl px-4 py-3">
-            <div className="flex items-center justify-between gap-4 rounded-lg border border-border/80 bg-card/72 px-3 py-3">
-              <Button
-                variant="outline"
-                onClick={handlePrev}
-                disabled={currentStep === 1}
-                className="flex-1 sm:flex-none"
-              >
-                <ChevronLeftIcon className="w-4 h-4 mr-1" />
-                戻る
-              </Button>
+            <div className="space-y-3">
+              {editorStatus ? (
+                <InlineNotice
+                  tone={editorStatus.tone}
+                  message={editorStatus.message}
+                  onDismiss={() => setEditorStatus(null)}
+                />
+              ) : null}
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border/80 bg-card/72 px-3 py-3">
+                <Button
+                  variant="outline"
+                  onClick={handlePrev}
+                  disabled={currentStep === 1}
+                  className="flex-1 sm:flex-none"
+                >
+                  <ChevronLeftIcon className="w-4 h-4 mr-1" />
+                  戻る
+                </Button>
 
-              <div className="hidden text-xs tracking-[0.16em] text-muted-foreground uppercase sm:block">
-                {currentStep.toString().padStart(2, "0")} /{" "}
-                {STEPS.length.toString().padStart(2, "0")}
+                <div className="hidden text-xs tracking-[0.16em] text-muted-foreground uppercase sm:block">
+                  {currentStep.toString().padStart(2, "0")} /{" "}
+                  {STEPS.length.toString().padStart(2, "0")}
+                </div>
+
+                {currentStep < STEPS.length ? (
+                  <Button
+                    onClick={handleNext}
+                    disabled={!canProceed()}
+                    className="flex-1 sm:flex-none"
+                  >
+                    次へ
+                    <ChevronRightIcon className="w-4 h-4 ml-1" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleOpenSaveDialog}
+                    variant="default"
+                    className="flex-1 sm:flex-none"
+                    disabled={!hasValidSelectedProduct || isAuthLoading}
+                  >
+                    保存
+                  </Button>
+                )}
               </div>
-
-              {currentStep < STEPS.length ? (
-                <Button
-                  onClick={handleNext}
-                  disabled={!canProceed()}
-                  className="flex-1 sm:flex-none"
-                >
-                  次へ
-                  <ChevronRightIcon className="w-4 h-4 ml-1" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleOpenSaveDialog}
-                  variant="default"
-                  className="flex-1 sm:flex-none"
-                  disabled={!hasValidSelectedProduct || isAuthLoading}
-                >
-                  保存
-                </Button>
-              )}
             </div>
           </div>
         </footer>
