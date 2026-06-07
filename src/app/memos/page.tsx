@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { auth } from "@/auth";
+import { DeleteMemoButton } from "@/components/delete-memo-button";
 import { ProfileSettingsCard } from "@/components/profile-settings-card";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Button } from "@/components/ui/button";
@@ -166,6 +167,7 @@ export default async function MemosPage() {
                     <EyeIcon className="h-4 w-4" />
                   </Link>
                 </Button>
+                <DeleteMemoButton memoId={memo.id} memoTitle={memo.title} />
               </CardContent>
             </Card>
           ))}
