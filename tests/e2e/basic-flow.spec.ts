@@ -91,12 +91,12 @@ test("ステップは未入力でも常に自由に移動できる", async ({ pa
 
   await page.getByRole("button", { name: /カテゴリ/ }).click();
   await expect(
-    page.getByRole("heading", { name: "カテゴリを入力" }),
+    page.getByRole("heading", { name: "何を比較する？" }),
   ).toBeVisible();
 
   await nextButton.click();
   await expect(
-    page.getByRole("heading", { name: "比較ポイント" }),
+    page.getByRole("heading", { name: "あなたが重視するポイントは？" }),
   ).toBeVisible();
 });
 
@@ -189,7 +189,7 @@ test("guest の保存済みメモ由来 draft をリセットすると初期状�
   await page.getByRole("button", { name: "元に戻す" }).click();
 
   await expect(
-    page.getByRole("heading", { name: "カテゴリを入力する" }),
+    page.getByRole("heading", { name: "何を比較する？" }),
   ).toBeVisible();
   await expect(categoryInput).toHaveValue("");
 });
@@ -212,6 +212,56 @@ test("入力欄は保存上限を超える文字を保持しない", async ({ pa
   await page.getByRole("button", { name: /候補/ }).click();
   await page.getByLabel("候補を追加").fill("c".repeat(130));
   await expect(page.getByLabel("候補を追加")).toHaveValue("c".repeat(120));
+});
+
+test("追加後のポイント名と候補名は各入力画面で編集できる", async ({ page }) => {
+  await page.goto("/memos/new");
+
+  await page.getByRole("button", { name: "次へ" }).click();
+
+  await page.getByLabel("ポイントを追加").fill("保証");
+  await page.getByRole("button", { name: "追加" }).click();
+
+  const pointNameInput = page.locator('input[value="保証"]');
+  await pointNameInput.fill("保証内容");
+  await page.keyboard.press("Tab");
+  await expect(page.locator('input[value="保証内容"]')).toBeVisible();
+
+  await page.getByRole("button", { name: /候補/ }).click();
+  await page.getByLabel("候補を追加").fill("モデルA");
+  await page.getByRole("button", { name: "追加" }).click();
+
+  const productNameInput = page.locator('input[value="モデルA"]');
+  await productNameInput.fill("モデルA Pro");
+  await page.keyboard.press("Tab");
+  await expect(page.locator('input[value="モデルA Pro"]')).toBeVisible();
+
+  await page.getByRole("button", { name: /評価/ }).click();
+
+  const evaluationTable = page.getByRole("table");
+  const evaluationPointInput = evaluationTable.locator(
+    'input[value="保証内容"]',
+  );
+  await evaluationPointInput.fill("保証と耐久性");
+  await page.keyboard.press("Tab");
+  await expect(
+    evaluationTable.locator('input[value="保証と耐久性"]'),
+  ).toBeVisible();
+
+  const evaluationProductInput = evaluationTable.locator(
+    'input[value="モデルA Pro"]',
+  );
+  await evaluationProductInput.fill("モデルA Pro Max");
+  await page.keyboard.press("Tab");
+  await expect(
+    evaluationTable.locator('input[value="モデルA Pro Max"]'),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: /ポイント/ }).click();
+  await expect(page.locator('input[value="保証と耐久性"]')).toBeVisible();
+
+  await page.getByRole("button", { name: /候補/ }).click();
+  await expect(page.locator('input[value="モデルA Pro Max"]')).toBeVisible();
 });
 
 test("比較ポイントと候補は30件までしか追加できない", async ({ page }) => {
@@ -302,7 +352,7 @@ test("未ログインで memoId 付き URL を開くと新規作成画面へ戻�
   await page.goto(`/memos/new?memoId=${savedMemoResponse.memo.id}`);
   await expect(page).toHaveURL("/memos/new");
   await expect(
-    page.getByRole("heading", { name: "カテゴリを入力する" }),
+    page.getByRole("heading", { name: "何を比較する？" }),
   ).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
@@ -358,7 +408,7 @@ test("ログイン復帰時に編集中の内容を復元する", async ({ page 
   await page.goto("/memos/new");
 
   await expect(
-    page.getByRole("heading", { name: "候補を洗い出す" }),
+    page.getByRole("heading", { name: "気になる候補は？" }),
   ).toBeVisible();
   await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
     "店頭で触って決める",
@@ -465,7 +515,7 @@ test("guest の memoId 付き session draft は URL に memoId を復元しな�
   await expect(page).toHaveURL("/memos/new");
 
   await expect(
-    page.getByRole("heading", { name: "候補を洗い出す" }),
+    page.getByRole("heading", { name: "気になる候補は？" }),
   ).toBeVisible();
   await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
     "URL 同期後も復元したいメモ",
@@ -559,7 +609,7 @@ test("新規作成画面では新規作成用ドラフトを復元し、他メ�
   await page.goto("/memos/new");
 
   await expect(
-    page.getByRole("heading", { name: "比較ポイント" }),
+    page.getByRole("heading", { name: "あなたが重視するポイントは？" }),
   ).toBeVisible();
   await page.getByRole("button", { name: /カテゴリ/ }).click();
   await expect(page.getByLabel("その他のカテゴリ")).toHaveValue(
@@ -603,7 +653,7 @@ test("未ログインでは memoId キーの localStorage draft を復元しな�
   await page.goto("/memos/new");
 
   await expect(
-    page.getByRole("heading", { name: "カテゴリを入力する" }),
+    page.getByRole("heading", { name: "何を比較する？" }),
   ).toBeVisible();
   await expect(page.getByLabel("その他のカテゴリ")).toHaveValue("");
 });
@@ -647,7 +697,7 @@ test("guest は user スコープの localStorage ドラフトを復元しない
   await page.goto("/memos/new");
 
   await expect(
-    page.getByRole("heading", { name: "カテゴリを入力する" }),
+    page.getByRole("heading", { name: "何を比較する？" }),
   ).toBeVisible();
   await expect(page.getByLabel("その他のカテゴリ")).toHaveValue("");
 });

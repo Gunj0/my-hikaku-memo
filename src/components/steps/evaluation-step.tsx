@@ -1,6 +1,7 @@
 "use client";
 
 import { DecisionPointImportanceIcon } from "@/components/decision-point-importance-icon";
+import { EditableItemName } from "@/components/editable-item-name";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -12,7 +13,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { COMPARISON_MEMO_TEXT_MAX_LENGTH } from "@/lib/comparison-limits";
+import {
+  COMPARISON_MEMO_TEXT_MAX_LENGTH,
+  COMPARISON_SHORT_TEXT_MAX_LENGTH,
+} from "@/lib/comparison-limits";
 import { DecisionPoint, Product, ProductScore } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -45,6 +49,7 @@ interface EvaluationStepProps {
 interface SortableMobilePointSectionProps {
   point: DecisionPoint;
   scoreData?: ProductScore;
+  onNameChange: (name: string) => void;
   onScoreChange: (score: number) => void;
   onMemoChange: (memo: string) => void;
 }
@@ -53,6 +58,8 @@ interface SortableMobileProductCardProps {
   product: Product;
   decisionPoints: DecisionPoint[];
   pointSensors: ReturnType<typeof useSensors>;
+  onProductNameChange: (productId: string, name: string) => void;
+  onPointNameChange: (pointId: string, name: string) => void;
   onPointDragEnd: (event: DragEndEvent) => void;
   getScore: (productId: string, pointId: string) => ProductScore | undefined;
   onScoreChange: (productId: string, pointId: string, score: number) => void;
@@ -61,11 +68,13 @@ interface SortableMobileProductCardProps {
 
 interface SortableProductHeaderProps {
   product: Product;
+  onNameChange: (name: string) => void;
 }
 
 interface SortablePointRowProps {
   point: DecisionPoint;
   products: Product[];
+  onNameChange: (name: string) => void;
   getScore: (productId: string, pointId: string) => ProductScore | undefined;
   onScoreChange: (productId: string, pointId: string, score: number) => void;
   onMemoChange: (productId: string, pointId: string, memo: string) => void;
@@ -89,6 +98,7 @@ function reorderDecisionPoints(
 function SortableMobilePointSection({
   point,
   scoreData,
+  onNameChange,
   onScoreChange,
   onMemoChange,
 }: SortableMobilePointSectionProps) {
@@ -126,7 +136,13 @@ function SortableMobilePointSection({
           >
             <GripVerticalIcon className="w-4 h-4" />
           </Button>
-          <span className="text-sm font-medium truncate">{point.name}</span>
+          <EditableItemName
+            value={point.name}
+            onCommit={onNameChange}
+            aria-label="ポイント名を編集"
+            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            className="h-8 border-0 bg-transparent px-0 text-sm font-medium shadow-none"
+          />
         </div>
         <span className="inline-flex shrink-0 items-center text-muted-foreground">
           <DecisionPointImportanceIcon weight={point.weight} />
@@ -166,6 +182,8 @@ function SortableMobileProductCard({
   product,
   decisionPoints,
   pointSensors,
+  onProductNameChange,
+  onPointNameChange,
   onPointDragEnd,
   getScore,
   onScoreChange,
@@ -204,7 +222,13 @@ function SortableMobileProductCard({
         >
           <GripVerticalIcon className="w-4 h-4" />
         </Button>
-        <h3 className="font-medium">{product.name}</h3>
+        <EditableItemName
+          value={product.name}
+          onCommit={(name) => onProductNameChange(product.id, name)}
+          aria-label="候補名を編集"
+          maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+          className="h-8 border-0 bg-transparent px-0 font-medium shadow-none"
+        />
       </div>
       <DndContext
         sensors={pointSensors}
@@ -221,6 +245,7 @@ function SortableMobileProductCard({
                 key={point.id}
                 point={point}
                 scoreData={getScore(product.id, point.id)}
+                onNameChange={(name) => onPointNameChange(point.id, name)}
                 onScoreChange={(score) =>
                   onScoreChange(product.id, point.id, score)
                 }
@@ -236,7 +261,10 @@ function SortableMobileProductCard({
   );
 }
 
-function SortableProductHeader({ product }: SortableProductHeaderProps) {
+function SortableProductHeader({
+  product,
+  onNameChange,
+}: SortableProductHeaderProps) {
   const {
     attributes,
     listeners,
@@ -273,9 +301,13 @@ function SortableProductHeader({ product }: SortableProductHeaderProps) {
         >
           <GripVerticalIcon className="w-4 h-4 rotate-90" />
         </Button>
-        <span className="line-clamp-3 min-w-0 break-all text-left leading-5 wrap-anywhere">
-          {product.name}
-        </span>
+        <EditableItemName
+          value={product.name}
+          onCommit={onNameChange}
+          aria-label="候補名を編集"
+          maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+          className="h-auto min-h-8 bg-background text-left leading-5"
+        />
       </div>
     </TableHead>
   );
@@ -284,6 +316,7 @@ function SortableProductHeader({ product }: SortableProductHeaderProps) {
 function SortablePointRow({
   point,
   products,
+  onNameChange,
   getScore,
   onScoreChange,
   onMemoChange,
@@ -327,9 +360,13 @@ function SortablePointRow({
           >
             <GripVerticalIcon className="w-4 h-4" />
           </Button>
-          <span className="line-clamp-2 min-w-0 break-all leading-5 wrap-anywhere">
-            {point.name}
-          </span>
+          <EditableItemName
+            value={point.name}
+            onCommit={onNameChange}
+            aria-label="ポイント名を編集"
+            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            className="h-auto min-h-8 bg-background leading-5"
+          />
         </div>
       </TableCell>
       <TableCell className="text-center">
@@ -453,6 +490,22 @@ export function EvaluationStep({
     onScoresChange([...scores, { productId, pointId, score: 0, memo }]);
   };
 
+  const updateProductName = (productId: string, name: string) => {
+    onProductsChange(
+      products.map((product) =>
+        product.id === productId ? { ...product, name } : product,
+      ),
+    );
+  };
+
+  const updatePointName = (pointId: string, name: string) => {
+    onDecisionPointsChange(
+      decisionPoints.map((point) =>
+        point.id === pointId ? { ...point, name } : point,
+      ),
+    );
+  };
+
   const handleProductsDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) {
       return;
@@ -518,9 +571,9 @@ export function EvaluationStep({
   return (
     <div className="space-y-6">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-xl font-semibold mb-2">評価を入力する</h2>
+        <h2 className="text-xl font-semibold mb-2">情報を整理して評価する</h2>
         <p className="text-muted-foreground text-sm">
-          候補ごとに評価を入力しましょう
+          気になる全ての情報をまとめましょう
         </p>
       </div>
 
@@ -541,6 +594,8 @@ export function EvaluationStep({
                   product={product}
                   decisionPoints={decisionPoints}
                   pointSensors={pointSensors}
+                  onProductNameChange={updateProductName}
+                  onPointNameChange={updatePointName}
                   onPointDragEnd={handlePointsDragEnd}
                   getScore={getScore}
                   onScoreChange={updateScore}
@@ -570,7 +625,13 @@ export function EvaluationStep({
                   </TableHead>
                   <TableHead className="text-center w-20">重要度</TableHead>
                   {products.map((product) => (
-                    <SortableProductHeader key={product.id} product={product} />
+                    <SortableProductHeader
+                      key={product.id}
+                      product={product}
+                      onNameChange={(name) =>
+                        updateProductName(product.id, name)
+                      }
+                    />
                   ))}
                 </TableRow>
               </SortableContext>
@@ -585,6 +646,7 @@ export function EvaluationStep({
                     key={point.id}
                     point={point}
                     products={products}
+                    onNameChange={(name) => updatePointName(point.id, name)}
                     getScore={getScore}
                     onScoreChange={updateScore}
                     onMemoChange={updateMemo}

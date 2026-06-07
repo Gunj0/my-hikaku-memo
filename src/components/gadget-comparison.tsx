@@ -8,13 +8,6 @@ import { PointsStep } from "@/components/steps/points-step";
 import { ProductsStep } from "@/components/steps/products-step";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -44,23 +37,17 @@ import type {
 import { STEPS } from "@/lib/types";
 import {
   ArrowLeftIcon,
-  BookMarkedIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   LogInIcon,
   RotateCcwIcon,
   SaveIcon,
-  Trash2Icon,
 } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-
-type MemoListResponse = {
-  memos: ComparisonMemoSummary[];
-};
 
 type MemoDetailResponse = {
   memo: ComparisonMemo;
@@ -166,16 +153,12 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const [activeMemo, setActiveMemo] = useState<ComparisonMemoSummary | null>(
     null,
   );
-  const [savedMemos, setSavedMemos] = useState<ComparisonMemoSummary[]>([]);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
-  const [isLibraryDialogOpen, setIsLibraryDialogOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [memoTitle, setMemoTitle] = useState("");
   const [memoIsPublic, setMemoIsPublic] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isLibraryLoading, setIsLibraryLoading] = useState(false);
   const [isLoadingMemoId, setIsLoadingMemoId] = useState<string | null>(null);
-  const [isDeletingMemoId, setIsDeletingMemoId] = useState<string | null>(null);
   const [hasResolvedDraftRestore, setHasResolvedDraftRestore] = useState(false);
   const latestDraftRef = useRef<PersistedComparisonDraft | null>(null);
 
@@ -319,34 +302,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         return true;
       default:
         return false;
-    }
-  };
-
-  const refreshSavedMemos = async () => {
-    if (!isAuthenticated) {
-      setSavedMemos([]);
-      return;
-    }
-
-    setIsLibraryLoading(true);
-
-    try {
-      const response = await fetch("/api/memos", { cache: "no-store" });
-      const { memos } = await readResponse<MemoListResponse>(response);
-      setSavedMemos(memos);
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "保存済みメモを取得できませんでした。";
-
-      toast.error(message);
-
-      if (message.includes("ログイン")) {
-        setIsAuthDialogOpen(true);
-      }
-    } finally {
-      setIsLibraryLoading(false);
     }
   };
 
@@ -570,12 +525,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   ]);
 
   useEffect(() => {
-    if (isLibraryDialogOpen && isAuthenticated) {
-      void refreshSavedMemos();
-    }
-  }, [isAuthenticated, isLibraryDialogOpen]);
-
-  useEffect(() => {
     if (!hasResolvedDraftRestore) {
       return;
     }
@@ -668,7 +617,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     memoId: string,
     options?: {
       skipConfirm?: boolean;
-      onLoaded?: () => void;
     },
   ) => {
     if (!isAuthenticated) {
@@ -720,7 +668,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setMemoTitle(memo.title);
       setMemoIsPublic(memo.isPublic);
       replaceEditorUrl(summary.id);
-      options?.onLoaded?.();
       toast.success("保存済みメモを読み込みました。");
     } catch (error) {
       const message =
@@ -750,15 +697,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     );
     setMemoIsPublic(activeMemo?.isPublic ?? false);
     setIsSaveDialogOpen(true);
-  };
-
-  const handleOpenLibrary = () => {
-    if (!isAuthenticated) {
-      setIsAuthDialogOpen(true);
-      return;
-    }
-
-    setIsLibraryDialogOpen(true);
   };
 
   const saveMemo = async (mode: "create" | "update") => {
@@ -824,7 +762,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         window.localStorage.removeItem(previousLocalDraftStorageKey);
       }
       setIsSaveDialogOpen(false);
-      await refreshSavedMemos();
       toast.success(
         mode === "update" ? "メモを更新しました。" : "メモを保存しました。",
       );
@@ -838,63 +775,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       }
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleLoadMemo = async (memoSummary: ComparisonMemoSummary) => {
-    await loadMemoById(memoSummary.id, {
-      onLoaded: () => setIsLibraryDialogOpen(false),
-    });
-  };
-
-  const handleDeleteMemo = async (memoSummary: ComparisonMemoSummary) => {
-    if (!isAuthenticated) {
-      setIsAuthDialogOpen(true);
-      return;
-    }
-
-    if (!confirm(`「${memoSummary.title}」を削除します。よろしいですか？`)) {
-      return;
-    }
-
-    setIsDeletingMemoId(memoSummary.id);
-
-    try {
-      const response = await fetch(`/api/memos/${memoSummary.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        await readResponse(response);
-      }
-
-      setSavedMemos((prev) =>
-        prev.filter((memo) => memo.id !== memoSummary.id),
-      );
-
-      if (activeMemo?.id === memoSummary.id) {
-        if (currentDraftOwnerScope) {
-          window.localStorage.removeItem(
-            getLocalDraftStorageKey(memoSummary.id, currentDraftOwnerScope),
-          );
-        }
-        setActiveMemo(null);
-        replaceEditorUrl(null);
-      }
-
-      toast.success("保存済みメモを削除しました。");
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "保存済みメモを削除できませんでした。";
-      toast.error(message);
-
-      if (message.includes("ログイン")) {
-        setIsAuthDialogOpen(true);
-      }
-    } finally {
-      setIsDeletingMemoId(null);
     }
   };
 
@@ -1081,86 +961,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isLibraryDialogOpen} onOpenChange={setIsLibraryDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>あなたの比較メモ一覧から複製する</DialogTitle>
-          </DialogHeader>
-
-          <div className="max-h-[60vh] overflow-y-auto pr-1">
-            {isLibraryLoading ? (
-              <div className="flex items-center justify-center py-10 text-muted-foreground">
-                <Spinner className="mr-2" />
-                読み込み中...
-              </div>
-            ) : savedMemos.length === 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>保存済みメモはまだありません</CardTitle>
-                  <CardDescription>
-                    比較内容を保存すると、ここからいつでも再開できます。
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            ) : (
-              <div className="space-y-3">
-                {savedMemos.map((memo) => {
-                  const isLoading = isLoadingMemoId === memo.id;
-                  const isDeleting = isDeletingMemoId === memo.id;
-
-                  return (
-                    <Card key={memo.id}>
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <CardTitle className="text-base">
-                              {memo.title}
-                            </CardTitle>
-                            <CardDescription>
-                              カテゴリ: {memo.category || "未設定"} / 更新:{" "}
-                              {new Date(memo.updatedAt).toLocaleString("ja-JP")}
-                            </CardDescription>
-                          </div>
-                          <span className="rounded-full border border-border/70 px-2 py-0.5 text-[11px] text-muted-foreground">
-                            {memo.isPublic ? "公開" : "非公開"}
-                          </span>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="flex flex-wrap gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => void handleLoadMemo(memo)}
-                          disabled={isLoading || isDeleting}
-                        >
-                          {isLoading ? (
-                            <Spinner />
-                          ) : (
-                            <BookMarkedIcon className="w-4 h-4" />
-                          )}
-                          読み込む
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          onClick={() => void handleDeleteMemo(memo)}
-                          disabled={isLoading || isDeleting}
-                        >
-                          {isDeleting ? (
-                            <Spinner />
-                          ) : (
-                            <Trash2Icon className="w-4 h-4" />
-                          )}
-                          削除
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <div className="min-h-dvh flex flex-col">
         <header className="sticky top-0 z-40 border-b border-border/80 bg-background/82 backdrop-blur-md mx-4">
           <div className="max-w-6xl mx-auto py-3">
@@ -1185,16 +985,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                   className="text-muted-foreground"
                 >
                   <RotateCcwIcon className="w-4 h-4 mr-1" />
-                  元に戻す
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleOpenLibrary}
-                  disabled={isAuthLoading}
-                >
-                  <BookMarkedIcon className="w-4 h-4 mr-1" />
-                  複製する
+                  <p className="hidden sm:block">元に戻す</p>
                 </Button>
                 <Button
                   variant="success"

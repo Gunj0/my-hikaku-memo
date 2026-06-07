@@ -1,5 +1,6 @@
 "use client";
 
+import { EditableItemName } from "@/components/editable-item-name";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +40,7 @@ interface ProductsStepProps {
 interface SortableProductItemProps {
   index: number;
   product: Product;
+  onNameChange: (name: string) => void;
   onRemove: () => void;
   onMemoChange: (memo: string) => void;
 }
@@ -46,6 +48,7 @@ interface SortableProductItemProps {
 function SortableProductItem({
   index,
   product,
+  onNameChange,
   onRemove,
   onMemoChange,
 }: SortableProductItemProps) {
@@ -82,7 +85,13 @@ function SortableProductItem({
         >
           <GripVerticalIcon className="w-4 h-4" />
         </Button>
-        <span className="flex-1 font-medium">{product.name}</span>
+        <EditableItemName
+          value={product.name}
+          onCommit={onNameChange}
+          aria-label="候補名を編集"
+          maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+          className="h-9 flex-1 bg-background font-medium"
+        />
         <Button
           type="button"
           variant="ghost"
@@ -145,10 +154,10 @@ export function ProductsStep({
     onProductsChange(products.filter((product) => product.id !== id));
   };
 
-  const updateProductMemo = (id: string, memo: string) => {
+  const updateProduct = (id: string, updates: Partial<Product>) => {
     onProductsChange(
       products.map((product) =>
-        product.id === id ? { ...product, memo } : product,
+        product.id === id ? { ...product, ...updates } : product,
       ),
     );
   };
@@ -178,10 +187,9 @@ export function ProductsStep({
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
-        <h2 className="text-xl font-semibold mb-2">候補を洗い出す</h2>
+        <h2 className="text-xl font-semibold mb-2">気になる候補は？</h2>
         <p className="text-muted-foreground text-sm">
-          比較したい候補を追加しましょう（ヒント: 「カテゴリ ランキング」で検索
-          ）
+          ヒント: 「カテゴリ名 ランキング」で検索
         </p>
       </div>
 
@@ -206,8 +214,9 @@ export function ProductsStep({
                   key={product.id}
                   index={index}
                   product={product}
+                  onNameChange={(name) => updateProduct(product.id, { name })}
                   onRemove={() => removeProduct(product.id)}
-                  onMemoChange={(memo) => updateProductMemo(product.id, memo)}
+                  onMemoChange={(memo) => updateProduct(product.id, { memo })}
                 />
               ))}
             </div>

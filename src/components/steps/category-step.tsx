@@ -51,13 +51,13 @@ export function CategoryStep({
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
-        <h2 className="text-xl font-semibold mb-2">カテゴリを入力する</h2>
+        <h2 className="text-xl font-semibold mb-2">何を比較する？</h2>
         <p className="text-muted-foreground text-sm">
           まずは比較するカテゴリを選択・入力してください
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-4 lg:grid-cols-8 gap-3">
         {PRESET_CATEGORIES.map(({ name, icon: Icon }) => (
           <Button
             key={name}

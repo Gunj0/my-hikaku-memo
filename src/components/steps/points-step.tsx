@@ -1,6 +1,7 @@
 "use client";
 
 import { DecisionPointImportanceIcon } from "@/components/decision-point-importance-icon";
+import { EditableItemName } from "@/components/editable-item-name";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -117,9 +118,13 @@ function SortablePointItem({
             })}
           </div>
 
-          <span className="min-w-0 flex-1 text-sm font-medium sm:text-base">
-            {point.name}
-          </span>
+          <EditableItemName
+            value={point.name}
+            onCommit={(name) => onUpdate({ name })}
+            aria-label="ポイント名を編集"
+            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            className="h-9 flex-1 bg-background text-sm font-medium sm:text-base"
+          />
         </div>
 
         <Button
@@ -221,10 +226,11 @@ export function PointsStep({
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
-        <h2 className="text-xl font-semibold mb-2">比較ポイントを洗い出す</h2>
+        <h2 className="text-xl font-semibold mb-2">
+          あなたが重視するポイントは？
+        </h2>
         <p className="text-muted-foreground text-sm">
-          あなたが重視するポイントを書き出しましょう（ヒント: 「カテゴリ
-          選ぶポイント」で検索 ）
+          ヒント: 「カテゴリ名 選ぶポイント」で検索
         </p>
       </div>
 
