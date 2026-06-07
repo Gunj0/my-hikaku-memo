@@ -108,7 +108,7 @@ export function AppHeader() {
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="default"
                   disabled={isLoading}
                   className="shrink-0"
                 >
