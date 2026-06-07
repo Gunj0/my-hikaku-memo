@@ -1043,13 +1043,13 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
         <main className="flex-1">
           <div className="mx-auto grid gap-4 px-4 py-4 lg:items-start">
-            <section className="min-w-0 rounded-lg border border-border/80 bg-card/74 p-4 shadow-[0_0_0_1px_rgb(255_255_255/0.02),0_20px_40px_rgb(0_0_0/0.2)] md:p-5">
+            <section className="min-w-0 rounded-lg bg-card/74 p-4 shadow-[0_0_0_1px_rgb(255_255_255/0.02),0_20px_40px_rgb(0_0_0/0.2)] md:p-5">
               {renderStep()}
             </section>
           </div>
         </main>
 
-        <footer className="sticky bottom-0 border-t border-border/80 bg-background/82 backdrop-blur-md">
+        <footer className="sticky bottom-0 bg-background/82 backdrop-blur-md">
           <div className="mx-auto max-w-6xl px-4 py-3">
             <div className="space-y-3">
               {editorStatus ? (

@@ -14,7 +14,7 @@ export function StepIndicator({
 }: StepIndicatorProps) {
   return (
     <nav className="max-w-6xl mx-auto" aria-label="進捗状況">
-      <div className="flex gap-2 overflow-x-auto rounded-lg border border-border/80 bg-card/72 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide">
         {STEPS.map((step) => {
           const isComplete = currentStep > step.id;
           const isCurrent = currentStep === step.id;

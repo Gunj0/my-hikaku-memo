@@ -289,12 +289,12 @@ function SortableProductHeader({
         isDragging && "bg-card",
       )}
     >
-      <div className="flex items-start justify-center gap-2 min-w-0">
+      <div className="flex h-8 items-start justify-center gap-2 min-w-0">
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
-          className="cursor-grab touch-none text-muted-foreground active:cursor-grabbing"
+          className="cursor-grab touch-none text-muted-foreground active:cursor-grabbing h-8"
           aria-label={`${product.name}の列をドラッグして並び替え`}
           {...attributes}
           {...listeners}
@@ -306,7 +306,7 @@ function SortableProductHeader({
           onCommit={onNameChange}
           aria-label="候補名を編集"
           maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-          className="h-auto min-h-8 bg-background text-left leading-5"
+          className="h-8 bg-background text-left"
         />
       </div>
     </TableHead>

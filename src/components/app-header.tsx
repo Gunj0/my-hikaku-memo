@@ -80,9 +80,9 @@ export function AppHeader() {
                       key={item.href}
                       href={item.href}
                       aria-label={item.label}
-                      className="inline-flex items-center gap-1 rounded-sm px-2 py-1 transition-colors hover:text-foreground"
+                      className="inline-flex items-center gap-1 rounded-sm px-2 py-1 transition-colors text-foreground hover:text-foreground/80"
                     >
-                      <Icon className="h-4 w-4 shrink-0 text-success-foreground" />
+                      <Icon className="h-4 w-4 shrink-0" />
                       <span className="hidden md:inline">{item.label}</span>
                     </Link>
                   );

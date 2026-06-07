@@ -108,7 +108,7 @@ export function ProfileSettingsCard({
             <p className="text-[11px] tracking-[0.22em] text-primary">
               公開ユーザー名 (12文字以内)
             </p>
-            <form className="flex my-2" onSubmit={handleSubmit}>
+            <form className="flex my-2 gap-2" onSubmit={handleSubmit}>
               <div>
                 <Input
                   id="profile-name"

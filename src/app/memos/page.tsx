@@ -84,9 +84,9 @@ export default async function MemosPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
-      <section className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <section className="flex gap-3 flex-row items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">あなたの比較メモ一覧</h1>
+          <h1 className="text-xl font-semibold">マイページ</h1>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button asChild variant="success">
@@ -95,7 +95,7 @@ export default async function MemosPage() {
               新しいメモを作る
             </Link>
           </Button>
-          <SignOutButton variant="outline" size="default">
+          <SignOutButton variant="secondary" size="default">
             <LogOutIcon className="h-4 w-4" />
             ログアウト
           </SignOutButton>
@@ -110,6 +110,9 @@ export default async function MemosPage() {
         />
       ) : null}
 
+      <div>
+        <h1 className="text-lg font-semibold">比較メモ</h1>
+      </div>
       {memos.length === 0 ? (
         <Card className="border-dashed border-border/80 bg-card/60">
           <CardHeader>
