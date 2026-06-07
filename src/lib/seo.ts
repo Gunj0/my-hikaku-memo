@@ -69,7 +69,7 @@ function isLoopbackSiteUrl(siteUrl: string) {
 }
 
 function assertSafeConfiguredSiteUrl(siteUrl?: string) {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NEXTJS_ENV !== "production") {
     return;
   }
 
@@ -98,7 +98,7 @@ export async function getRequestSiteUrl() {
   }
 
   try {
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NEXTJS_ENV !== "production") {
       const headerStore = await headers();
       const siteUrl = buildSiteUrlFromHeaders(headerStore);
 

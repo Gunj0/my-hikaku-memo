@@ -4,22 +4,22 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #0b0f1a;
+  --background: #0d1117;
   --foreground: #c0caf5;
   --card: #12182a;
   --card-foreground: #c0caf5;
   --popover: #12182a;
   --popover-foreground: #c0caf5;
   --primary: #7aa2f7;
-  --primary-foreground: #0b0f1a;
+  --primary-foreground: #0d1117;
   --secondary: #1a2238;
   --secondary-foreground: #a9b7e7;
   --muted: #151c2f;
   --muted-foreground: #7983a9;
   --accent: #bb9af7;
-  --accent-foreground: #0b0f1a;
+  --accent-foreground: #0d1117;
   --destructive: #f7768e;
-  --destructive-foreground: #0b0f1a;
+  --destructive-foreground: #0d1117;
   --border: #c0caf521;
   --input: #141b2e;
   --ring: #7dcfff;
@@ -32,34 +32,34 @@
   --sidebar: #0d1322;
   --sidebar-foreground: #c0caf5;
   --sidebar-primary: #7aa2f7;
-  --sidebar-primary-foreground: #0b0f1a;
+  --sidebar-primary-foreground: #0d1117;
   --sidebar-accent: #1a2238;
   --sidebar-accent-foreground: #c0caf5;
   --sidebar-border: #c0caf518;
   --sidebar-ring: #7dcfff;
   --success: #9ece6a;
-  --success-foreground: #0b0f1a;
+  --success-foreground: #0d1117;
   --grid-line: #27314a44;
   --grid-glow: #7aa2f720;
 }
 
 .dark {
-  --background: #0b0f1a;
+  --background: #0d1117;
   --foreground: #c0caf5;
   --card: #12182a;
   --card-foreground: #c0caf5;
   --popover: #12182a;
   --popover-foreground: #c0caf5;
   --primary: #7aa2f7;
-  --primary-foreground: #0b0f1a;
+  --primary-foreground: #0d1117;
   --secondary: #1a2238;
   --secondary-foreground: #a9b7e7;
   --muted: #151c2f;
   --muted-foreground: #9fa7c3;
   --accent: #bb9af7;
-  --accent-foreground: #0b0f1a;
+  --accent-foreground: #0d1117;
   --destructive: #f7768e;
-  --destructive-foreground: #0b0f1a;
+  --destructive-foreground: #0d1117;
   --border: #c0caf521;
   --input: #141b2e;
   --ring: #7dcfff;
@@ -71,7 +71,7 @@
   --sidebar: #0d1322;
   --sidebar-foreground: #c0caf5;
   --sidebar-primary: #7aa2f7;
-  --sidebar-primary-foreground: #0b0f1a;
+  --sidebar-primary-foreground: #0d1117;
   --sidebar-accent: #1a2238;
   --sidebar-accent-foreground: #c0caf5;
   --sidebar-border: #c0caf518;
