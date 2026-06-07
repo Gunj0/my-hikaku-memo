@@ -244,7 +244,7 @@ export function ProductsStep({
             }}
             maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
             disabled={hasReachedProductLimit}
-            className="flex-1"
+            className="flex-1 border-foreground/20"
           />
           <Button
             onClick={addProduct}
@@ -264,7 +264,7 @@ export function ProductsStep({
           value={productsMemo}
           onChange={(e) => onMemoChange(e.target.value)}
           maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-          className="min-h-25 resize-none"
+          className="min-h-25 resize-none border-foreground/20"
         />
       </div>
     </div>

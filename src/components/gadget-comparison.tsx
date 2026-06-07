@@ -1061,7 +1061,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
               ) : null}
               <div className="flex items-center justify-between gap-4 rounded-lg border border-border/80 bg-card/72 px-3 py-3">
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   onClick={handlePrev}
                   disabled={currentStep === 1}
                   className="flex-1 sm:flex-none"

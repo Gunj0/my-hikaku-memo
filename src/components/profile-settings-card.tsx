@@ -97,7 +97,7 @@ export function ProfileSettingsCard({
   };
 
   return (
-    <Card className="border-border/80 bg-card/72">
+    <Card className="border border-border/80 bg-card/72">
       <CardContent>
         <div className="flex items-center gap-3">
           <Avatar className="size-12 border border-border/70">
@@ -105,7 +105,7 @@ export function ProfileSettingsCard({
             <AvatarFallback>{getInitials(name)}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-[11px] tracking-[0.22em] text-primary">
+            <p className="text-[11px] tracking-[0.22em] text-foreground">
               公開ユーザー名 (12文字以内)
             </p>
             <form className="flex my-2 gap-2" onSubmit={handleSubmit}>
@@ -119,6 +119,7 @@ export function ProfileSettingsCard({
                     setNameError(null);
                   }}
                   disabled={isSaving}
+                  className="border border-foreground/20"
                 />
                 {nameError ? (
                   <InlineNotice

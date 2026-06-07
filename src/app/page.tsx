@@ -16,12 +16,7 @@ import {
   serializeJsonLd,
 } from "@/lib/seo";
 import { listRandomComparisonMemos } from "@/lib/server/comparison-memos";
-import {
-  BookMarkedIcon,
-  EyeIcon,
-  PlusCircleIcon,
-  RefreshCwIcon,
-} from "lucide-react";
+import { EyeIcon, PlusCircleIcon, RefreshCwIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -31,7 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = await getRequestSiteUrl();
 
   return buildMetadata({
-    title: "オレの比較メモ | ガジェットや家電の比較メモを公開・共有",
+    title:
+      "オレの比較メモ | ガジェットや家電の比較メモを残す、あなたのためのアプリ",
     description:
       "ガジェットや家電の比較ポイント、評価、最終判断をまとめて残せる比較メモアプリ。公開メモを閲覧しながら自分の比較メモもすぐ作成できます。",
     path: "/",
@@ -98,20 +94,20 @@ export default async function Home() {
           __html: serializeJsonLd(softwareApplicationJsonLd),
         }}
       />
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,1fr)]">
-        <Card className="overflow-hidden border-border/80 bg-card/78">
-          <CardHeader className="space-y-4 pb-4">
+      <section className="grid gap-4">
+        <Card className="overflow-hidden">
+          <CardHeader className="space-y-4 pb-4 text-center">
             <div className="space-y-2">
-              <CardTitle className="text-2xl leading-tight md:text-3xl">
-                あなただけの「比較メモ」を残そう
+              <CardTitle className="text-2xl leading-tight md:text-3xl text-center">
+                「なぜ選んだか」を、ちゃんと残そう
               </CardTitle>
-              <CardDescription className="max-w-2xl text-md leading-6 text-muted-foreground">
-                <p>なんで選んだっけ？をちゃんと残すためのアプリ</p>
-                <p>次のガジェット、家電を選ぶときの参考に</p>
+              <CardDescription className="max-w-2xl text-md leading-6 text-muted-foreground mx-auto">
+                <p>家電やガジェットの比較がしやすいメモアプリ</p>
+                <p>今あなたが残した判断が、未来のあなたの判断軸に</p>
               </CardDescription>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 ">
               <div className="rounded-lg border border-primary/30 bg-primary/8 p-4">
                 <p className="mt-2 text-lg font-semibold">
                   さっそく比較メモを作る
@@ -128,36 +124,8 @@ export default async function Home() {
                   </Button>
                 </div>
               </div>
-
-              <div className="rounded-lg border border-border/80 bg-background/50 p-4">
-                <p className="mt-2 text-lg font-semibold">
-                  保存したメモを確認する
-                </p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  ログインすると自分のメモ一覧を確認できます
-                </p>
-                <div className="mt-4">
-                  <Button asChild variant="outline">
-                    <Link href="/memos">
-                      <BookMarkedIcon className="h-4 w-4" />
-                      メモ一覧へ
-                    </Link>
-                  </Button>
-                </div>
-              </div>
             </div>
           </CardHeader>
-        </Card>
-
-        <Card className="border-border/80 bg-card/74">
-          <CardHeader>
-            <CardTitle className="text-xl">このアプリでできること</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm leading-6 text-muted-foreground">
-            <div className="rounded-lg border border-border/70 bg-background/40 p-3">
-              開発中...
-            </div>
-          </CardContent>
         </Card>
       </section>
 
@@ -238,36 +206,19 @@ export default async function Home() {
         )}
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
+      <section className="gap-4 text-center">
         <Card className="border-border/80 bg-card/72">
           <CardHeader>
-            <CardTitle className="text-lg">新規作成へ進む</CardTitle>
-            <CardDescription>
-              比較対象が決まっているなら、すぐに入力フローを開始できます。
+            <CardTitle className="text-lg">比較メモを作成する</CardTitle>
+            <CardDescription className="">
+              比較したいものが決まっているなら、すぐにメモを開始できます
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild variant="success">
               <Link href="/memos/new">
                 <PlusCircleIcon className="h-4 w-4" />
-                新しい比較メモを作る
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/80 bg-card/72">
-          <CardHeader>
-            <CardTitle className="text-lg">マイメモ一覧へ進む</CardTitle>
-            <CardDescription>
-              保存済みメモを開いて再編集したり、閲覧モードで内容だけ確認できます。
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline">
-              <Link href="/memos">
-                <BookMarkedIcon className="h-4 w-4" />
-                作成済みメモ一覧を見る
+                無料で比較メモを作る
               </Link>
             </Button>
           </CardContent>

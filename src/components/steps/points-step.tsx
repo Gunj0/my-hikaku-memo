@@ -276,7 +276,7 @@ export function PointsStep({
             }}
             maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
             disabled={hasReachedPointLimit}
-            className="flex-1"
+            className="flex-1 border-foreground/20"
           />
           <Button
             onClick={addPoint}
@@ -296,7 +296,7 @@ export function PointsStep({
           value={pointsMemo}
           onChange={(e) => onMemoChange(e.target.value)}
           maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-          className="min-h-25 resize-none"
+          className="min-h-25 resize-none border-foreground/20"
         />
       </div>
     </div>

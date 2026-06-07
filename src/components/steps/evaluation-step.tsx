@@ -557,7 +557,7 @@ export function EvaluationStep({
 
   if (products.length === 0 || decisionPoints.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 mx-auto max-w-6xl">
         <div>
           <h2 className="text-xl font-semibold mb-2">評価を入力</h2>
           <p className="text-muted-foreground text-sm">

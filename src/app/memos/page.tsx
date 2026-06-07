@@ -135,7 +135,7 @@ export default async function MemosPage() {
       ) : (
         <div className="grid gap-4">
           {memos.map((memo) => (
-            <Card key={memo.id} className="border-border/80 bg-card/72">
+            <Card key={memo.id} className="border border-border/80 bg-card/72">
               <CardHeader className="gap-3 md:flex-row md:items-start md:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">

@@ -85,9 +85,9 @@ export function CategoryStep({
             onChange={(e) => onCategoryChange(e.target.value)}
             maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
             className={cn(
-              "flex-1 border-foreground/50",
+              "flex-1 border-foreground/20",
               hasCustomCategoryValue &&
-                "border-primary bg-primary/5 ring-2 ring-primary/35",
+                "border-primary bg-primary/5 ring-2 ring-primary ring-offset-2 ring-offset-background",
             )}
           />
         </div>
@@ -101,7 +101,7 @@ export function CategoryStep({
           value={categoryMemo}
           onChange={(e) => onMemoChange(e.target.value)}
           maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-          className="min-h-30 resize-none"
+          className="min-h-30 resize-none border-foreground/20"
         />
       </div>
     </div>

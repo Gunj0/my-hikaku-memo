@@ -68,7 +68,7 @@ export function DecisionStep({
 
   if (products.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 mx-auto max-w-6xl">
         <div>
           <h2 className="text-xl font-semibold mb-2">最終決定</h2>
           <p className="text-muted-foreground text-sm">
@@ -93,7 +93,7 @@ export function DecisionStep({
           <div className="flex items-center gap-3 mb-4">
             <PartyPopperIcon className="w-8 h-8 text-success" />
             <div>
-              <p className="text-sm text-success">購入決定</p>
+              <p className="text-sm text-success">決定</p>
               <h3 className="text-2xl font-bold">{selectedProduct.name}</h3>
             </div>
           </div>
@@ -161,21 +161,9 @@ export function DecisionStep({
           value={decisionMemo}
           onChange={(e) => onMemoChange(e.target.value)}
           maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-          className="min-h-37.5 resize-none"
+          className="min-h-37.5 resize-none border-foreground/20"
         />
       </div>
-
-      {selectedProduct && (
-        <div className="p-4 bg-secondary/50 rounded-lg">
-          <h4 className="font-medium mb-2">次のステップ</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>• 最終的な価格を確認する</li>
-            <li>• 在庫・納期を確認する</li>
-            <li>• 購入先を決める（実店舗 / オンライン）</li>
-            <li>• 必要なアクセサリを確認する</li>
-          </ul>
-        </div>
-      )}
     </div>
   );
 }

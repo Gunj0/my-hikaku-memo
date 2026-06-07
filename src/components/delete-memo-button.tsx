@@ -68,7 +68,6 @@ export function DeleteMemoButton({ memoId, memoTitle }: DeleteMemoButtonProps) {
         aria-label={`${memoTitle}を削除`}
       >
         {isDeleting ? <Spinner /> : <Trash2Icon className="h-4 w-4" />}
-        削除
       </Button>
       {deleteError ? (
         <InlineNotice
