@@ -120,11 +120,11 @@ export default async function MemosPage() {
               保存済みメモはまだありません
             </CardTitle>
             <CardDescription>
-              新しい比較メモを作成して保存すると、この画面に一覧表示されます。
+              比較メモを保存すると、ここに一覧表示されます。
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
+            <Button asChild variant="success">
               <Link href="/memos/new">
                 <PlusCircleIcon className="h-4 w-4" />
                 最初のメモを作る

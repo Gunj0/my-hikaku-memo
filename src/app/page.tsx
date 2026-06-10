@@ -16,7 +16,7 @@ import {
   serializeJsonLd,
 } from "@/lib/seo";
 import { listRandomComparisonMemos } from "@/lib/server/comparison-memos";
-import { EyeIcon, PlusCircleIcon, RefreshCwIcon } from "lucide-react";
+import { ArrowRightIcon, PlusCircleIcon, RefreshCwIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -145,62 +145,50 @@ export default async function Home() {
         {publicMemos.length === 0 ? (
           <Card className="border-dashed border-border/80 bg-card/60">
             <CardHeader>
-              <CardTitle className="text-lg">
-                表示できる公開メモがまだありません
-              </CardTitle>
-              <CardDescription>
-                まずは自分で比較メモを作成し、保存時に公開設定をオンにするとここに表示されます。
-              </CardDescription>
+              <CardDescription>まだメモがありません</CardDescription>
             </CardHeader>
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {publicMemos.map((memo) => (
-              <Card key={memo.id} className="border-border/80 bg-card/72">
-                <CardHeader className="space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <Avatar className="size-9 border border-border/70">
-                        <AvatarImage
-                          src={memo.author.image ?? undefined}
-                          alt={getAuthorLabel(memo.author.name)}
-                        />
-                        <AvatarFallback>
-                          {getInitials(memo.author.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
-                          {getAuthorLabel(memo.author.name)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(memo.updatedAt).toLocaleString("ja-JP")}
-                        </p>
+              <Link key={memo.id} href={`/memos/${memo.id}`}>
+                <Card className="border-border/80 border bg-card/72 hover:bg-card/80 transition-colors">
+                  <CardHeader className="space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <Avatar className="size-9 border border-border/70">
+                          <AvatarImage
+                            src={memo.author.image ?? undefined}
+                            alt={getAuthorLabel(memo.author.name)}
+                          />
+                          <AvatarFallback>
+                            {getInitials(memo.author.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">
+                            {getAuthorLabel(memo.author.name)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(memo.updatedAt).toLocaleString("ja-JP")}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div>
-                    <CardTitle className="line-clamp-2 text-lg leading-7">
-                      {memo.title}
-                    </CardTitle>
-                    <CardDescription className="mt-2">
-                      カテゴリ: {memo.category || "未設定"}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full justify-between"
-                  >
-                    <Link href={`/memos/${memo.id}`}>
-                      閲覧する
-                      <EyeIcon className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
+                    <div>
+                      <CardTitle className="line-clamp-2 text-lg leading-7">
+                        {memo.title}
+                      </CardTitle>
+                      <CardDescription className="mt-2">
+                        カテゴリ: {memo.category || "未設定"}
+                      </CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-end">
+                    <ArrowRightIcon className="h-4 w-4" />
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         )}

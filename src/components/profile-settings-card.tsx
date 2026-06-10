@@ -133,7 +133,7 @@ export function ProfileSettingsCard({
               <div className="flex flex-wrap items-center gap-2">
                 <Button type="submit" disabled={isSaving}>
                   <PencilLineIcon className="h-4 w-4" />
-                  {isSaving ? "保存中..." : "ユーザー名を変更"}
+                  {isSaving ? "保存中..." : "保存"}
                 </Button>
               </div>
             </form>

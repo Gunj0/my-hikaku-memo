@@ -98,7 +98,7 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
   });
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-3">
       {memo.isPublic ? (
         <script
           type="application/ld+json"
@@ -107,8 +107,14 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
           }}
         />
       ) : null}
-      <section className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap gap-3">
+      <section className="flex flex-col gap-3 justify-between">
+        <div className="flex flex-wrap gap-3 justify-between items-center">
+          <Button asChild variant="ghost" size="default">
+            <Link href="/memos">
+              <ArrowLeftIcon className="h-4 w-4" />
+              メモ一覧
+            </Link>
+          </Button>
           {memo.isOwner ? (
             <Button asChild>
               <Link href={`/memos/new?memoId=${memo.id}`}>
@@ -117,12 +123,6 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
               </Link>
             </Button>
           ) : null}
-          <Button asChild variant="outline">
-            <Link href="/memos">
-              <ArrowLeftIcon className="h-4 w-4" />
-              一覧へ戻る
-            </Link>
-          </Button>
         </div>
       </section>
 
