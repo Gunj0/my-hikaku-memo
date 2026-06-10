@@ -1,5 +1,6 @@
 "use client";
 
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { StepIndicator } from "@/components/step-indicator";
 import { CategoryStep } from "@/components/steps/category-step";
 import { DecisionStep } from "@/components/steps/decision-step";
@@ -40,7 +41,6 @@ import {
   ArrowLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  LogInIcon,
   RotateCcwIcon,
   SaveIcon,
 } from "lucide-react";
@@ -907,10 +907,12 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
             >
               あとで
             </Button>
-            <Button onClick={() => void handleSignIn()}>
-              <LogInIcon className="w-4 h-4" />
-              Googleでログイン
-            </Button>
+            <GoogleSignInButton
+              onClick={() => void handleSignIn()}
+              className="w-auto min-w-55"
+            >
+              Google でログイン
+            </GoogleSignInButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

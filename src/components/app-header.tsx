@@ -5,6 +5,7 @@ import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -128,19 +129,20 @@ export function AppHeader() {
                     />
                     <span className="text-xl font-bold">オレの比較メモ β</span>
                   </p>
-                  <DialogTitle>無料で作り始められます</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-center">
+                    無料で作り始められます
+                  </DialogTitle>
+                  <DialogDescription className="text-center">
                     ログインすると、比較メモを保存して見返すことができます。
                   </DialogDescription>
                 </DialogHeader>
-                <Button
+                <GoogleSignInButton
                   onClick={() => void handleSignIn()}
                   disabled={isLoading}
-                  className="w-full"
+                  className="mt-5"
                 >
-                  <LogInIcon className="h-4 w-4" />
-                  Googleでログイン
-                </Button>
+                  Google でログイン
+                </GoogleSignInButton>
               </DialogContent>
             </Dialog>
           )}

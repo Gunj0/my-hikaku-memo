@@ -71,7 +71,7 @@ test("ホーム初期表示でヘッダーを表示する", async ({ page }) => 
   await signInTrigger.click();
 
   await expect(
-    page.getByRole("button", { name: "Googleでログイン" }),
+    page.getByRole("button", { name: "Google でログイン" }),
   ).toBeVisible();
 });
 
