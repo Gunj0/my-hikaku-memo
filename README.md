@@ -84,7 +84,7 @@ pnpm lint
 
 Playwright で未ログインの基本フローを E2E テストできます。
 
-初回はブラウザをインストールします。
+初回・ライブラリアップデート時にはブラウザをインストールします。
 
 ```bash
 pnpm test:e2e:install
@@ -94,18 +94,6 @@ pnpm test:e2e:install
 
 ```bash
 pnpm test:e2e
-```
-
-特定のテストだけ実行する場合
-
-```bash
-pnpm exec playwright test tests/e2e/basic-flow.spec.ts --project=chromium
-```
-
-レポートUIを開く場合
-
-```bash
-pnpm exec playwright show-report
 ```
 
 ### ビルド
@@ -123,7 +111,7 @@ pnpm deploy
 
 ### 保守
 
-wrangler.jsonc を更新した後は型定義を再生成してください。
+wrangler.jsonc を更新した後の型定義再生成
 
 ```bash
 pnpm run cf-typegen
