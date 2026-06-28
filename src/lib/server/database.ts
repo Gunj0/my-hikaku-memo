@@ -49,6 +49,7 @@ const memoTableStatements = [
       category TEXT NOT NULL,
       data TEXT NOT NULL,
       is_public INTEGER NOT NULL DEFAULT 0,
+      public_id INTEGER NOT NULL DEFAULT 0,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -57,6 +58,10 @@ const memoTableStatements = [
   `
     CREATE INDEX IF NOT EXISTS idx_comparison_memos_user_updated
     ON comparison_memos(user_id, updated_at DESC)
+  `,
+  `
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_comparison_memos_public_id
+    ON comparison_memos(public_id)
   `,
 ];
 
@@ -73,6 +78,30 @@ async function ensureMemoVisibilityColumn(database: D1Database) {
     await database
       .prepare(
         `ALTER TABLE comparison_memos ADD COLUMN is_public INTEGER NOT NULL DEFAULT 0`,
+      )
+      .run();
+  }
+}
+
+async function ensureMemoPublicId(database: D1Database) {
+  const columns = await database
+    .prepare('PRAGMA table_info("comparison_memos")')
+    .all<TableInfoRow>();
+
+  if (!columns.results.some((column) => column.name === "public_id")) {
+    await database
+      .prepare(
+        `ALTER TABLE comparison_memos ADD COLUMN public_id INTEGER NOT NULL DEFAULT 0`,
+      )
+      .run();
+    await database
+      .prepare(
+        `UPDATE comparison_memos SET public_id = rowid WHERE public_id = 0`,
+      )
+      .run();
+    await database
+      .prepare(
+        `CREATE UNIQUE INDEX IF NOT EXISTS idx_comparison_memos_public_id ON comparison_memos(public_id)`,
       )
       .run();
   }
@@ -108,6 +137,7 @@ export function ensureDatabaseSetup(database: D1Database) {
       }
 
       await ensureMemoVisibilityColumn(database);
+      await ensureMemoPublicId(database);
       await ensureUserProfileInitializedColumn(database);
     })().catch((error) => {
       setupPromise = null;

@@ -26,6 +26,7 @@ type ComparisonMemoRow = {
   category: string;
   data: string;
   is_public: number;
+  public_id: number;
   created_at: number;
   updated_at: number;
 };
@@ -43,7 +44,7 @@ type PublicComparisonMemoRow = ComparisonMemoRow & {
 };
 
 type PublicComparisonMemoSitemapRow = {
-  id: string;
+  public_id: number;
   updated_at: number;
 };
 
@@ -80,7 +81,7 @@ function mapAuthor(
 
 function mapSummary(row: ComparisonMemoSummaryRow): ComparisonMemoSummary {
   return {
-    id: row.id,
+    id: String(row.public_id),
     title: row.title,
     category: row.category,
     isPublic: Boolean(row.is_public),
@@ -142,7 +143,7 @@ export async function listComparisonMemos(userId: string) {
   const result = await database
     .prepare(
       `
-        SELECT id, user_id, title, category, data, is_public, created_at, updated_at
+        SELECT id, user_id, title, category, data, is_public, public_id, created_at, updated_at
         FROM comparison_memos
         WHERE user_id = ?1
         ORDER BY updated_at DESC
@@ -155,17 +156,23 @@ export async function listComparisonMemos(userId: string) {
 }
 
 export async function getComparisonMemo(userId: string, memoId: string) {
+  const publicId = parseInt(memoId, 10);
+
+  if (!Number.isInteger(publicId) || publicId <= 0) {
+    return null;
+  }
+
   const database = await getDatabase();
   const row = await database
     .prepare(
       `
-        SELECT id, user_id, title, category, data, is_public, created_at, updated_at
+        SELECT id, user_id, title, category, data, is_public, public_id, created_at, updated_at
         FROM comparison_memos
-        WHERE id = ?1 AND user_id = ?2
+        WHERE public_id = ?1 AND user_id = ?2
         LIMIT 1
       `,
     )
-    .bind(memoId, userId)
+    .bind(publicId, userId)
     .first<ComparisonMemoRow>();
 
   return row ? (mapMemo(row) ?? null) : null;
@@ -179,7 +186,7 @@ export async function listRandomComparisonMemos(
   const result = await database
     .prepare(
       `
-        SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.created_at, m.updated_at,
+        SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
            u.name AS user_name, u.profile_initialized AS user_profile_initialized
         FROM comparison_memos AS m
         LEFT JOIN users AS u ON u.id = m.user_id
@@ -201,7 +208,7 @@ export async function listPublicComparisonMemos(limit?: number) {
       ? database
           .prepare(
             `
-              SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.created_at, m.updated_at,
+              SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
                  u.name AS user_name, u.profile_initialized AS user_profile_initialized
               FROM comparison_memos AS m
               LEFT JOIN users AS u ON u.id = m.user_id
@@ -213,7 +220,7 @@ export async function listPublicComparisonMemos(limit?: number) {
           .bind(limit)
       : database.prepare(
           `
-            SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.created_at, m.updated_at,
+            SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
                u.name AS user_name, u.profile_initialized AS user_profile_initialized
             FROM comparison_memos AS m
             LEFT JOIN users AS u ON u.id = m.user_id
@@ -232,7 +239,7 @@ export async function listPublicComparisonMemoSitemapEntries() {
   const result = await database
     .prepare(
       `
-        SELECT id, updated_at
+        SELECT public_id, updated_at
         FROM comparison_memos
         WHERE is_public = 1
         ORDER BY updated_at DESC
@@ -241,7 +248,7 @@ export async function listPublicComparisonMemoSitemapEntries() {
     .all<PublicComparisonMemoSitemapRow>();
 
   return result.results.map((row) => ({
-    id: row.id,
+    id: String(row.public_id),
     updatedAt: toIsoString(row.updated_at),
   }));
 }
@@ -250,20 +257,26 @@ export async function getPublicComparisonMemo(
   memoId: string,
   viewerUserId?: string,
 ) {
+  const publicId = parseInt(memoId, 10);
+
+  if (!Number.isInteger(publicId) || publicId <= 0) {
+    return null;
+  }
+
   const database = await getDatabase();
   const row = await database
     .prepare(
       `
-        SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.created_at, m.updated_at,
+        SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.public_id, m.created_at, m.updated_at,
            u.name AS user_name, u.profile_initialized AS user_profile_initialized
         FROM comparison_memos AS m
         LEFT JOIN users AS u ON u.id = m.user_id
-        WHERE m.id = ?1
+        WHERE m.public_id = ?1
           AND (m.is_public = 1 OR (?2 IS NOT NULL AND m.user_id = ?2))
         LIMIT 1
       `,
     )
-    .bind(memoId, viewerUserId ?? null)
+    .bind(publicId, viewerUserId ?? null)
     .first<PublicComparisonMemoRow>();
 
   return row ? (mapPublicMemo(row, viewerUserId) ?? null) : null;
@@ -283,8 +296,8 @@ export async function createComparisonMemo(
   await database
     .prepare(
       `
-        INSERT INTO comparison_memos (id, user_id, title, category, data, is_public, created_at, updated_at)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+        INSERT INTO comparison_memos (id, user_id, title, category, data, is_public, public_id, created_at, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, (SELECT COALESCE(MAX(public_id), 0) + 1 FROM comparison_memos), ?7, ?8)
       `,
     )
     .bind(
@@ -299,7 +312,18 @@ export async function createComparisonMemo(
     )
     .run();
 
-  return getComparisonMemo(userId, memoId);
+  const row = await database
+    .prepare(
+      `SELECT public_id FROM comparison_memos WHERE id = ?1 LIMIT 1`,
+    )
+    .bind(memoId)
+    .first<{ public_id: number }>();
+
+  if (!row) {
+    return null;
+  }
+
+  return getComparisonMemo(userId, String(row.public_id));
 }
 
 export async function updateComparisonMemo(
@@ -307,6 +331,12 @@ export async function updateComparisonMemo(
   memoId: string,
   payload: ComparisonMemoPayload,
 ) {
+  const publicId = parseInt(memoId, 10);
+
+  if (!Number.isInteger(publicId) || publicId <= 0) {
+    return null;
+  }
+
   const database = await getDatabase();
   const normalized = normalizePayload(payload);
   const now = Date.now();
@@ -320,11 +350,11 @@ export async function updateComparisonMemo(
             data = ?5,
             is_public = ?6,
             updated_at = ?7
-        WHERE id = ?1 AND user_id = ?2
+        WHERE public_id = ?1 AND user_id = ?2
       `,
     )
     .bind(
-      memoId,
+      publicId,
       userId,
       normalized.title,
       normalized.category,
@@ -342,15 +372,21 @@ export async function updateComparisonMemo(
 }
 
 export async function deleteComparisonMemo(userId: string, memoId: string) {
+  const publicId = parseInt(memoId, 10);
+
+  if (!Number.isInteger(publicId) || publicId <= 0) {
+    return false;
+  }
+
   const database = await getDatabase();
   const result = await database
     .prepare(
       `
         DELETE FROM comparison_memos
-        WHERE id = ?1 AND user_id = ?2
+        WHERE public_id = ?1 AND user_id = ?2
       `,
     )
-    .bind(memoId, userId)
+    .bind(publicId, userId)
     .run();
 
   return Boolean(result.meta.changed_db);

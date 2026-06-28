@@ -33,7 +33,7 @@ E2E テストは `tests/e2e/` に配置し、`pnpm dev` が起動済みであれ
 
 ```
 /                          → ホーム（公開メモ一覧含む、SSR）
-/memos/new                 → 比較編集フロー（クライアントコンポーネント中心）
+/memos/edit                 → 比較編集フロー（クライアントコンポーネント中心）
 /memos/[memoId]            → メモ閲覧（SSR）
 /memos                     → 保存済みメモ一覧（要ログイン、SSR）
 /api/memos                 → POST/PUT/DELETE（Route Handler）
@@ -42,7 +42,7 @@ E2E テストは `tests/e2e/` に配置し、`pnpm dev` が起動済みであれ
 
 ### 比較フローの構造
 
-`/memos/new` は 5 ステップ構成の単一画面。全体状態は `GadgetComparison`（`src/components/gadget-comparison.tsx`）が保持し、各ステップへ props で渡す。
+`/memos/edit` は 5 ステップ構成の単一画面。全体状態は `GadgetComparison`（`src/components/gadget-comparison.tsx`）が保持し、各ステップへ props で渡す。
 
 ```
 GadgetComparison

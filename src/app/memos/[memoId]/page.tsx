@@ -117,7 +117,7 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
           </Button>
           {memo.isOwner ? (
             <Button asChild>
-              <Link href={`/memos/new?memoId=${memo.id}`}>
+              <Link href={`/memos/edit?memoId=${memo.id}`}>
                 <PencilIcon className="h-4 w-4" />
                 編集する
               </Link>

@@ -62,7 +62,7 @@ export default async function MemosPage() {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
             <Button asChild variant="success">
-              <Link href="/memos/new">
+              <Link href="/memos/edit">
                 <PlusCircleIcon className="h-4 w-4" />
                 新しいメモを作る
               </Link>
@@ -90,7 +90,7 @@ export default async function MemosPage() {
         </div>
         <div className="flex flex-wrap gap-3">
           <Button asChild variant="success">
-            <Link href="/memos/new">
+            <Link href="/memos/edit">
               <PlusCircleIcon className="h-4 w-4" />
               新しいメモを作る
             </Link>
@@ -125,7 +125,7 @@ export default async function MemosPage() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="success">
-              <Link href="/memos/new">
+              <Link href="/memos/edit">
                 <PlusCircleIcon className="h-4 w-4" />
                 最初のメモを作る
               </Link>
@@ -159,7 +159,7 @@ export default async function MemosPage() {
               </CardHeader>
               <CardContent className="flex flex-wrap gap-3">
                 <Button asChild>
-                  <Link href={`/memos/new?memoId=${memo.id}`}>
+                  <Link href={`/memos/edit?memoId=${memo.id}`}>
                     編集する
                     <ArrowRightIcon className="h-4 w-4" />
                   </Link>

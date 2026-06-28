@@ -117,7 +117,7 @@ export default async function Home() {
                 </p>
                 <div className="mt-4">
                   <Button asChild variant="success">
-                    <Link href="/memos/new">
+                    <Link href="/memos/edit">
                       <PlusCircleIcon className="h-4 w-4" />
                       無料で比較メモを作る
                     </Link>
@@ -204,7 +204,7 @@ export default async function Home() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="success">
-              <Link href="/memos/new">
+              <Link href="/memos/edit">
                 <PlusCircleIcon className="h-4 w-4" />
                 無料で比較メモを作る
               </Link>

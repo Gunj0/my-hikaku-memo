@@ -115,7 +115,7 @@ test("評価テーブルの表示で hydration error を出さない", async ({ 
       key: persistedDraftStorageKey,
       value: {
         ownerScope: guestDraftOwnerScope,
-        redirectTo: "/memos/new",
+        redirectTo: "/memos/edit",
         currentStep: 4,
         data: savedMemoResponse.memo.data,
         savedSnapshot: null,
@@ -126,7 +126,7 @@ test("評価テーブルの表示で hydration error を出さない", async ({ 
     },
   );
 
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
   await expect(page.getByRole("table")).toBeVisible();
@@ -151,7 +151,7 @@ test("guest の保存済みメモ由来 draft をリセットすると初期状�
       key: persistedDraftStorageKey,
       value: {
         ownerScope: guestDraftOwnerScope,
-        redirectTo: "/memos/new",
+        redirectTo: "/memos/edit",
         currentStep: 4,
         data: {
           ...savedMemoResponse.memo.data,
@@ -172,7 +172,7 @@ test("guest の保存済みメモ由来 draft をリセットすると初期状�
     },
   );
 
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
 
@@ -195,7 +195,7 @@ test("guest の保存済みメモ由来 draft をリセットすると初期状�
 });
 
 test("入力欄は保存上限を超える文字を保持しない", async ({ page }) => {
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await page.getByLabel("その他のカテゴリ").fill("a".repeat(130));
   await expect(page.getByLabel("その他のカテゴリ")).toHaveValue(
@@ -215,7 +215,7 @@ test("入力欄は保存上限を超える文字を保持しない", async ({ pa
 });
 
 test("追加後のポイント名と候補名は各入力画面で編集できる", async ({ page }) => {
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await page.getByRole("button", { name: "次へ" }).click();
 
@@ -265,7 +265,7 @@ test("追加後のポイント名と候補名は各入力画面で編集でき�
 });
 
 test("比較ポイントと候補は30件までしか追加できない", async ({ page }) => {
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
   const initialPointCount = 4;
   const maxPointCount = 30;
 
@@ -295,7 +295,7 @@ test("比較ポイントと候補は30件までしか追加できない", async 
 });
 
 test("候補を削除すると最終ステップは保存できない", async ({ page }) => {
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await page.getByRole("button", { name: /候補/ }).click();
 
@@ -321,7 +321,7 @@ test("候補を削除すると最終ステップは保存できない", async ({
 });
 
 test("ログイン遷移イベントで編集中の内容を退避する", async ({ page }) => {
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await page.getByLabel("その他のカテゴリ").fill("ミラーレスカメラ");
 
@@ -337,7 +337,7 @@ test("ログイン遷移イベントで編集中の内容を退避する", async
 
   expect(persistedDraft).toMatchObject({
     ownerScope: guestDraftOwnerScope,
-    redirectTo: "/memos/new",
+    redirectTo: "/memos/edit",
     currentStep: 1,
     memoIsPublic: false,
     data: {
@@ -349,8 +349,8 @@ test("ログイン遷移イベントで編集中の内容を退避する", async
 test("未ログインで memoId 付き URL を開くと新規作成画面へ戻る", async ({
   page,
 }) => {
-  await page.goto(`/memos/new?memoId=${savedMemoResponse.memo.id}`);
-  await expect(page).toHaveURL("/memos/new");
+  await page.goto(`/memos/edit?memoId=${savedMemoResponse.memo.id}`);
+  await expect(page).toHaveURL("/memos/edit");
   await expect(
     page.getByRole("heading", { name: "何を比較する？" }),
   ).toBeVisible();
@@ -366,7 +366,7 @@ test("ログイン復帰時に編集中の内容を復元する", async ({ page 
       key: persistedDraftStorageKey,
       value: {
         ownerScope: guestDraftOwnerScope,
-        redirectTo: "/memos/new",
+        redirectTo: "/memos/edit",
         currentStep: 3,
         data: {
           category: "ミラーレスカメラ",
@@ -405,7 +405,7 @@ test("ログイン復帰時に編集中の内容を復元する", async ({ page 
     },
   );
 
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await expect(
     page.getByRole("heading", { name: "気になる候補は？" }),
@@ -434,7 +434,7 @@ test("guest の memoId 付き session draft は新規作成として保存し直
       value: {
         ownerScope: guestDraftOwnerScope,
         memoId: savedMemoResponse.memo.id,
-        redirectTo: "/memos/new",
+        redirectTo: "/memos/edit",
         currentStep: 1,
         data: savedMemoResponse.memo.data,
         savedSnapshot: savedMemoResponse.memo.data,
@@ -452,9 +452,9 @@ test("guest の memoId 付き session draft は新規作成として保存し直
     },
   );
 
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
-  await expect(page).toHaveURL("/memos/new");
+  await expect(page).toHaveURL("/memos/edit");
   await expect(page.getByLabel("その他のカテゴリ")).toHaveValue(
     savedMemoResponse.memo.data.category,
   );
@@ -470,7 +470,7 @@ test("guest の memoId 付き session draft は新規作成として保存し直
   expect(persistedDraft).toMatchObject({
     ownerScope: guestDraftOwnerScope,
     memoId: null,
-    redirectTo: "/memos/new",
+    redirectTo: "/memos/edit",
     currentStep: 2,
   });
 
@@ -490,7 +490,7 @@ test("guest の memoId 付き session draft は URL に memoId を復元しな�
       value: {
         ownerScope: guestDraftOwnerScope,
         memoId: savedMemoResponse.memo.id,
-        redirectTo: "/memos/new",
+        redirectTo: "/memos/edit",
         currentStep: 3,
         data: {
           ...savedMemoResponse.memo.data,
@@ -511,8 +511,8 @@ test("guest の memoId 付き session draft は URL に memoId を復元しな�
     },
   );
 
-  await page.goto("/memos/new");
-  await expect(page).toHaveURL("/memos/new");
+  await page.goto("/memos/edit");
+  await expect(page).toHaveURL("/memos/edit");
 
   await expect(
     page.getByRole("heading", { name: "気になる候補は？" }),
@@ -528,7 +528,7 @@ test("guest の memoId 付き session draft は URL に memoId を復元しな�
 test("新規作成画面では編集中の内容を localStorage へ即時保存する", async ({
   page,
 }) => {
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await page.getByLabel("その他のカテゴリ").fill("モバイルバッテリー");
   await page.getByRole("button", { name: "次へ" }).click();
@@ -542,7 +542,7 @@ test("新規作成画面では編集中の内容を localStorage へ即時保存
   expect(persistedDraft).toMatchObject({
     ownerScope: guestDraftOwnerScope,
     memoId: null,
-    redirectTo: "/memos/new",
+    redirectTo: "/memos/edit",
     currentStep: 2,
     data: {
       category: "モバイルバッテリー",
@@ -566,7 +566,7 @@ test("新規作成画面では新規作成用ドラフトを復元し、他メ�
           value: {
             ownerScope: guestDraftOwnerScope,
             memoId: savedMemoResponse.memo.id,
-            redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
+            redirectTo: `/memos/edit?memoId=${savedMemoResponse.memo.id}`,
             currentStep: 2,
             data: {
               ...savedMemoResponse.memo.data,
@@ -590,7 +590,7 @@ test("新規作成画面では新規作成用ドラフトを復元し、他メ�
           value: {
             ownerScope: guestDraftOwnerScope,
             memoId: null,
-            redirectTo: "/memos/new",
+            redirectTo: "/memos/edit",
             currentStep: 2,
             data: {
               ...savedMemoResponse.memo.data,
@@ -606,7 +606,7 @@ test("新規作成画面では新規作成用ドラフトを復元し、他メ�
     },
   );
 
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await expect(
     page.getByRole("heading", { name: "あなたが重視するポイントは？" }),
@@ -629,7 +629,7 @@ test("未ログインでは memoId キーの localStorage draft を復元しな�
       value: {
         ownerScope: guestDraftOwnerScope,
         memoId: savedMemoResponse.memo.id,
-        redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
+        redirectTo: `/memos/edit?memoId=${savedMemoResponse.memo.id}`,
         currentStep: 3,
         data: {
           ...savedMemoResponse.memo.data,
@@ -650,7 +650,7 @@ test("未ログインでは memoId キーの localStorage draft を復元しな�
     },
   );
 
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await expect(
     page.getByRole("heading", { name: "何を比較する？" }),
@@ -673,7 +673,7 @@ test("guest は user スコープの localStorage ドラフトを復元しない
       value: {
         ownerScope: userDraftOwnerScope,
         memoId: savedMemoResponse.memo.id,
-        redirectTo: `/memos/new?memoId=${savedMemoResponse.memo.id}`,
+        redirectTo: `/memos/edit?memoId=${savedMemoResponse.memo.id}`,
         currentStep: 3,
         data: {
           ...savedMemoResponse.memo.data,
@@ -694,7 +694,7 @@ test("guest は user スコープの localStorage ドラフトを復元しない
     },
   );
 
-  await page.goto("/memos/new");
+  await page.goto("/memos/edit");
 
   await expect(
     page.getByRole("heading", { name: "何を比較する？" }),

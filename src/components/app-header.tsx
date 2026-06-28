@@ -32,10 +32,10 @@ export function AppHeader() {
   const isAuthenticated = status === "authenticated";
   const isLoading = status === "loading";
   const navItems: { href: string; label: string; icon: LucideIcon }[] = [
-    { href: "/memos/new", label: "新規メモ", icon: PlusCircleIcon },
+    { href: "/memos/edit", label: "新規メモ", icon: PlusCircleIcon },
   ];
 
-  if (pathname === "/memos/new") {
+  if (pathname === "/memos/edit") {
     return null;
   }
 
