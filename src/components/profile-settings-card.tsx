@@ -131,7 +131,7 @@ export function ProfileSettingsCard({
                 ) : null}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="submit" disabled={isSaving}>
+                <Button type="submit" disabled={isSaving} variant="default">
                   <PencilLineIcon className="h-4 w-4" />
                   {isSaving ? "保存中..." : "保存"}
                 </Button>

@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 export const size = {
   width: 1200,
@@ -7,61 +9,69 @@ export const size = {
 
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const iconData = await readFile(path.join(process.cwd(), "public/icon.png"));
+  const iconSrc = `data:image/png;base64,${iconData.toString("base64")}`;
+
   return new ImageResponse(
     <div
       style={{
         display: "flex",
         height: "100%",
         width: "100%",
-        background:
-          "linear-gradient(135deg, rgb(12, 18, 32) 0%, rgb(24, 60, 47) 52%, rgb(231, 249, 235) 100%)",
-        color: "rgb(244, 247, 245)",
-        padding: "64px",
+        background: "#010409",
+        color: "#f0f6fc",
         flexDirection: "column",
-        justifyContent: "space-between",
         fontFamily: "sans-serif",
+        border: "20px solid #238636",
       }}
     >
       <div
         style={{
           display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          fontSize: 28,
-          letterSpacing: "0.24em",
-          textTransform: "uppercase",
-          color: "rgba(244, 247, 245, 0.72)",
+          flexDirection: "column",
+          gap: "50px",
+          height: "100%",
+          justifyContent: "center",
+          textAlign: "center",
         }}
       >
-        Compare Better
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <div style={{ fontSize: 76, fontWeight: 700, lineHeight: 1.1 }}>
-          オレの比較メモ
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            justifyContent: "center",
+            textAlign: "center",
+          }}
+        >
+          <img
+            src={iconSrc}
+            width={75}
+            height={75}
+            style={{ verticalAlign: "middle" }}
+          />
+          <div style={{ fontSize: 75, fontWeight: 700 }}>オレの比較メモ</div>
+        </div>
+        <div></div>
+        <div
+          style={{
+            fontSize: 32,
+            color: "rgba(240, 246, 252, 0.8)",
+            justifyContent: "center",
+          }}
+        >
+          あなただけの「選んだ理由」を残しませんか？
         </div>
         <div
           style={{
-            maxWidth: 900,
             fontSize: 32,
-            lineHeight: 1.5,
-            color: "rgba(244, 247, 245, 0.88)",
+            color: "rgba(240, 246, 252, 0.8)",
+            justifyContent: "center",
           }}
         >
-          ガジェットや家電の比較ポイント、評価、最終判断をひとつのメモに整理できる
-          Web アプリ
+          ガジェットや家電の比較過程を整理できるメモアプリ
         </div>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          fontSize: 26,
-          color: "rgba(244, 247, 245, 0.78)",
-        }}
-      >
-        <div>my-hikaku-memo</div>
       </div>
     </div>,
     size,

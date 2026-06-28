@@ -818,16 +818,9 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
   const updateProducts = (products: ComparisonData["products"]) => {
     clearEditorStatus();
-    setData((prev) => {
-      const hasDeletion = products.length < prev.products.length;
-
-      return normalizeComparisonDataToLimits({
-        ...prev,
-        products,
-        selectedProductId:
-          hasDeletion && prev.selectedProductId ? null : prev.selectedProductId,
-      });
-    });
+    setData((prev) =>
+      normalizeComparisonDataToLimits({ ...prev, products }),
+    );
   };
 
   const renderStep = () => {

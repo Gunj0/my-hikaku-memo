@@ -89,11 +89,15 @@ function mapSummary(row: ComparisonMemoSummaryRow): ComparisonMemoSummary {
   };
 }
 
-function mapMemo(row: ComparisonMemoRow): ComparisonMemo {
-  return {
-    ...mapSummary(row),
-    data: comparisonDataSchema.parse(JSON.parse(row.data)),
-  };
+function mapMemo(row: ComparisonMemoRow): ComparisonMemo | null {
+  try {
+    return {
+      ...mapSummary(row),
+      data: comparisonDataSchema.parse(JSON.parse(row.data)),
+    };
+  } catch {
+    return null;
+  }
 }
 
 function mapPublicSummary(
@@ -108,9 +112,15 @@ function mapPublicSummary(
 function mapPublicMemo(
   row: PublicComparisonMemoRow,
   viewerUserId?: string,
-): PublicComparisonMemo {
+): PublicComparisonMemo | null {
+  const memo = mapMemo(row);
+
+  if (!memo) {
+    return null;
+  }
+
   return {
-    ...mapMemo(row),
+    ...memo,
     author: mapAuthor(row),
     isOwner: row.user_id === viewerUserId,
   };
@@ -158,7 +168,7 @@ export async function getComparisonMemo(userId: string, memoId: string) {
     .bind(memoId, userId)
     .first<ComparisonMemoRow>();
 
-  return row ? mapMemo(row) : null;
+  return row ? (mapMemo(row) ?? null) : null;
 }
 
 export async function listRandomComparisonMemos(
@@ -256,7 +266,7 @@ export async function getPublicComparisonMemo(
     .bind(memoId, viewerUserId ?? null)
     .first<PublicComparisonMemoRow>();
 
-  return row ? mapPublicMemo(row, viewerUserId) : null;
+  return row ? (mapPublicMemo(row, viewerUserId) ?? null) : null;
 }
 
 export async function createComparisonMemo(
