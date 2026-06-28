@@ -163,10 +163,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const [memoTitle, setMemoTitle] = useState("");
   const [memoIsPublic, setMemoIsPublic] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoadingMemoId, setIsLoadingMemoId] = useState<string | null>(null);
   const [hasResolvedDraftRestore, setHasResolvedDraftRestore] = useState(false);
   const [editorStatus, setEditorStatus] = useState<EditorStatus | null>(null);
   const latestDraftRef = useRef<PersistedComparisonDraft | null>(null);
+  const autoLoadAttemptedForRef = useRef<string | null>(null);
 
   const isAuthenticated = status === "authenticated";
   const isAuthLoading = status === "loading";
@@ -553,15 +553,15 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     if (
       status === "authenticated" &&
       activeMemo?.id !== initialMemoId &&
-      isLoadingMemoId !== initialMemoId
+      autoLoadAttemptedForRef.current !== initialMemoId
     ) {
+      autoLoadAttemptedForRef.current = initialMemoId;
       void loadMemoById(initialMemoId, { skipConfirm: true });
     }
   }, [
     activeMemo?.id,
     hasResolvedDraftRestore,
     initialMemoId,
-    isLoadingMemoId,
     status,
   ]);
 
@@ -615,8 +615,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       setData(createInitialComparisonData());
       setCurrentStep(1);
       setSavedSnapshot(null);
+      setActiveMemo(null);
       setMemoTitle("");
       setMemoIsPublic(false);
+      replaceEditorUrl(null);
     }
   };
 
@@ -645,7 +647,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       return;
     }
 
-    setIsLoadingMemoId(memoId);
     setEditorStatus(null);
 
     try {
@@ -698,8 +699,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       if (message.includes("ログイン")) {
         setIsAuthDialogOpen(true);
       }
-    } finally {
-      setIsLoadingMemoId(null);
     }
   };
 
