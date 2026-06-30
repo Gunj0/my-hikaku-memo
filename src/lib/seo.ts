@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 
 const DEFAULT_SITE_URL = "http://localhost:3000";
 const SITE_NAME = "オレの比較メモ";
-const DEFAULT_OG_IMAGE = "/opengraph-image";
+const DEFAULT_OG_IMAGE = "/ogp.png";
 
 function normalizeSiteUrl(value?: string) {
   if (!value) {

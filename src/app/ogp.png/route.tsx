@@ -2,18 +2,13 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-export const size = {
-  width: 1200,
-  height: 630,
-};
+export const runtime = "nodejs";
 
-export const contentType = "image/png";
-
-export default async function OpenGraphImage() {
+export async function GET() {
   const iconData = await readFile(path.join(process.cwd(), "public/icon.png"));
   const iconSrc = `data:image/png;base64,${iconData.toString("base64")}`;
 
-  return new ImageResponse(
+  const response = new ImageResponse(
     <div
       style={{
         display: "flex",
@@ -30,12 +25,21 @@ export default async function OpenGraphImage() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "50px",
+          gap: "100px",
           height: "100%",
           justifyContent: "center",
           textAlign: "center",
         }}
       >
+        <div
+          style={{
+            fontSize: 32,
+            color: "rgba(240, 246, 252, 0.8)",
+            justifyContent: "center",
+          }}
+        >
+          「あなたが選んだ理由」を残しませんか？
+        </div>
         <div
           style={{
             display: "flex",
@@ -45,23 +49,15 @@ export default async function OpenGraphImage() {
             textAlign: "center",
           }}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={iconSrc}
             width={75}
             height={75}
             style={{ verticalAlign: "middle" }}
+            alt=""
           />
           <div style={{ fontSize: 75, fontWeight: 700 }}>オレの比較メモ</div>
-        </div>
-        <div></div>
-        <div
-          style={{
-            fontSize: 32,
-            color: "rgba(240, 246, 252, 0.8)",
-            justifyContent: "center",
-          }}
-        >
-          あなただけの「選んだ理由」を残しませんか？
         </div>
         <div
           style={{
@@ -74,6 +70,16 @@ export default async function OpenGraphImage() {
         </div>
       </div>
     </div>,
-    size,
+    {
+      width: 1200,
+      height: 630,
+    },
   );
+
+  return new Response(response.body, {
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=86400, immutable",
+    },
+  });
 }
