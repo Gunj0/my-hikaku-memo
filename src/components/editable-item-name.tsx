@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { type ComponentProps, useEffect, useState } from "react";
+import { type ComponentProps, useState } from "react";
 
 interface EditableItemNameProps extends Omit<
   ComponentProps<typeof Input>,
@@ -21,10 +21,12 @@ export function EditableItemName({
   ...props
 }: EditableItemNameProps) {
   const [draft, setDraft] = useState(value);
+  const [lastSyncedValue, setLastSyncedValue] = useState(value);
 
-  useEffect(() => {
+  if (value !== lastSyncedValue) {
+    setLastSyncedValue(value);
     setDraft(value);
-  }, [value]);
+  }
 
   const commit = () => {
     const trimmedValue = draft.trim();

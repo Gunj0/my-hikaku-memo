@@ -9,13 +9,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## コマンド
 
 ```bash
-pnpm dev          # 開発サーバー起動
-pnpm build        # 本番ビルド（実装後は必ず確認）
-pnpm lint         # ESLint
-pnpm test:e2e     # Playwright E2E テスト（Chromium のみ）
-pnpm test:e2e:ui  # Playwright UI モードで実行
-pnpm preview      # OpenNext Cloudflare プレビュー（PR 前に確認）
-pnpm deploy       # Cloudflare へデプロイ
+pnpm dev              # 開発サーバー起動（ローカル D1 へ migration 適用後に next dev）
+pnpm build            # 本番ビルド（実装後は必ず確認）
+pnpm lint             # ESLint
+pnpm test:e2e         # Playwright E2E テスト（Chromium のみ）
+pnpm test:e2e:ui      # Playwright UI モードで実行
+pnpm preview          # OpenNext Cloudflare プレビュー（PR 前に確認）
+pnpm deploy           # 本番 D1 へ migration 適用後、Cloudflare へデプロイ
+pnpm db:migrate       # 本番 D1 へ migration 適用のみ
+pnpm db:migrate:local # ローカル D1 へ migration 適用のみ
 ```
 
 E2E テストは `tests/e2e/` に配置し、`pnpm dev` が起動済みであれば既存サーバーを再利用する。
@@ -67,7 +69,7 @@ GadgetComparison
 
 - 未保存ドラフトは `localStorage` に退避（guest / ユーザー単位で分離）
 - 保存済みメモは Cloudflare D1 の `comparison_memos` テーブルへ保存（`data` カラムに `ComparisonData` を JSON シリアライズ）
-- DB スキーマは `ensureDatabaseSetup`（`src/lib/server/database.ts`）が初回アクセス時に自動作成
+- DB スキーマは `migrations/` の SQL が唯一の正。スキーマ変更時は新しい migration ファイルを追加し、`pnpm db:migrate:local`（ローカル）/ `pnpm db:migrate`（本番、`pnpm deploy` にも組み込み済み）で適用する
 
 ### バリデーション
 

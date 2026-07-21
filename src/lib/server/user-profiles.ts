@@ -1,7 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-import { ensureDatabaseSetup } from "@/lib/server/database";
-
 type UserProfileRow = {
   id: string;
   name: string | null;
@@ -53,13 +51,10 @@ function getAvatarSvg(userId: string) {
   `.trim();
 }
 
-async function getDatabase() {
+function getDatabase() {
   const { env } = getCloudflareContext();
-  const database = (env as CloudflareEnv & { DB: D1Database }).DB;
 
-  await ensureDatabaseSetup(database);
-
-  return database;
+  return (env as CloudflareEnv & { DB: D1Database }).DB;
 }
 
 export function getDefaultUserName(userId: string) {
@@ -171,19 +166,19 @@ export async function updateUserProfileNameRecord(
 }
 
 export async function getUserProfile(userId: string) {
-  const database = await getDatabase();
+  const database = getDatabase();
 
   return getUserProfileRecord(database, userId);
 }
 
 export async function ensureUserProfile(userId: string) {
-  const database = await getDatabase();
+  const database = getDatabase();
 
   return ensureUserProfileRecord(database, userId);
 }
 
 export async function updateUserProfileName(userId: string, name: string) {
-  const database = await getDatabase();
+  const database = getDatabase();
 
   return updateUserProfileNameRecord(database, userId, name);
 }

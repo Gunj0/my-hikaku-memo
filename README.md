@@ -65,6 +65,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:8787
 1. D1 データベースを作成する
 2. wrangler.jsonc の database_id を実際の ID に置き換える
 3. Cloudflare の secret に AUTH_SECRET、AUTH_GOOGLE_ID、AUTH_GOOGLE_SECRET を登録する
+4. `pnpm db:migrate` でスキーマ（`migrations/` の SQL）を適用する
+
+スキーマは `migrations/` のマイグレーションで管理します。ローカル開発用 D1 へは `pnpm dev` 起動時に自動適用されます（単体実行は `pnpm db:migrate:local`）。本番へは `pnpm deploy` 時に自動適用されます。
 
 ## 開発用コマンド
 

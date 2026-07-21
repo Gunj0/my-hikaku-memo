@@ -5,7 +5,6 @@ import {
   comparisonMemoPayloadSchema,
   type ComparisonMemoPayload,
 } from "@/lib/comparison-schemas";
-import { ensureDatabaseSetup } from "@/lib/server/database";
 import {
   ensureUserProfile,
   getDefaultUserName,
@@ -48,13 +47,10 @@ type PublicComparisonMemoSitemapRow = {
   updated_at: number;
 };
 
-async function getDatabase() {
+function getDatabase() {
   const { env } = getCloudflareContext();
-  const database = (env as CloudflareEnv & { DB: D1Database }).DB;
 
-  await ensureDatabaseSetup(database);
-
-  return database;
+  return (env as CloudflareEnv & { DB: D1Database }).DB;
 }
 
 function toIsoString(timestamp: number) {
@@ -139,7 +135,7 @@ function normalizePayload(payload: ComparisonMemoPayload) {
 }
 
 export async function listComparisonMemos(userId: string) {
-  const database = await getDatabase();
+  const database = getDatabase();
   const result = await database
     .prepare(
       `
@@ -162,7 +158,7 @@ export async function getComparisonMemo(userId: string, memoId: string) {
     return null;
   }
 
-  const database = await getDatabase();
+  const database = getDatabase();
   const row = await database
     .prepare(
       `
@@ -182,7 +178,7 @@ export async function listRandomComparisonMemos(
   limit: number,
   excludeUserId?: string,
 ) {
-  const database = await getDatabase();
+  const database = getDatabase();
   const result = await database
     .prepare(
       `
@@ -202,7 +198,7 @@ export async function listRandomComparisonMemos(
 }
 
 export async function listPublicComparisonMemos(limit?: number) {
-  const database = await getDatabase();
+  const database = getDatabase();
   const query =
     typeof limit === "number"
       ? database
@@ -235,7 +231,7 @@ export async function listPublicComparisonMemos(limit?: number) {
 }
 
 export async function listPublicComparisonMemoSitemapEntries() {
-  const database = await getDatabase();
+  const database = getDatabase();
   const result = await database
     .prepare(
       `
@@ -263,7 +259,7 @@ export async function getPublicComparisonMemo(
     return null;
   }
 
-  const database = await getDatabase();
+  const database = getDatabase();
   const row = await database
     .prepare(
       `
@@ -288,7 +284,7 @@ export async function createComparisonMemo(
 ) {
   await ensureUserProfile(userId);
 
-  const database = await getDatabase();
+  const database = getDatabase();
   const normalized = normalizePayload(payload);
   const now = Date.now();
   const memoId = crypto.randomUUID();
@@ -337,7 +333,7 @@ export async function updateComparisonMemo(
     return null;
   }
 
-  const database = await getDatabase();
+  const database = getDatabase();
   const normalized = normalizePayload(payload);
   const now = Date.now();
 
@@ -378,7 +374,7 @@ export async function deleteComparisonMemo(userId: string, memoId: string) {
     return false;
   }
 
-  const database = await getDatabase();
+  const database = getDatabase();
   const result = await database
     .prepare(
       `

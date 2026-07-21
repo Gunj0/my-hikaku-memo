@@ -11,18 +11,15 @@ type DecisionPointImportanceIconProps = {
   className?: string;
 };
 
-function renderIcon(iconName: DecisionPointImportanceIconName) {
-  switch (iconName) {
-    case "circle-alert":
-      return CircleAlertIcon;
-    case "circle":
-      return CircleIcon;
-    case "triangle":
-      return TriangleIcon;
-    case "x":
-      return XIcon;
-  }
-}
+const IMPORTANCE_ICONS: Record<
+  DecisionPointImportanceIconName,
+  typeof CircleIcon
+> = {
+  "circle-alert": CircleAlertIcon,
+  circle: CircleIcon,
+  triangle: TriangleIcon,
+  x: XIcon,
+};
 
 export function DecisionPointImportanceIcon({
   weight,
@@ -34,7 +31,7 @@ export function DecisionPointImportanceIcon({
     return null;
   }
 
-  const Icon = renderIcon(option.icon);
+  const Icon = IMPORTANCE_ICONS[option.icon];
 
   return (
     <span title={option.message} aria-label={option.message}>

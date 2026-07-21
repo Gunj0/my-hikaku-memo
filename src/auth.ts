@@ -3,7 +3,6 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-import { ensureDatabaseSetup } from "@/lib/server/database";
 import { ensureUserProfileRecord } from "@/lib/server/user-profiles";
 
 export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
@@ -15,8 +14,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
     AUTH_GOOGLE_SECRET: string;
   };
   const database = authEnv.DB;
-
-  await ensureDatabaseSetup(database);
 
   const adapter = D1Adapter(database);
   const createUser = adapter.createUser;

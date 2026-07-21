@@ -170,7 +170,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
   const isAuthenticated = status === "authenticated";
   const isAuthLoading = status === "loading";
-  const progressPercent = Math.round((currentStep / STEPS.length) * 100);
   const redirectTo = (() => {
     const query = searchParams.toString();
 
@@ -323,6 +322,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     savedSnapshot,
   ]);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- localStorage からの復元はハイドレーション後にしか実行できない */
   useEffect(() => {
     if (
       typeof window === "undefined" ||
@@ -480,6 +480,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     searchParams,
     status,
   ]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (
@@ -536,6 +537,81 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     savedSnapshot,
   ]);
 
+  const loadMemoById = async (
+    memoId: string,
+    options?: {
+      skipConfirm?: boolean;
+    },
+  ) => {
+    if (!isAuthenticated) {
+      setIsAuthDialogOpen(true);
+      return;
+    }
+
+    if (
+      !options?.skipConfirm &&
+      activeMemo?.id !== memoId &&
+      hasMeaningfulComparisonData(data) &&
+      !confirm("現在の編集中内容を保存せずに置き換えます。よろしいですか？")
+    ) {
+      return;
+    }
+
+    setEditorStatus(null);
+
+    try {
+      const response = await fetch(`/api/memos/${memoId}`, {
+        cache: "no-store",
+      });
+      const { memo } = await readResponse<MemoDetailResponse>(response);
+      const summary = {
+        id: memo.id,
+        title: memo.title,
+        category: memo.category,
+        isPublic: memo.isPublic,
+        createdAt: memo.createdAt,
+        updatedAt: memo.updatedAt,
+      } satisfies ComparisonMemoSummary;
+      const restoredData = cloneComparisonData(memo.data);
+      const restoredStep = getInitialStepForComparisonData(memo.data);
+
+      persistDraftToLocal(
+        buildDraft({
+          currentStep: restoredStep,
+          data: restoredData,
+          savedSnapshot: restoredData,
+          activeMemo: summary,
+          memoTitle: memo.title,
+          memoIsPublic: memo.isPublic,
+        }),
+      );
+      setData(restoredData);
+      setSavedSnapshot(cloneComparisonData(memo.data));
+      setCurrentStep(restoredStep);
+      setActiveMemo(summary);
+      setMemoTitle(memo.title);
+      setMemoIsPublic(memo.isPublic);
+      replaceEditorUrl(summary.id);
+      setEditorStatus({
+        tone: "success",
+        message: "保存済みメモを読み込みました。",
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "保存済みメモを読み込めませんでした。";
+      setEditorStatus({
+        tone: "error",
+        message,
+      });
+
+      if (message.includes("ログイン")) {
+        setIsAuthDialogOpen(true);
+      }
+    }
+  };
+
   useEffect(() => {
     if (!hasResolvedDraftRestore) {
       return;
@@ -546,6 +622,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     }
 
     if (status === "unauthenticated") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 認証状態確定後にのみ判定できるため effect 内で開く
       setIsAuthDialogOpen(true);
       return;
     }
@@ -625,81 +702,6 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
   const handleSignIn = async () => {
     persistDraftForAuthRedirect();
     await signIn("google", { redirectTo });
-  };
-
-  const loadMemoById = async (
-    memoId: string,
-    options?: {
-      skipConfirm?: boolean;
-    },
-  ) => {
-    if (!isAuthenticated) {
-      setIsAuthDialogOpen(true);
-      return;
-    }
-
-    if (
-      !options?.skipConfirm &&
-      activeMemo?.id !== memoId &&
-      hasMeaningfulComparisonData(data) &&
-      !confirm("現在の編集中内容を保存せずに置き換えます。よろしいですか？")
-    ) {
-      return;
-    }
-
-    setEditorStatus(null);
-
-    try {
-      const response = await fetch(`/api/memos/${memoId}`, {
-        cache: "no-store",
-      });
-      const { memo } = await readResponse<MemoDetailResponse>(response);
-      const summary = {
-        id: memo.id,
-        title: memo.title,
-        category: memo.category,
-        isPublic: memo.isPublic,
-        createdAt: memo.createdAt,
-        updatedAt: memo.updatedAt,
-      } satisfies ComparisonMemoSummary;
-      const restoredData = cloneComparisonData(memo.data);
-      const restoredStep = getInitialStepForComparisonData(memo.data);
-
-      persistDraftToLocal(
-        buildDraft({
-          currentStep: restoredStep,
-          data: restoredData,
-          savedSnapshot: restoredData,
-          activeMemo: summary,
-          memoTitle: memo.title,
-          memoIsPublic: memo.isPublic,
-        }),
-      );
-      setData(restoredData);
-      setSavedSnapshot(cloneComparisonData(memo.data));
-      setCurrentStep(restoredStep);
-      setActiveMemo(summary);
-      setMemoTitle(memo.title);
-      setMemoIsPublic(memo.isPublic);
-      replaceEditorUrl(summary.id);
-      setEditorStatus({
-        tone: "success",
-        message: "保存済みメモを読み込みました。",
-      });
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "保存済みメモを読み込めませんでした。";
-      setEditorStatus({
-        tone: "error",
-        message,
-      });
-
-      if (message.includes("ログイン")) {
-        setIsAuthDialogOpen(true);
-      }
-    }
   };
 
   const handleOpenSaveDialog = () => {

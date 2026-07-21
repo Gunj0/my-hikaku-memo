@@ -38,7 +38,6 @@ interface ProductsStepProps {
 }
 
 interface SortableProductItemProps {
-  index: number;
   product: Product;
   onNameChange: (name: string) => void;
   onRemove: () => void;
@@ -46,7 +45,6 @@ interface SortableProductItemProps {
 }
 
 function SortableProductItem({
-  index,
   product,
   onNameChange,
   onRemove,
@@ -209,10 +207,9 @@ export function ProductsStep({
             strategy={verticalListSortingStrategy}
           >
             <div className="space-y-3">
-              {products.map((product, index) => (
+              {products.map((product) => (
                 <SortableProductItem
                   key={product.id}
-                  index={index}
                   product={product}
                   onNameChange={(name) => updateProduct(product.id, { name })}
                   onRemove={() => removeProduct(product.id)}
