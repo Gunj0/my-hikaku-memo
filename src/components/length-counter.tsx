@@ -14,7 +14,7 @@ export function LengthCounter({ current, max, className }: LengthCounterProps) {
         className,
       )}
     >
-      {current}/{max}文字
+      {current}/{max}
     </p>
   );
 }
