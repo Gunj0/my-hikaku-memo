@@ -38,9 +38,17 @@ E2E テストは `tests/e2e/` に配置し、`pnpm dev` が起動済みであれ
 /memos/edit                 → 比較編集フロー（クライアントコンポーネント中心）
 /memos/[memoId]            → メモ閲覧（SSR）
 /memos                     → 保存済みメモ一覧（要ログイン、SSR）
-/api/memos                 → POST/PUT/DELETE（Route Handler）
+/settings                  → アカウント設定（表示名・ユーザーID・ログアウト、SSR）
+/terms, /privacy, /commercial-disclosure → 法務ページ（静的）
+/api/memos                 → GET/POST、/api/memos/[memoId] は GET/PUT/DELETE
+/api/profile               → PATCH（表示ユーザー名・ユーザーID 更新）
 /api/auth/[...nextauth]    → Auth.js ハンドラ
+/robots.txt, /sitemap.xml  → src/app/robots.ts, src/app/sitemap.ts
 ```
+
+URL の詳細（認証要否、クエリ、インデックス方針）は `docs/11_URL設計.md` を参照する。
+
+**トップレベルのパスを追加する場合は、`src/lib/username.ts` の `RESERVED_USERNAMES` にも同じ語を追加する。** ユーザーID（`users.username`）は将来 `/{username}` としてルート直下を占有するため、予約漏れは既存ユーザーの URL を奪う。
 
 ### 比較フローの構造
 

@@ -86,6 +86,8 @@ export interface ComparisonMemo extends ComparisonMemoSummary {
 export interface ComparisonMemoAuthor {
   id: string;
   name: string | null;
+  /** URL ハンドル。`/{username}/{memoId}` の組み立てに用いる。 */
+  username: string;
   image: string | null;
 }
 

@@ -10,6 +10,7 @@ import {
   getDefaultUserName,
   getUserAvatarDataUri,
 } from "@/lib/server/user-profiles";
+import { generateDefaultUsername, normalizeUsername } from "@/lib/username";
 import type {
   ComparisonMemo,
   ComparisonMemoAuthor,
@@ -34,18 +35,25 @@ type ComparisonMemoSummaryRow = Omit<ComparisonMemoRow, "data">;
 
 type PublicComparisonMemoSummaryRow = ComparisonMemoSummaryRow & {
   user_name: string | null;
+  user_username: string | null;
   user_profile_initialized: number | null;
 };
 
 type PublicComparisonMemoRow = ComparisonMemoRow & {
   user_name: string | null;
+  user_username: string | null;
   user_profile_initialized: number | null;
 };
 
 type PublicComparisonMemoSitemapRow = {
   public_id: number;
   updated_at: number;
+  user_id: string;
+  user_username: string | null;
 };
+
+/** 公開メモを持つユーザーの JOIN 句。全ての公開系クエリで共通。 */
+const AUTHOR_COLUMNS = `u.name AS user_name, u.username AS user_username, u.profile_initialized AS user_profile_initialized`;
 
 function getDatabase() {
   const { env } = getCloudflareContext();
@@ -60,7 +68,7 @@ function toIsoString(timestamp: number) {
 function mapAuthor(
   row: Pick<
     PublicComparisonMemoSummaryRow,
-    "user_id" | "user_name" | "user_profile_initialized"
+    "user_id" | "user_name" | "user_username" | "user_profile_initialized"
   >,
 ): ComparisonMemoAuthor {
   const normalizedName = row.user_name?.trim();
@@ -71,8 +79,20 @@ function mapAuthor(
       row.user_profile_initialized === 1 && normalizedName
         ? normalizedName
         : getDefaultUserName(row.user_id),
+    username: resolveAuthorUsername(row.user_id, row.user_username),
     image: getUserAvatarDataUri(row.user_id),
   };
+}
+
+/**
+ * username 未採番の行に対する既定値。
+ * ensureUserProfile が採番するため通常は NULL にならないが、
+ * 読み取り経路が採番前の行に当たっても URL を組み立てられるようにする。
+ */
+function resolveAuthorUsername(userId: string, username: string | null) {
+  const normalized = username ? normalizeUsername(username) : "";
+
+  return normalized || generateDefaultUsername(userId);
 }
 
 function mapSummary(row: ComparisonMemoSummaryRow): ComparisonMemoSummary {
@@ -183,7 +203,7 @@ export async function listRandomComparisonMemos(
     .prepare(
       `
         SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
-           u.name AS user_name, u.profile_initialized AS user_profile_initialized
+           ${AUTHOR_COLUMNS}
         FROM comparison_memos AS m
         LEFT JOIN users AS u ON u.id = m.user_id
         WHERE m.is_public = 1 AND (?1 IS NULL OR m.user_id != ?1)
@@ -205,7 +225,7 @@ export async function listPublicComparisonMemos(limit?: number) {
           .prepare(
             `
               SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
-                 u.name AS user_name, u.profile_initialized AS user_profile_initialized
+                 ${AUTHOR_COLUMNS}
               FROM comparison_memos AS m
               LEFT JOIN users AS u ON u.id = m.user_id
               WHERE m.is_public = 1
@@ -217,7 +237,7 @@ export async function listPublicComparisonMemos(limit?: number) {
       : database.prepare(
           `
             SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
-               u.name AS user_name, u.profile_initialized AS user_profile_initialized
+               ${AUTHOR_COLUMNS}
             FROM comparison_memos AS m
             LEFT JOIN users AS u ON u.id = m.user_id
             WHERE m.is_public = 1
@@ -235,18 +255,53 @@ export async function listPublicComparisonMemoSitemapEntries() {
   const result = await database
     .prepare(
       `
-        SELECT public_id, updated_at
-        FROM comparison_memos
-        WHERE is_public = 1
-        ORDER BY updated_at DESC
+        SELECT m.public_id, m.updated_at, m.user_id, u.username AS user_username
+        FROM comparison_memos AS m
+        LEFT JOIN users AS u ON u.id = m.user_id
+        WHERE m.is_public = 1
+        ORDER BY m.updated_at DESC
       `,
     )
     .all<PublicComparisonMemoSitemapRow>();
 
   return result.results.map((row) => ({
     id: String(row.public_id),
+    username: resolveAuthorUsername(row.user_id, row.user_username),
     updatedAt: toIsoString(row.updated_at),
   }));
+}
+
+/**
+ * `/{username}` 用の一覧。
+ * 閲覧者が本人の場合のみ非公開メモも含める。
+ */
+export async function listComparisonMemosByUsername(
+  username: string,
+  viewerUserId?: string,
+) {
+  const normalized = normalizeUsername(username);
+
+  if (!normalized) {
+    return [];
+  }
+
+  const database = getDatabase();
+  const result = await database
+    .prepare(
+      `
+        SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
+           ${AUTHOR_COLUMNS}
+        FROM comparison_memos AS m
+        INNER JOIN users AS u ON u.id = m.user_id
+        WHERE u.username = ?1 COLLATE NOCASE
+          AND (m.is_public = 1 OR (?2 IS NOT NULL AND m.user_id = ?2))
+        ORDER BY m.updated_at DESC
+      `,
+    )
+    .bind(normalized, viewerUserId ?? null)
+    .all<PublicComparisonMemoSummaryRow>();
+
+  return result.results.map(mapPublicSummary);
 }
 
 export async function getPublicComparisonMemo(
@@ -264,7 +319,7 @@ export async function getPublicComparisonMemo(
     .prepare(
       `
         SELECT m.id, m.user_id, m.title, m.category, m.data, m.is_public, m.public_id, m.created_at, m.updated_at,
-           u.name AS user_name, u.profile_initialized AS user_profile_initialized
+           ${AUTHOR_COLUMNS}
         FROM comparison_memos AS m
         LEFT JOIN users AS u ON u.id = m.user_id
         WHERE m.public_id = ?1

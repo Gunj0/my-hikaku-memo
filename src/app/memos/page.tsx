@@ -2,8 +2,6 @@ import Link from "next/link";
 
 import { auth } from "@/auth";
 import { DeleteMemoButton } from "@/components/delete-memo-button";
-import { ProfileSettingsCard } from "@/components/profile-settings-card";
-import { SignOutButton } from "@/components/sign-out-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,15 +12,12 @@ import {
 } from "@/components/ui/card";
 import { buildMetadata, getRequestSiteUrl } from "@/lib/seo";
 import { listComparisonMemos } from "@/lib/server/comparison-memos";
-import {
-  USER_PROFILE_NAME_MAX_LENGTH,
-  ensureUserProfile,
-} from "@/lib/server/user-profiles";
+import { ensureUserProfile } from "@/lib/server/user-profiles";
 import {
   ArrowRightIcon,
   EyeIcon,
-  LogOutIcon,
   PlusCircleIcon,
+  SettingsIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -80,7 +75,9 @@ export default async function MemosPage() {
   }
 
   const memos = await listComparisonMemos(userId);
-  const profile = await ensureUserProfile(userId);
+
+  // username の採番漏れを防ぐため、マイページ到達時にも確実に通す。
+  await ensureUserProfile(userId);
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
@@ -95,20 +92,14 @@ export default async function MemosPage() {
               新しいメモを作る
             </Link>
           </Button>
-          <SignOutButton variant="secondary" size="default">
-            <LogOutIcon className="h-4 w-4" />
-            ログアウト
-          </SignOutButton>
+          <Button asChild variant="secondary">
+            <Link href="/settings">
+              <SettingsIcon className="h-4 w-4" />
+              アカウント設定
+            </Link>
+          </Button>
         </div>
       </section>
-
-      {profile ? (
-        <ProfileSettingsCard
-          initialName={profile.name}
-          image={profile.image}
-          maxLength={USER_PROFILE_NAME_MAX_LENGTH}
-        />
-      ) : null}
 
       <div>
         <h1 className="text-lg font-semibold">比較メモ</h1>

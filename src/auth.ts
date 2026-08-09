@@ -91,6 +91,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
 
           session.user.id = user.id;
           session.user.name = profile?.name ?? session.user.name;
+          session.user.username = profile?.username ?? session.user.username;
           session.user.image = profile?.image ?? session.user.image;
         }
 
