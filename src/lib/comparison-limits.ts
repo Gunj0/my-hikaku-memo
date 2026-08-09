@@ -1,8 +1,8 @@
 import { normalizeDecisionPointWeight, type ComparisonData } from "@/lib/types";
 
 export const COMPARISON_ID_MAX_LENGTH = 128;
-export const COMPARISON_SHORT_TEXT_MAX_LENGTH = 120;
-export const COMPARISON_MEMO_TEXT_MAX_LENGTH = 5_000;
+export const COMPARISON_SHORT_TEXT_MAX_LENGTH = 30;
+export const COMPARISON_MEMO_TEXT_MAX_LENGTH = 500;
 export const COMPARISON_DECISION_POINTS_MAX_COUNT = 30;
 export const COMPARISON_PRODUCTS_MAX_COUNT = 30;
 export const COMPARISON_SCORES_MAX_COUNT =

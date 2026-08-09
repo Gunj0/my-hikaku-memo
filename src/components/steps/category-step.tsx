@@ -1,5 +1,6 @@
 "use client";
 
+import { LengthCounter } from "@/components/length-counter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -78,31 +79,43 @@ export function CategoryStep({
       <div className="space-y-3">
         <Label htmlFor="custom-category">その他のカテゴリ</Label>
         <div className="flex gap-2">
-          <Input
-            id="custom-category"
-            placeholder="カテゴリ名を入力..."
-            value={customCategoryValue}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-            className={cn(
-              "flex-1 border-foreground/20",
-              hasCustomCategoryValue &&
-                "border-primary bg-primary/5 ring-2 ring-primary ring-offset-2 ring-offset-background",
-            )}
-          />
+          <div className="flex-1 space-y-1">
+            <Input
+              id="custom-category"
+              placeholder="カテゴリ名を入力..."
+              value={customCategoryValue}
+              onChange={(e) => onCategoryChange(e.target.value)}
+              maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+              className={cn(
+                "flex-1 border-foreground/20",
+                hasCustomCategoryValue &&
+                  "border-primary bg-primary/5 ring-2 ring-primary ring-offset-2 ring-offset-background",
+              )}
+            />
+            <LengthCounter
+              current={customCategoryValue.length}
+              max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            />
+          </div>
         </div>
       </div>
 
       <div className="space-y-3">
         <Label htmlFor="category-memo">メモ（任意）</Label>
-        <Textarea
-          id="category-memo"
-          placeholder="購入の背景、予算感、利用シーンなど自由にメモ..."
-          value={categoryMemo}
-          onChange={(e) => onMemoChange(e.target.value)}
-          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-          className="min-h-30 resize-none border-foreground/20"
-        />
+        <div className="space-y-1">
+          <Textarea
+            id="category-memo"
+            placeholder="購入の背景、予算感、利用シーンなど自由にメモ..."
+            value={categoryMemo}
+            onChange={(e) => onMemoChange(e.target.value)}
+            maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+            className="min-h-30 resize-none border-foreground/20"
+          />
+          <LengthCounter
+            current={categoryMemo.length}
+            max={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+          />
+        </div>
       </div>
     </div>
   );

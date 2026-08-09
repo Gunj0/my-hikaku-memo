@@ -1,13 +1,11 @@
 "use client";
 
+import { LengthCounter } from "@/components/length-counter";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { COMPARISON_MEMO_TEXT_MAX_LENGTH } from "@/lib/comparison-limits";
-import {
-  getTopTotalScore,
-  rankProductTotals,
-} from "@/lib/comparison-scoring";
+import { getTopTotalScore, rankProductTotals } from "@/lib/comparison-scoring";
 import { DecisionPoint, Product, ProductScore } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CheckCircle2Icon, PartyPopperIcon, TrophyIcon } from "lucide-react";
@@ -124,14 +122,20 @@ export function DecisionStep({
 
       <div className="space-y-3">
         <Label htmlFor="decision-memo">決定理由・メモ</Label>
-        <Textarea
-          id="decision-memo"
-          placeholder="この製品を選んだ理由、購入予定日、注意点など..."
-          value={decisionMemo}
-          onChange={(e) => onMemoChange(e.target.value)}
-          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-          className="min-h-37.5 resize-none border-foreground/20"
-        />
+        <div className="space-y-1">
+          <Textarea
+            id="decision-memo"
+            placeholder="この製品を選んだ理由、購入予定日、注意点など..."
+            value={decisionMemo}
+            onChange={(e) => onMemoChange(e.target.value)}
+            maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+            className="min-h-37.5 resize-none border-foreground/20"
+          />
+          <LengthCounter
+            current={decisionMemo.length}
+            max={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+          />
+        </div>
       </div>
     </div>
   );

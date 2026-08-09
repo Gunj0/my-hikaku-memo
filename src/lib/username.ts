@@ -6,8 +6,8 @@
  * - ルート直下の静的ルートおよび将来追加しうるパスを予約語として拒否する
  */
 
-export const USERNAME_MIN_LENGTH = 3;
-export const USERNAME_MAX_LENGTH = 20;
+export const USERNAME_MIN_LENGTH = 5;
+export const USERNAME_MAX_LENGTH = 15;
 
 /** 英小文字・数字で始まり、途中に `-` / `_` を単独で挟め、英数字で終わる。 */
 const USERNAME_PATTERN = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
@@ -132,7 +132,10 @@ export function validateUsername(value: string): UsernameValidationResult {
  * migration 0002 のバックフィルと同じ規則で、id のハイフンを除いた先頭 8 文字を用いる。
  */
 export function generateDefaultUsername(userId: string): string {
-  const suffix = userId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8).toLowerCase();
+  const suffix = userId
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .slice(0, 8)
+    .toLowerCase();
 
   return `user-${suffix || "00000000"}`;
 }

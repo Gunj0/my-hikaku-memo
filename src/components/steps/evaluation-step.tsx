@@ -2,6 +2,7 @@
 
 import { DecisionPointImportanceIcon } from "@/components/decision-point-importance-icon";
 import { EditableItemName } from "@/components/editable-item-name";
+import { LengthCounter } from "@/components/length-counter";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -125,7 +126,7 @@ function SortableMobilePointSection({
       )}
     >
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex min-w-0 flex-1 items-start gap-2">
           <Button
             type="button"
             variant="ghost"
@@ -137,13 +138,19 @@ function SortableMobilePointSection({
           >
             <GripVerticalIcon className="w-4 h-4" />
           </Button>
-          <EditableItemName
-            value={point.name}
-            onCommit={onNameChange}
-            aria-label="ポイント名を編集"
-            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-            className="h-8 border-0 bg-transparent px-0 text-sm font-medium shadow-none"
-          />
+          <div className="min-w-0 flex-1 space-y-1">
+            <EditableItemName
+              value={point.name}
+              onCommit={onNameChange}
+              aria-label="ポイント名を編集"
+              maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+              className="h-8 border-0 bg-transparent px-0 text-sm font-medium shadow-none"
+            />
+            <LengthCounter
+              current={point.name.length}
+              max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            />
+          </div>
         </div>
         <span className="inline-flex shrink-0 items-center text-muted-foreground">
           <DecisionPointImportanceIcon weight={point.weight} />
@@ -168,13 +175,19 @@ function SortableMobilePointSection({
           </button>
         ))}
       </div>
-      <Textarea
-        placeholder="メモ..."
-        value={scoreData?.memo || ""}
-        onChange={(e) => onMemoChange(e.target.value)}
-        maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-        className="min-h-15 resize-none text-sm"
-      />
+      <div className="space-y-1">
+        <Textarea
+          placeholder="メモ..."
+          value={scoreData?.memo || ""}
+          onChange={(e) => onMemoChange(e.target.value)}
+          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+          className="min-h-15 resize-none text-sm"
+        />
+        <LengthCounter
+          current={(scoreData?.memo || "").length}
+          max={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+        />
+      </div>
     </div>
   );
 }
@@ -211,7 +224,7 @@ function SortableMobileProductCard({
         isDragging && "z-10 opacity-80 shadow-lg",
       )}
     >
-      <div className="bg-secondary p-4 flex items-center gap-2">
+      <div className="bg-secondary p-4 flex items-start gap-2">
         <Button
           type="button"
           variant="ghost"
@@ -223,13 +236,19 @@ function SortableMobileProductCard({
         >
           <GripVerticalIcon className="w-4 h-4" />
         </Button>
-        <EditableItemName
-          value={product.name}
-          onCommit={(name) => onProductNameChange(product.id, name)}
-          aria-label="候補名を編集"
-          maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-          className="h-8 border-0 bg-transparent px-0 font-medium shadow-none"
-        />
+        <div className="min-w-0 flex-1 space-y-1">
+          <EditableItemName
+            value={product.name}
+            onCommit={(name) => onProductNameChange(product.id, name)}
+            aria-label="候補名を編集"
+            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            className="h-8 border-0 bg-transparent px-0 font-medium shadow-none"
+          />
+          <LengthCounter
+            current={product.name.length}
+            max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+          />
+        </div>
       </div>
       <DndContext
         sensors={pointSensors}
@@ -290,7 +309,7 @@ function SortableProductHeader({
         isDragging && "bg-card",
       )}
     >
-      <div className="flex h-8 items-start justify-center gap-2 min-w-0">
+      <div className="flex items-start justify-center gap-2 min-w-0">
         <Button
           type="button"
           variant="ghost"
@@ -302,13 +321,19 @@ function SortableProductHeader({
         >
           <GripVerticalIcon className="w-4 h-4 rotate-90" />
         </Button>
-        <EditableItemName
-          value={product.name}
-          onCommit={onNameChange}
-          aria-label="候補名を編集"
-          maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-          className="h-8 bg-background text-left"
-        />
+        <div className="min-w-0 flex-1 space-y-1">
+          <EditableItemName
+            value={product.name}
+            onCommit={onNameChange}
+            aria-label="候補名を編集"
+            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            className="h-8 bg-background text-left"
+          />
+          <LengthCounter
+            current={product.name.length}
+            max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+          />
+        </div>
       </div>
     </TableHead>
   );
@@ -349,7 +374,7 @@ function SortablePointRow({
           isDragging && "bg-card",
         )}
       >
-        <div className="flex items-start gap-2 min-w-0">
+        <div className="flex min-w-0 flex-1 items-start gap-2">
           <Button
             type="button"
             variant="ghost"
@@ -361,13 +386,19 @@ function SortablePointRow({
           >
             <GripVerticalIcon className="w-4 h-4" />
           </Button>
-          <EditableItemName
-            value={point.name}
-            onCommit={onNameChange}
-            aria-label="ポイント名を編集"
-            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-            className="h-auto min-h-8 bg-background leading-5"
-          />
+          <div className="min-w-0 flex-1 space-y-1">
+            <EditableItemName
+              value={point.name}
+              onCommit={onNameChange}
+              aria-label="ポイント名を編集"
+              maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+              className="h-auto min-h-8 bg-background leading-5"
+            />
+            <LengthCounter
+              current={point.name.length}
+              max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            />
+          </div>
         </div>
       </TableCell>
       <TableCell className="text-center">
@@ -405,15 +436,21 @@ function SortablePointRow({
                   </button>
                 ))}
               </div>
-              <Textarea
-                placeholder="メモ..."
-                value={scoreData?.memo || ""}
-                onChange={(e) =>
-                  onMemoChange(product.id, point.id, e.target.value)
-                }
-                maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-                className="min-h-12.5 resize-none text-xs"
-              />
+              <div className="space-y-1">
+                <Textarea
+                  placeholder="メモ..."
+                  value={scoreData?.memo || ""}
+                  onChange={(e) =>
+                    onMemoChange(product.id, point.id, e.target.value)
+                  }
+                  maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+                  className="min-h-12.5 resize-none text-xs"
+                />
+                <LengthCounter
+                  current={(scoreData?.memo || "").length}
+                  max={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+                />
+              </div>
             </div>
           </TableCell>
         );

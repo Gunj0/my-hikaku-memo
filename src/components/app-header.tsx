@@ -96,7 +96,10 @@ export function AppHeader() {
                 <Avatar className="size-8 border border-border/70">
                   <AvatarImage
                     src={session?.user?.image ?? undefined}
-                    alt={getDisplayName(session?.user?.name, USER_NAME_FALLBACK)}
+                    alt={getDisplayName(
+                      session?.user?.name,
+                      USER_NAME_FALLBACK,
+                    )}
                   />
                   <AvatarFallback>
                     {getUserInitials(session?.user?.name, USER_NAME_FALLBACK)}
@@ -133,7 +136,7 @@ export function AppHeader() {
                     無料で作り始められます
                   </DialogTitle>
                   <DialogDescription className="text-center">
-                    ログインすると、比較メモを保存して見返すことができます。
+                    あなただけの比較メモを保存して見返しましょう
                   </DialogDescription>
                 </DialogHeader>
                 <GoogleSignInButton

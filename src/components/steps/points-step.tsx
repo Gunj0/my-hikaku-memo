@@ -2,6 +2,7 @@
 
 import { DecisionPointImportanceIcon } from "@/components/decision-point-importance-icon";
 import { EditableItemName } from "@/components/editable-item-name";
+import { LengthCounter } from "@/components/length-counter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -118,13 +119,19 @@ function SortablePointItem({
             })}
           </div>
 
-          <EditableItemName
-            value={point.name}
-            onCommit={(name) => onUpdate({ name })}
-            aria-label="ポイント名を編集"
-            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-            className="h-9 flex-1 bg-background text-sm font-medium sm:text-base"
-          />
+          <div className="min-w-0 flex-1 space-y-1">
+            <EditableItemName
+              value={point.name}
+              onCommit={(name) => onUpdate({ name })}
+              aria-label="ポイント名を編集"
+              maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+              className="h-9 bg-background text-sm font-medium sm:text-base"
+            />
+            <LengthCounter
+              current={point.name.length}
+              max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            />
+          </div>
         </div>
 
         <Button
@@ -139,13 +146,19 @@ function SortablePointItem({
         </Button>
       </div>
 
-      <Textarea
-        placeholder="このポイントに関するメモ..."
-        value={point.memo}
-        onChange={(e) => onUpdate({ memo: e.target.value })}
-        maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-        className="min-h-10 resize-none text-sm"
-      />
+      <div className="space-y-1">
+        <Textarea
+          placeholder="このポイントに関するメモ..."
+          value={point.memo}
+          onChange={(e) => onUpdate({ memo: e.target.value })}
+          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+          className="min-h-10 resize-none text-sm"
+        />
+        <LengthCounter
+          current={point.memo.length}
+          max={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+        />
+      </div>
     </div>
   );
 }
@@ -262,22 +275,28 @@ export function PointsStep({
           {decisionPoints.length}/{COMPARISON_DECISION_POINTS_MAX_COUNT}件
         </p>
         <div className="flex gap-2">
-          <Input
-            id="new-point"
-            placeholder="例: カラーバリエーション、拡張性..."
-            value={newPointName}
-            onChange={(e) => setNewPointName(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onCompositionStart={() => {
-              isComposingRef.current = true;
-            }}
-            onCompositionEnd={() => {
-              isComposingRef.current = false;
-            }}
-            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-            disabled={hasReachedPointLimit}
-            className="flex-1 border-foreground/20"
-          />
+          <div className="flex-1 space-y-1">
+            <Input
+              id="new-point"
+              placeholder="例: カラーバリエーション、拡張性..."
+              value={newPointName}
+              onChange={(e) => setNewPointName(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onCompositionStart={() => {
+                isComposingRef.current = true;
+              }}
+              onCompositionEnd={() => {
+                isComposingRef.current = false;
+              }}
+              maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+              disabled={hasReachedPointLimit}
+              className="flex-1 border-foreground/20"
+            />
+            <LengthCounter
+              current={newPointName.length}
+              max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            />
+          </div>
           <Button
             onClick={addPoint}
             disabled={!newPointName.trim() || hasReachedPointLimit}
@@ -290,14 +309,20 @@ export function PointsStep({
 
       <div className="space-y-3">
         <Label htmlFor="points-memo">全体メモ（任意）</Label>
-        <Textarea
-          id="points-memo"
-          placeholder="比較ポイントに関する補足メモ..."
-          value={pointsMemo}
-          onChange={(e) => onMemoChange(e.target.value)}
-          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-          className="min-h-25 resize-none border-foreground/20"
-        />
+        <div className="space-y-1">
+          <Textarea
+            id="points-memo"
+            placeholder="比較ポイントに関する補足メモ..."
+            value={pointsMemo}
+            onChange={(e) => onMemoChange(e.target.value)}
+            maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+            className="min-h-25 resize-none border-foreground/20"
+          />
+          <LengthCounter
+            current={pointsMemo.length}
+            max={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+          />
+        </div>
       </div>
     </div>
   );

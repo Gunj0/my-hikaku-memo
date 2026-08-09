@@ -5,13 +5,18 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { LengthCounter } from "@/components/length-counter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
 import { getUserInitials } from "@/lib/user-display";
-import { USERNAME_MAX_LENGTH, validateUsername } from "@/lib/username";
+import {
+  USERNAME_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+  validateUsername,
+} from "@/lib/username";
 
 type ProfileSettingsCardProps = {
   initialName: string;
@@ -151,6 +156,11 @@ export function ProfileSettingsCard({
                 disabled={isSaving}
                 className="mt-2 border border-foreground/20"
               />
+              <LengthCounter
+                current={name.length}
+                max={maxLength}
+                className="mt-1"
+              />
               {nameError ? (
                 <InlineNotice
                   tone="error"
@@ -167,23 +177,30 @@ export function ProfileSettingsCard({
               htmlFor="profile-username"
               className="text-[11px] tracking-[0.22em] text-foreground"
             >
-              ユーザーID (半角英数字と - _ 、{USERNAME_MAX_LENGTH}文字以内)
+              ユーザーID (半角英数字と - _ 、{USERNAME_MIN_LENGTH}〜
+              {USERNAME_MAX_LENGTH}文字)
             </label>
-            <div className="mt-2 flex items-center gap-1">
+            <div className="mt-2 flex items-start gap-1">
               <span className="text-sm text-muted-foreground">/</span>
-              <Input
-                id="profile-username"
-                value={username}
-                maxLength={USERNAME_MAX_LENGTH}
-                autoComplete="off"
-                spellCheck={false}
-                onChange={(event) => {
-                  setUsername(event.target.value);
-                  setUsernameError(null);
-                }}
-                disabled={isSaving}
-                className="border border-foreground/20"
-              />
+              <div className="flex-1 space-y-1">
+                <Input
+                  id="profile-username"
+                  value={username}
+                  maxLength={USERNAME_MAX_LENGTH}
+                  autoComplete="off"
+                  spellCheck={false}
+                  onChange={(event) => {
+                    setUsername(event.target.value);
+                    setUsernameError(null);
+                  }}
+                  disabled={isSaving}
+                  className="border border-foreground/20"
+                />
+                <LengthCounter
+                  current={username.length}
+                  max={USERNAME_MAX_LENGTH}
+                />
+              </div>
             </div>
             <p className="mt-2 text-xs leading-5 text-muted-foreground">
               メモ一覧ページの URL に使われます。

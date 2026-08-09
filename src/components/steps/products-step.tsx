@@ -1,6 +1,7 @@
 "use client";
 
 import { EditableItemName } from "@/components/editable-item-name";
+import { LengthCounter } from "@/components/length-counter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,13 +84,19 @@ function SortableProductItem({
         >
           <GripVerticalIcon className="w-4 h-4" />
         </Button>
-        <EditableItemName
-          value={product.name}
-          onCommit={onNameChange}
-          aria-label="候補名を編集"
-          maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-          className="h-9 flex-1 bg-background font-medium"
-        />
+        <div className="min-w-0 flex-1 space-y-1">
+          <EditableItemName
+            value={product.name}
+            onCommit={onNameChange}
+            aria-label="候補名を編集"
+            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            className="h-9 bg-background font-medium"
+          />
+          <LengthCounter
+            current={product.name.length}
+            max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+          />
+        </div>
         <Button
           type="button"
           variant="ghost"
@@ -101,13 +108,19 @@ function SortableProductItem({
           <XIcon className="w-4 h-4 text-muted-foreground hover:text-destructive" />
         </Button>
       </div>
-      <Textarea
-        placeholder="この製品に関するメモ（URL、有力候補など）..."
-        value={product.memo}
-        onChange={(e) => onMemoChange(e.target.value)}
-        maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-        className="min-h-10 resize-none text-sm"
-      />
+      <div className="space-y-1">
+        <Textarea
+          placeholder="この製品に関するメモ（URL、有力候補など）..."
+          value={product.memo}
+          onChange={(e) => onMemoChange(e.target.value)}
+          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+          className="min-h-10 resize-none text-sm"
+        />
+        <LengthCounter
+          current={product.memo.length}
+          max={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+        />
+      </div>
     </div>
   );
 }
@@ -227,22 +240,28 @@ export function ProductsStep({
           {products.length}/{COMPARISON_PRODUCTS_MAX_COUNT}件
         </p>
         <div className="flex gap-2">
-          <Input
-            id="new-product"
-            placeholder="候補を入力..."
-            value={newProductName}
-            onChange={(e) => setNewProductName(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onCompositionStart={() => {
-              isComposingRef.current = true;
-            }}
-            onCompositionEnd={() => {
-              isComposingRef.current = false;
-            }}
-            maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
-            disabled={hasReachedProductLimit}
-            className="flex-1 border-foreground/20"
-          />
+          <div className="flex-1 space-y-1">
+            <Input
+              id="new-product"
+              placeholder="候補を入力..."
+              value={newProductName}
+              onChange={(e) => setNewProductName(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onCompositionStart={() => {
+                isComposingRef.current = true;
+              }}
+              onCompositionEnd={() => {
+                isComposingRef.current = false;
+              }}
+              maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+              disabled={hasReachedProductLimit}
+              className="flex-1 border-foreground/20"
+            />
+            <LengthCounter
+              current={newProductName.length}
+              max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+            />
+          </div>
           <Button
             onClick={addProduct}
             disabled={!newProductName.trim() || hasReachedProductLimit}
@@ -255,14 +274,20 @@ export function ProductsStep({
 
       <div className="space-y-3">
         <Label htmlFor="products-memo">全体メモ（任意）</Label>
-        <Textarea
-          id="products-memo"
-          placeholder="候補に関する補足メモ..."
-          value={productsMemo}
-          onChange={(e) => onMemoChange(e.target.value)}
-          maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
-          className="min-h-25 resize-none border-foreground/20"
-        />
+        <div className="space-y-1">
+          <Textarea
+            id="products-memo"
+            placeholder="候補に関する補足メモ..."
+            value={productsMemo}
+            onChange={(e) => onMemoChange(e.target.value)}
+            maxLength={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+            className="min-h-25 resize-none border-foreground/20"
+          />
+          <LengthCounter
+            current={productsMemo.length}
+            max={COMPARISON_MEMO_TEXT_MAX_LENGTH}
+          />
+        </div>
       </div>
     </div>
   );

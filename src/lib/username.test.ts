@@ -17,18 +17,24 @@ describe("normalizeUsername", () => {
 describe("validateUsername", () => {
   it("正規形を返す", () => {
     expect(validateUsername("Gunjo")).toEqual({ ok: true, username: "gunjo" });
-    expect(validateUsername("a-b_c9")).toEqual({ ok: true, username: "a-b_c9" });
+    expect(validateUsername("a-b_c9")).toEqual({
+      ok: true,
+      username: "a-b_c9",
+    });
   });
 
   it("空文字と短すぎる値を拒否する", () => {
     expect(validateUsername("").ok).toBe(false);
     expect(validateUsername("   ").ok).toBe(false);
     expect(validateUsername("ab").ok).toBe(false);
+    expect(validateUsername("abcd").ok).toBe(false);
   });
 
   it("長すぎる値を拒否する", () => {
     expect(validateUsername("a".repeat(USERNAME_MAX_LENGTH)).ok).toBe(true);
-    expect(validateUsername("a".repeat(USERNAME_MAX_LENGTH + 1)).ok).toBe(false);
+    expect(validateUsername("a".repeat(USERNAME_MAX_LENGTH + 1)).ok).toBe(
+      false,
+    );
   });
 
   it("ASCII 英数字と - _ 以外を拒否する", () => {
@@ -66,9 +72,9 @@ describe("validateUsername", () => {
 
 describe("generateDefaultUsername", () => {
   it("id のハイフンを除いた先頭 8 文字を使う", () => {
-    expect(generateDefaultUsername("a1b2c3d4-e5f6-7890-abcd-ef1234567890")).toBe(
-      "user-a1b2c3d4",
-    );
+    expect(
+      generateDefaultUsername("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+    ).toBe("user-a1b2c3d4");
   });
 
   it("生成結果はバリデーションを通る", () => {
@@ -94,7 +100,10 @@ describe("buildUsernameCandidate", () => {
   });
 
   it("上限を超えないよう切り詰め、末尾の記号を残さない", () => {
-    const candidate = buildUsernameCandidate("a".repeat(USERNAME_MAX_LENGTH), 3);
+    const candidate = buildUsernameCandidate(
+      "a".repeat(USERNAME_MAX_LENGTH),
+      3,
+    );
 
     expect(candidate.length).toBeLessThanOrEqual(USERNAME_MAX_LENGTH);
     expect(validateUsername(candidate).ok).toBe(true);

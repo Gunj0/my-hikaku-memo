@@ -1,6 +1,7 @@
 "use client";
 
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { LengthCounter } from "@/components/length-counter";
 import { StepIndicator } from "@/components/step-indicator";
 import { CategoryStep } from "@/components/steps/category-step";
 import { DecisionStep } from "@/components/steps/decision-step";
@@ -140,7 +141,13 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       persistDraftToLocal(buildDraft({ currentStep: nextStep }));
       setCurrentStep(nextStep);
     }
-  }, [buildDraft, canProceed, currentStep, persistDraftToLocal, setCurrentStep]);
+  }, [
+    buildDraft,
+    canProceed,
+    currentStep,
+    persistDraftToLocal,
+    setCurrentStep,
+  ]);
 
   const handlePrev = useCallback(() => {
     if (currentStep > 1) {
@@ -317,9 +324,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
 
   const updateProducts = (products: ComparisonData["products"]) => {
     clearEditorStatus();
-    setData((prev) =>
-      normalizeComparisonDataToLimits({ ...prev, products }),
-    );
+    setData((prev) => normalizeComparisonDataToLimits({ ...prev, products }));
   };
 
   const renderStep = () => {
@@ -430,6 +435,10 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                 }}
                 placeholder="例: ノートPC買い替え比較"
                 maxLength={COMPARISON_SHORT_TEXT_MAX_LENGTH}
+              />
+              <LengthCounter
+                current={memoTitle.length}
+                max={COMPARISON_SHORT_TEXT_MAX_LENGTH}
               />
             </div>
             <div className="flex items-start justify-between gap-4 rounded-lg border border-border/70 bg-background/40 p-3">
