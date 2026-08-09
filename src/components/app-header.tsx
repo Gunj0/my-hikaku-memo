@@ -16,15 +16,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { getDisplayName, getUserInitials } from "@/lib/user-display";
 import Image from "next/image";
 
-function getDisplayName(name: string | null | undefined) {
-  return name?.trim() || "ユーザー";
-}
-
-function getInitials(name: string | null | undefined) {
-  return getDisplayName(name).slice(0, 2).toUpperCase();
-}
+const USER_NAME_FALLBACK = "ユーザー";
 
 export function AppHeader() {
   const { data: session, status } = useSession();
@@ -96,10 +91,10 @@ export function AppHeader() {
                 <Avatar className="size-8 border border-border/70">
                   <AvatarImage
                     src={session?.user?.image ?? undefined}
-                    alt={getDisplayName(session?.user?.name)}
+                    alt={getDisplayName(session?.user?.name, USER_NAME_FALLBACK)}
                   />
                   <AvatarFallback>
-                    {getInitials(session?.user?.name)}
+                    {getUserInitials(session?.user?.name, USER_NAME_FALLBACK)}
                   </AvatarFallback>
                 </Avatar>
               </Link>

@@ -16,76 +16,36 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  type DecisionPoint,
-  type Product,
-  type PublicComparisonMemo,
-} from "@/lib/types";
+  getProductPointScore,
+  getTopTotalScore,
+  rankProductTotals,
+} from "@/lib/comparison-scoring";
+import { type PublicComparisonMemo } from "@/lib/types";
+import { getDisplayName, getUserInitials } from "@/lib/user-display";
 import { BadgeCheckIcon, TrophyIcon } from "lucide-react";
 
 type ComparisonMemoViewProps = {
   memo: PublicComparisonMemo;
 };
 
-type ProductTotal = {
-  product: Product;
-  totalScore: number;
-  maxPossible: number;
-  percentage: number;
-};
+const AUTHOR_NAME_FALLBACK = "匿名ユーザー";
 
 function getAuthorLabel(name: string | null) {
-  return name?.trim() || "匿名ユーザー";
+  return getDisplayName(name, AUTHOR_NAME_FALLBACK);
 }
 
 function getInitials(name: string | null) {
-  return getAuthorLabel(name).slice(0, 2).toUpperCase();
-}
-
-function getScore(
-  memo: PublicComparisonMemo,
-  productId: string,
-  pointId: string,
-) {
-  return (
-    memo.data.scores.find(
-      (score) => score.productId === productId && score.pointId === pointId,
-    )?.score || 0
-  );
-}
-
-function getProductTotals(
-  products: Product[],
-  decisionPoints: DecisionPoint[],
-  memo: PublicComparisonMemo,
-) {
-  return products
-    .map((product) => {
-      let totalScore = 0;
-      let maxPossible = 0;
-
-      decisionPoints.forEach((point) => {
-        totalScore += getScore(memo, product.id, point.id) * point.weight;
-        maxPossible += 5 * point.weight;
-      });
-
-      return {
-        product,
-        totalScore,
-        maxPossible,
-        percentage: maxPossible > 0 ? (totalScore / maxPossible) * 100 : 0,
-      } satisfies ProductTotal;
-    })
-    .sort((left, right) => right.totalScore - left.totalScore);
+  return getUserInitials(name, AUTHOR_NAME_FALLBACK);
 }
 
 export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
   const evaluationPoints = memo.data.decisionPoints;
-  const productTotals = getProductTotals(
+  const productTotals = rankProductTotals(
     memo.data.products,
     memo.data.decisionPoints,
-    memo,
+    memo.data.scores,
   );
-  const topScore = productTotals[0]?.totalScore ?? 0;
+  const topScore = getTopTotalScore(productTotals);
   const selectedProduct = memo.data.products.find(
     (product) => product.id === memo.data.selectedProductId,
   );
@@ -302,7 +262,11 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
                       </TableCell>
                       {memo.data.products.map((product) => (
                         <TableCell key={product.id} className="text-center">
-                          {getScore(memo, product.id, point.id)}
+                          {getProductPointScore(
+                            memo.data.scores,
+                            product.id,
+                            point.id,
+                          )}
                         </TableCell>
                       ))}
                     </TableRow>

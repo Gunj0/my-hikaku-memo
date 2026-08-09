@@ -17,6 +17,7 @@ import {
   COMPARISON_MEMO_TEXT_MAX_LENGTH,
   COMPARISON_SHORT_TEXT_MAX_LENGTH,
 } from "@/lib/comparison-limits";
+import { getProductTotalScore as sumProductTotalScore } from "@/lib/comparison-scoring";
 import { DecisionPoint, Product, ProductScore } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -453,12 +454,8 @@ export function EvaluationStep({
     );
   };
 
-  const getProductTotalScore = (productId: string): number => {
-    return decisionPoints.reduce((total, point) => {
-      const score = getScore(productId, point.id)?.score || 0;
-      return total + score * point.weight;
-    }, 0);
-  };
+  const getProductTotalScore = (productId: string): number =>
+    sumProductTotalScore(scores, decisionPoints, productId);
 
   const updateScore = (productId: string, pointId: string, score: number) => {
     const existingIndex = scores.findIndex(

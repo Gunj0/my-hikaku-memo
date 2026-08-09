@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { COMPARISON_MEMO_TEXT_MAX_LENGTH } from "@/lib/comparison-limits";
+import {
+  getTopTotalScore,
+  rankProductTotals,
+} from "@/lib/comparison-scoring";
 import { DecisionPoint, Product, ProductScore } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CheckCircle2Icon, PartyPopperIcon, TrophyIcon } from "lucide-react";
@@ -18,13 +22,6 @@ interface DecisionStepProps {
   onMemoChange: (memo: string) => void;
 }
 
-interface ProductTotal {
-  product: Product;
-  totalScore: number;
-  maxPossible: number;
-  percentage: number;
-}
-
 export function DecisionStep({
   products,
   decisionPoints,
@@ -34,36 +31,8 @@ export function DecisionStep({
   onSelectProduct,
   onMemoChange,
 }: DecisionStepProps) {
-  const getScore = (productId: string, pointId: string): number => {
-    return (
-      scores.find((s) => s.productId === productId && s.pointId === pointId)
-        ?.score || 0
-    );
-  };
-
-  const calculateProductTotal = (product: Product): ProductTotal => {
-    let totalScore = 0;
-    let maxPossible = 0;
-
-    decisionPoints.forEach((point) => {
-      const rawScore = getScore(product.id, point.id);
-      totalScore += rawScore * point.weight;
-      maxPossible += 5 * point.weight;
-    });
-
-    return {
-      product,
-      totalScore,
-      maxPossible,
-      percentage: maxPossible > 0 ? (totalScore / maxPossible) * 100 : 0,
-    };
-  };
-
-  const productTotals = products
-    .map(calculateProductTotal)
-    .sort((a, b) => b.totalScore - a.totalScore);
-
-  const topScore = productTotals[0]?.totalScore || 0;
+  const productTotals = rankProductTotals(products, decisionPoints, scores);
+  const topScore = getTopTotalScore(productTotals);
   const selectedProduct = products.find((p) => p.id === selectedProductId);
 
   if (products.length === 0) {

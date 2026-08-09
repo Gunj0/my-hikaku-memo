@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { InlineNotice } from "@/components/ui/inline-notice";
 import { Input } from "@/components/ui/input";
+import { getUserInitials } from "@/lib/user-display";
 
 type ProfileSettingsCardProps = {
   initialName: string;
@@ -17,9 +18,7 @@ type ProfileSettingsCardProps = {
   maxLength: number;
 };
 
-function getInitials(name: string) {
-  return name.trim().slice(0, 2).toUpperCase() || "HM";
-}
+const PROFILE_INITIALS_FALLBACK = "HM";
 
 export function ProfileSettingsCard({
   initialName,
@@ -102,7 +101,9 @@ export function ProfileSettingsCard({
         <div className="flex items-center gap-3">
           <Avatar className="size-12 border border-border/70">
             <AvatarImage src={image} alt={name} />
-            <AvatarFallback>{getInitials(name)}</AvatarFallback>
+            <AvatarFallback>
+              {getUserInitials(name, PROFILE_INITIALS_FALLBACK)}
+            </AvatarFallback>
           </Avatar>
           <div>
             <p className="text-[11px] tracking-[0.22em] text-foreground">

@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { auth } from "@/auth";
+import { badRequestResponse, notFoundResponse, withAuth } from "@/lib/server/api";
 import {
   USER_PROFILE_NAME_MAX_LENGTH,
   normalizeUserProfileName,
   updateUserProfileName,
 } from "@/lib/server/user-profiles";
-
-function unauthorizedResponse() {
-  return NextResponse.json({ message: "認証が必要です。" }, { status: 401 });
-}
 
 function getSubmittedName(body: unknown) {
   if (!body || typeof body !== "object") {
@@ -21,41 +17,28 @@ function getSubmittedName(body: unknown) {
   return typeof name === "string" ? normalizeUserProfileName(name) : "";
 }
 
-export async function PATCH(request: Request) {
-  const session = await auth();
-  const userId = session?.user?.id;
+export const PATCH = withAuth(
+  async (userId, request) => {
+    const body = await request.json().catch(() => null);
+    const name = getSubmittedName(body);
 
-  if (!userId) {
-    return unauthorizedResponse();
-  }
+    if (!name) {
+      return badRequestResponse("ユーザー名を入力してください。");
+    }
 
-  const body = await request.json().catch(() => null);
-  const name = getSubmittedName(body);
+    if (name.length > USER_PROFILE_NAME_MAX_LENGTH) {
+      return badRequestResponse(
+        `ユーザー名は${USER_PROFILE_NAME_MAX_LENGTH}文字以内で入力してください。`,
+      );
+    }
 
-  if (!name) {
-    return NextResponse.json(
-      { message: "ユーザー名を入力してください。" },
-      { status: 400 },
-    );
-  }
+    const profile = await updateUserProfileName(userId, name);
 
-  if (name.length > USER_PROFILE_NAME_MAX_LENGTH) {
-    return NextResponse.json(
-      {
-        message: `ユーザー名は${USER_PROFILE_NAME_MAX_LENGTH}文字以内で入力してください。`,
-      },
-      { status: 400 },
-    );
-  }
+    if (!profile) {
+      return notFoundResponse("プロフィールが見つかりません。");
+    }
 
-  const profile = await updateUserProfileName(userId, name);
-
-  if (!profile) {
-    return NextResponse.json(
-      { message: "プロフィールが見つかりません。" },
-      { status: 404 },
-    );
-  }
-
-  return NextResponse.json(profile);
-}
+    return NextResponse.json(profile);
+  },
+  { message: "認証が必要です。" },
+);
