@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { useComparisonDraft } from "@/hooks/use-comparison-draft";
+import { useStepGestureNavigation } from "@/hooks/use-step-gesture-navigation";
 import {
   clampComparisonShortText,
   COMPARISON_SHORT_TEXT_MAX_LENGTH,
@@ -112,7 +113,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
     (product) => product.id === data.selectedProductId,
   );
 
-  const canProceed = () => {
+  const canProceed = useCallback(() => {
     switch (currentStep) {
       case 1:
       case 2:
@@ -125,25 +126,31 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
       default:
         return false;
     }
-  };
+  }, [currentStep]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentStep < STEPS.length && canProceed()) {
       const nextStep = currentStep + 1;
 
       persistDraftToLocal(buildDraft({ currentStep: nextStep }));
       setCurrentStep(nextStep);
     }
-  };
+  }, [buildDraft, canProceed, currentStep, persistDraftToLocal, setCurrentStep]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (currentStep > 1) {
       const nextStep = currentStep - 1;
 
       persistDraftToLocal(buildDraft({ currentStep: nextStep }));
       setCurrentStep(nextStep);
     }
-  };
+  }, [buildDraft, currentStep, persistDraftToLocal, setCurrentStep]);
+
+  const stepGestureHandlers = useStepGestureNavigation({
+    onPrev: handlePrev,
+    onNext: handleNext,
+    enabled: !isSaveDialogOpen && !isAuthDialogOpen,
+  });
 
   const handleStepClick = (step: number) => {
     persistDraftToLocal(buildDraft({ currentStep: step }));
@@ -522,7 +529,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
           </div>
         </header>
 
-        <main className="flex-1">
+        <main className="flex-1" {...stepGestureHandlers}>
           <div className="mx-auto grid gap-4 px-4 py-4 lg:items-start">
             <section className="min-w-0 rounded-lg bg-card/74 p-4 shadow-[0_0_0_1px_rgb(255_255_255/0.02),0_20px_40px_rgb(0_0_0/0.2)] md:p-5">
               {renderStep()}

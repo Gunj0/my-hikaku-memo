@@ -275,4 +275,95 @@ describe("GadgetComparison", () => {
       data: { category: "イヤホン" },
     });
   });
+
+  it("入力欄にフォーカスがないときは左右キーでステップを移動する", async () => {
+    render(<GadgetComparison />);
+
+    await fillCategoryInput("キーボード");
+    screen.getByLabelText("その他のカテゴリ").blur();
+
+    fireEvent.keyDown(document.body, { key: "ArrowRight" });
+
+    await waitFor(() => {
+      expect(readLocalDraft(guestLocalDraftKey())).toMatchObject({
+        currentStep: 2,
+      });
+    });
+
+    fireEvent.keyDown(document.body, { key: "ArrowLeft" });
+
+    await waitFor(() => {
+      expect(readLocalDraft(guestLocalDraftKey())).toMatchObject({
+        currentStep: 1,
+      });
+    });
+  });
+
+  it("入力欄にフォーカスがあるときは左右キーでステップを移動しない", async () => {
+    render(<GadgetComparison />);
+
+    const input = await screen.findByLabelText("その他のカテゴリ");
+
+    input.focus();
+    fireEvent.keyDown(input, { key: "ArrowRight" });
+
+    expect(readLocalDraft(guestLocalDraftKey())).toBeNull();
+    expect(screen.getByLabelText("その他のカテゴリ")).toBeInTheDocument();
+  });
+
+  it("横スワイプでステップを移動する", async () => {
+    const { container } = render(<GadgetComparison />);
+    const main = container.querySelector("main");
+
+    if (!main) {
+      throw new Error("main 要素が見つかりません");
+    }
+
+    // 空の状態でステップ1に戻ると draft が破棄されるため、内容を入れておく
+    await fillCategoryInput("スマートウォッチ");
+
+    fireEvent.touchStart(main, {
+      touches: [{ clientX: 240, clientY: 200 }],
+    });
+    fireEvent.touchEnd(main, {
+      changedTouches: [{ clientX: 60, clientY: 210 }],
+    });
+
+    await waitFor(() => {
+      expect(readLocalDraft(guestLocalDraftKey())).toMatchObject({
+        currentStep: 2,
+      });
+    });
+
+    fireEvent.touchStart(main, {
+      touches: [{ clientX: 60, clientY: 200 }],
+    });
+    fireEvent.touchEnd(main, {
+      changedTouches: [{ clientX: 240, clientY: 210 }],
+    });
+
+    await waitFor(() => {
+      expect(readLocalDraft(guestLocalDraftKey())).toMatchObject({
+        currentStep: 1,
+      });
+    });
+  });
+
+  it("縦方向の動きが大きいスワイプではステップを移動しない", () => {
+    const { container } = render(<GadgetComparison />);
+    const main = container.querySelector("main");
+
+    if (!main) {
+      throw new Error("main 要素が見つかりません");
+    }
+
+    fireEvent.touchStart(main, {
+      touches: [{ clientX: 240, clientY: 100 }],
+    });
+    fireEvent.touchEnd(main, {
+      changedTouches: [{ clientX: 160, clientY: 400 }],
+    });
+
+    expect(readLocalDraft(guestLocalDraftKey())).toBeNull();
+  });
 });
