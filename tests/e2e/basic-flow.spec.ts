@@ -78,7 +78,7 @@ test("ホーム初期表示でヘッダーを表示する", async ({ page }) => 
 test("ステップは未入力でも常に自由に移動できる", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("link", { name: "新しい比較メモを作る" }).click();
+  await page.getByRole("link", { name: "無料で比較メモを作る" }).first().click();
 
   const nextButton = page.getByRole("button", { name: "次へ" });
   await expect(nextButton).toBeEnabled();
@@ -128,7 +128,9 @@ test("評価テーブルの表示で hydration error を出さない", async ({ 
 
   await page.goto("/memos/edit");
 
-  await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "情報を整理して評価する" }),
+  ).toBeVisible();
   await expect(page.getByRole("table")).toBeVisible();
 
   const hydrationErrors = consoleMessages.filter((message) =>
@@ -174,7 +176,9 @@ test("guest の保存済みメモ由来 draft をリセットすると初期状�
 
   await page.goto("/memos/edit");
 
-  await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "情報を整理して評価する" }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: /カテゴリ/ }).click();
   const categoryInput = page.getByLabel("その他のカテゴリ");
@@ -314,7 +318,7 @@ test("候補を削除すると最終ステップは保存できない", async ({
   await expect(saveButton).toBeEnabled();
 
   await page.getByRole("button", { name: /候補/ }).click();
-  await page.getByRole("button", { name: "Pixel 10を削除" }).click();
+  await page.getByRole("button", { name: "iPhone 16を削除" }).click();
 
   await page.getByRole("button", { name: /結論/ }).click();
   await expect(saveButton).toBeDisabled();
@@ -413,7 +417,7 @@ test("ログイン復帰時に編集中の内容を復元する", async ({ page 
   await expect(page.getByLabel("全体メモ（任意）")).toHaveValue(
     "店頭で触って決める",
   );
-  await expect(page.getByText("Camera A")).toBeVisible();
+  await expect(page.locator('input[value="Camera A"]')).toBeVisible();
 
   await page.getByRole("button", { name: /カテゴリ/ }).click();
   await expect(page.getByLabel("その他のカテゴリ")).toHaveValue(
@@ -546,6 +550,34 @@ test("新規作成画面では編集中の内容を localStorage へ即時保存
     currentStep: 2,
     data: {
       category: "モバイルバッテリー",
+    },
+  });
+});
+
+test("pagehide イベントで編集中の内容を localStorage へ退避する", async ({
+  page,
+}) => {
+  await page.goto("/memos/edit");
+
+  // ステップ移動を挟まず入力だけした状態でも pagehide で退避されること
+  await page.getByLabel("その他のカテゴリ").fill("スマートウォッチ");
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new Event("pagehide"));
+  });
+
+  const persistedDraft = await page.evaluate((storageKey) => {
+    const rawDraft = window.localStorage.getItem(storageKey);
+
+    return rawDraft ? JSON.parse(rawDraft) : null;
+  }, getLocalDraftStorageKey(null));
+
+  expect(persistedDraft).toMatchObject({
+    ownerScope: guestDraftOwnerScope,
+    memoId: null,
+    redirectTo: "/memos/edit",
+    data: {
+      category: "スマートウォッチ",
     },
   });
 });
