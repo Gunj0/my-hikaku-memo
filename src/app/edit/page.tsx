@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({
     title: "新しい比較メモを作成 | オレの比較メモ",
     description: "ガジェットや家電の新しい比較メモを作成する画面です。",
-    path: "/memos/edit",
+    path: "/edit",
     noIndex: true,
     siteUrl,
   });
@@ -28,7 +28,7 @@ export default async function NewMemoPage({ searchParams }: NewMemoPageProps) {
   const initialMemoId = Array.isArray(memoId) ? memoId[0] : memoId;
 
   if (!session?.user?.id && initialMemoId) {
-    redirect("/memos/edit");
+    redirect("/edit");
   }
 
   return <GadgetComparison initialMemoId={initialMemoId} />;

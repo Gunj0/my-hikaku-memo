@@ -32,7 +32,7 @@ const mockRouter = { replace: mockRouterReplace };
 const mockSearchParams = new URLSearchParams();
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/memos/edit",
+  usePathname: () => "/edit",
   useRouter: () => mockRouter,
   useSearchParams: () => mockSearchParams,
 }));
@@ -117,7 +117,7 @@ describe("GadgetComparison", () => {
       JSON.stringify({
         ownerScope: "guest",
         memoId: "saved-memo",
-        redirectTo: "/memos/edit",
+        redirectTo: "/edit",
         currentStep: 1,
         data: { ...baseComparisonData, category: "編集中のカテゴリ" },
         savedSnapshot: { ...baseComparisonData, category: "保存済みカテゴリ" },
@@ -153,7 +153,7 @@ describe("GadgetComparison", () => {
       JSON.stringify({
         ownerScope: "user:user-1",
         memoId: "memo-1",
-        redirectTo: "/memos/edit",
+        redirectTo: "/edit",
         currentStep: 1,
         data: { ...baseComparisonData, category: "編集中のカテゴリ" },
         savedSnapshot: { ...baseComparisonData, category: "保存済みカテゴリ" },

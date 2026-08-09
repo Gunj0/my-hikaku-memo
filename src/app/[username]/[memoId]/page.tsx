@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { ComparisonMemoView } from "@/components/comparison-memo-view";
@@ -13,12 +13,14 @@ import {
   serializeJsonLd,
 } from "@/lib/seo";
 import { getPublicComparisonMemo } from "@/lib/server/comparison-memos";
+import { normalizeUsername } from "@/lib/username";
 import { ArrowLeftIcon, PencilIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 type MemoDetailPageProps = {
   params: Promise<{
+    username: string;
     memoId: string;
   }>;
 };
@@ -37,10 +39,25 @@ function getAuthorNameLabel(name: string | null) {
   return name?.trim() || "匿名ユーザー";
 }
 
+/**
+ * memoId はグローバル一意なので、URL の username が古くてもメモは引ける。
+ * その場合は所有者の現在のハンドルへ 308 で寄せる。
+ * これにより username 変更後も既存のメモ URL が切れない。
+ */
+function assertCanonicalUsername(
+  requestedUsername: string,
+  authorUsername: string,
+  memoId: string,
+): void {
+  if (normalizeUsername(decodeURIComponent(requestedUsername)) !== authorUsername) {
+    permanentRedirect(`/${authorUsername}/${memoId}`);
+  }
+}
+
 export async function generateMetadata({
   params,
 }: MemoDetailPageProps): Promise<Metadata> {
-  const { memoId } = await params;
+  const { username, memoId } = await params;
   const session = await auth();
   const memo = await getPublicComparisonMemo(memoId, session?.user?.id);
   const siteUrl = await getRequestSiteUrl();
@@ -49,11 +66,13 @@ export async function generateMetadata({
     return buildMetadata({
       title: "比較メモが見つかりません | オレの比較メモ",
       description: "指定された比較メモは見つからないか、閲覧できません。",
-      path: `/memos/${memoId}`,
+      path: `/${username}/${memoId}`,
       noIndex: true,
       siteUrl,
     });
   }
+
+  const canonicalPath = `/${memo.author.username}/${memo.id}`;
 
   return buildMetadata({
     title: `${memo.title} | オレの比較メモ`,
@@ -62,8 +81,8 @@ export async function generateMetadata({
       memo.category,
       getAuthorNameLabel(memo.author.name),
     ),
-    path: `/memos/${memo.id}`,
-    image: getAbsoluteUrl(`/memos/${memo.id}/opengraph-image`, siteUrl),
+    path: canonicalPath,
+    image: getAbsoluteUrl(`${canonicalPath}/opengraph-image`, siteUrl),
     type: "article",
     publishedTime: memo.createdAt,
     modifiedTime: memo.updatedAt,
@@ -73,7 +92,7 @@ export async function generateMetadata({
 }
 
 export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
-  const { memoId } = await params;
+  const { username, memoId } = await params;
   const session = await auth();
   const memo = await getPublicComparisonMemo(memoId, session?.user?.id);
   const siteUrl = await getRequestSiteUrl();
@@ -82,6 +101,9 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
     notFound();
   }
 
+  assertCanonicalUsername(username, memo.author.username, memo.id);
+
+  const canonicalPath = `/${memo.author.username}/${memo.id}`;
   const articleJsonLd = buildArticleJsonLd({
     title: memo.title,
     description: buildMemoDescription(
@@ -89,8 +111,8 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
       memo.category,
       getAuthorNameLabel(memo.author.name),
     ),
-    path: `/memos/${memo.id}`,
-    image: getAbsoluteUrl(`/memos/${memo.id}/opengraph-image`, siteUrl),
+    path: canonicalPath,
+    image: getAbsoluteUrl(`${canonicalPath}/opengraph-image`, siteUrl),
     publishedTime: memo.createdAt,
     modifiedTime: memo.updatedAt,
     authorName: getAuthorNameLabel(memo.author.name),
@@ -110,14 +132,14 @@ export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
       <section className="flex flex-col gap-3 justify-between">
         <div className="flex flex-wrap gap-3 justify-between items-center">
           <Button asChild variant="ghost" size="default">
-            <Link href="/memos">
+            <Link href={`/${memo.author.username}`}>
               <ArrowLeftIcon className="h-4 w-4" />
               メモ一覧
             </Link>
           </Button>
           {memo.isOwner ? (
             <Button asChild>
-              <Link href={`/memos/edit?memoId=${memo.id}`}>
+              <Link href={`/edit?memoId=${memo.id}`}>
                 <PencilIcon className="h-4 w-4" />
                 編集する
               </Link>

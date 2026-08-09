@@ -27,12 +27,17 @@ export function AppHeader() {
   const isAuthenticated = status === "authenticated";
   const isLoading = status === "loading";
   const navItems: { href: string; label: string; icon: LucideIcon }[] = [
-    { href: "/memos/edit", label: "新規メモ", icon: PlusCircleIcon },
+    { href: "/edit", label: "新規メモ", icon: PlusCircleIcon },
   ];
 
-  if (pathname === "/memos/edit") {
+  if (pathname === "/edit") {
     return null;
   }
+
+  // username はセッション経由で受け取る。取得前・未設定のときは設定画面へ逃がす。
+  const myPageHref = session?.user?.username
+    ? `/${session.user.username}`
+    : "/settings";
 
   const handleSignIn = async () => {
     if (typeof window === "undefined") {
@@ -85,7 +90,7 @@ export function AppHeader() {
                 })}
               </nav>
               <Link
-                href="/memos"
+                href={myPageHref}
                 className="items-center gap-2 rounded-md px-2.5 py-1.5 text-left md:flex"
               >
                 <Avatar className="size-8 border border-border/70">

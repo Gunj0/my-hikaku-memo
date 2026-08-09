@@ -92,7 +92,9 @@ export function ProfileSettingsCard({
         .catch(() => null)) as ProfileResponse | null;
 
       if (!response.ok || !result?.name || !result.username || !result.image) {
-        throw new Error(result?.message || "プロフィールを更新できませんでした。");
+        throw new Error(
+          result?.message || "プロフィールを更新できませんでした。",
+        );
       }
 
       setName(result.name);
@@ -184,7 +186,7 @@ export function ProfileSettingsCard({
               />
             </div>
             <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              メモ一覧ページの URL に使われます。変更すると以前の URL は使えなくなります。
+              メモ一覧ページの URL に使われます。
             </p>
             {usernameError ? (
               <InlineNotice

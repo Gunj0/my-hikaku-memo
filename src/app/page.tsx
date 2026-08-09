@@ -117,7 +117,7 @@ export default async function Home() {
                 </p>
                 <div className="mt-4">
                   <Button asChild variant="success">
-                    <Link href="/memos/edit">
+                    <Link href="/edit">
                       <PlusCircleIcon className="h-4 w-4" />
                       無料で比較メモを作る
                     </Link>
@@ -151,7 +151,7 @@ export default async function Home() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {publicMemos.map((memo) => (
-              <Link key={memo.id} href={`/memos/${memo.id}`}>
+              <Link key={memo.id} href={`/${memo.author.username}/${memo.id}`}>
                 <Card className="border-border/80 border bg-card/72 hover:bg-card/80 transition-colors">
                   <CardHeader className="space-y-3">
                     <div className="flex items-center justify-between gap-3">
@@ -204,7 +204,7 @@ export default async function Home() {
           </CardHeader>
           <CardContent>
             <Button asChild variant="success">
-              <Link href="/memos/edit">
+              <Link href="/edit">
                 <PlusCircleIcon className="h-4 w-4" />
                 無料で比較メモを作る
               </Link>

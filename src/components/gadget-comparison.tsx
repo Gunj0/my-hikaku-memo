@@ -45,7 +45,7 @@ import {
   RotateCcwIcon,
   SaveIcon,
 } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
@@ -76,6 +76,11 @@ type GadgetComparisonProps = {
 };
 
 export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
+  const { data: session } = useSession();
+  // username はセッション経由で受け取る。未ログイン・取得前はホームへ逃がす。
+  const memoListHref = session?.user?.username
+    ? `/${session.user.username}`
+    : "/";
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -494,7 +499,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
                   size="sm"
                   className="text-muted-foreground"
                 >
-                  <Link href="/memos" className="flex items-center">
+                  <Link href={memoListHref} className="flex items-center">
                     <ArrowLeftIcon className="w-4 h-4 mr-1" />
                     メモ一覧
                   </Link>

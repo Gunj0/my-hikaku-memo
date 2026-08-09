@@ -9,8 +9,10 @@
 
 - ルーティングは Next.js App Router のファイルベースルーティングに従い、`src/app/` 配下の構成が唯一の正とする。
 - ミドルウェアによる URL 書き換えやリダイレクトは行わない。認証によるアクセス制御は各ページ・各ルートハンドラ内で行う。
-- 画面パスは名詞複数形のリソース表現（`/memos`）を基本とし、比較編集は配下の固定セグメント（`/memos/edit`）として持つ。
-- 比較フローはステップごとに URL を分けず、`/memos/edit` の 1 URL 内で状態遷移する。
+- 画面パスはユーザーを起点とし、メモ一覧を `/{username}`、メモ閲覧を `/{username}/{memoId}` とする。ルート直下はユーザーの名前空間として扱う。
+- 比較編集などの操作系は、ユーザーに紐づかない固定セグメント（`/edit`、`/settings`）としてルート直下に置く。これらは `RESERVED_USERNAMES` で予約する。
+- 比較フローはステップごとに URL を分けず、`/edit` の 1 URL 内で状態遷移する。
+- 旧 `/memos` 名前空間は互換ルートを残さず削除する。
 - 公開対象 URL は canonical、OGP、sitemap.xml に一貫して現れ、非公開・操作系 URL は noindex と robots.txt の双方で除外する。
 
 ## 3. 画面 URL 一覧
@@ -18,9 +20,9 @@
 | パス                     | 役割                                       | 認証     | レンダリング | インデックス |
 | ------------------------ | ------------------------------------------ | -------- | ------------ | ------------ |
 | `/`                      | ホーム。公開メモ一覧を表示する             | 任意     | 動的（SSR）  | 許可         |
-| `/memos`                 | マイページ。保存済みメモ一覧とプロフィール | 実質必須 | 動的（SSR）  | 拒否         |
-| `/memos/edit`            | 比較編集フロー（5 ステップ単一画面）       | 任意     | 動的（SSR）  | 拒否         |
-| `/memos/[memoId]`        | メモ閲覧                                   | 任意     | 動的（SSR）  | 条件付き     |
+| `/{username}`            | 公開プロフィール。メモ一覧を表示する       | 任意     | 動的（SSR）  | 条件付き     |
+| `/{username}/{memoId}`   | メモ閲覧                                   | 任意     | 動的（SSR）  | 条件付き     |
+| `/edit`                  | 比較編集フロー（5 ステップ単一画面）       | 任意     | 動的（SSR）  | 拒否         |
 | `/settings`              | アカウント設定。プロフィールとログアウト   | 実質必須 | 動的（SSR）  | 拒否         |
 | `/terms`                 | 利用規約                                   | 不要     | 動的（SSR）  | 許可         |
 | `/privacy`               | プライバシーポリシー                       | 不要     | 動的（SSR）  | 許可         |
@@ -28,32 +30,43 @@
 
 補足。
 
-- `/memos` は未ログインでもリダイレクトせず 200 を返し、ログインを促す案内カードを表示する。一覧データはログイン時のみ取得する。
-- `/settings` も未ログインでリダイレクトせず 200 を返し、ログイン案内を表示する。表示ユーザー名とユーザーID（username）の変更、ログアウトを担う。
-- `/memos/edit` は未ログインでも入力・閲覧できる。保存操作のみログインを要求する。
-- `/memos/[memoId]` のインデックス可否はメモの公開設定に従う。公開メモは `index, follow`、非公開メモは所有者のみ閲覧可能かつ `noindex, nofollow`。
+- `/{username}` は誰でも閲覧できる。他人には公開メモのみを表示し、所有者本人には非公開メモも「非公開」バッジ付きで表示する。編集・削除・新規作成の導線は本人にのみ表示する。
+- `/{username}` のインデックス可否は公開メモの有無に従う。公開メモが 1 件以上あれば `index, follow`、0 件なら `noindex, nofollow`。sitemap.xml の掲載条件と一致させる。
+- 存在しない username は 404 を返す。
+- `/settings` は未ログインでもリダイレクトせず 200 を返し、ログイン案内を表示する。表示ユーザー名とユーザーID（username）の変更、ログアウトを担う。
+- `/edit` は未ログインでも入力・閲覧できる。保存操作のみログインを要求する。
+- `/{username}/{memoId}` のインデックス可否はメモの公開設定に従う。公開メモは `index, follow`、非公開メモは所有者のみ閲覧可能かつ `noindex, nofollow`。
 - 全ページが動的レンダリングとなる。ルートレイアウトが `auth()` を呼ぶため、静的プリレンダリングされるページは存在しない（法務ページも含む）。
-- `/`、`/memos`、`/memos/[memoId]` は `export const dynamic = "force-dynamic"` を明示する。`/memos/edit` は `auth()` と `searchParams` の参照により、法務ページはレイアウト経由で、いずれも実行時解決となる。
+- `/`、`/{username}`、`/{username}/{memoId}` は `export const dynamic = "force-dynamic"` を明示する。`/edit` は `auth()` と `searchParams` の参照により、法務ページはレイアウト経由で、いずれも実行時解決となる。
 
 ## 4. 動的セグメント
 
 ### 4.1 `memoId`
 
-- `/memos/[memoId]` および `/api/memos/[memoId]`、`/memos/edit?memoId=` で用いる識別子は、`comparison_memos.public_id`（正の整数）である。内部主キー `id` は URL に露出しない。
+- `/{username}/{memoId}` および `/api/memos/[memoId]`、`/edit?memoId=` で用いる識別子は、`comparison_memos.public_id`（正の整数）である。内部主キー `id` は URL に露出しない。
+- `public_id` は全ユーザー横断の連番であり、ユーザーごとの連番ではない。したがって `memoId` だけでメモを一意に特定でき、URL 中の `username` は正規化のヒントとして働く。
 - 数値として解釈できない値、0 以下の値は取得層で `null` を返し、画面では 404、API では 404 応答となる。
 - 閲覧可否条件は「公開メモである」または「閲覧者が所有者である」。いずれも満たさない場合は存在有無を区別せず 404 を返す。
 
 ### 4.2 `username`
 
-- `users.username` は URL ハンドルとして採番済みだが、現時点では URL セグメントとして露出していない。`/{username}` および `/{username}/{memoId}` へのルーティング移行時に用いる。
+- `/{username}` および `/{username}/{memoId}` で用いる識別子は `users.username` である。内部 ID は URL に露出しない。
 - ルート直下を占有するため、`src/lib/username.ts` の `RESERVED_USERNAMES` で既存および将来のトップレベルパスを予約する。**ルートを追加する際は同ファイルへ予約語を追加すること。** 追加を怠ると、後から既存ユーザーの URL を奪う。
 - 文字種・長さ・一意性の仕様は情報モデル設計の「9.5.1 username」を参照する。ASCII のみに限定しているため、percent-encoding や punycode を考慮する必要はない。
+- Next.js は静的セグメントを動的セグメントより優先するため、`/edit` や `/settings` が `/{username}` に食われることはない。
+
+### 4.3 URL の正規化
+
+- `/{username}` は URL のハンドルを小文字化して解決する。大文字小文字が食い違う場合は正規形へ 308 で寄せる。
+- `/{username}/{memoId}` はメモの所有者の現在のハンドルと URL のハンドルを照合し、一致しない場合は `/{所有者のusername}/{memoId}` へ 308 で寄せる。
+- この照合により、username を変更しても既存のメモ URL は切れない。旧ハンドルの URL、および削除済みの旧 `/memos/{memoId}` も現在の正規 URL へ寄せられる。切れるのはプロフィール単体 URL `/{旧username}` のみである。
+- リダイレクトは各ページ内の `permanentRedirect()` で行う。ミドルウェアは使わない。
 
 ## 5. クエリパラメータ
 
 | URL           | パラメータ | 用途                             | 挙動                                                                    |
 | ------------- | ---------- | -------------------------------- | ----------------------------------------------------------------------- |
-| `/memos/edit` | `memoId`   | 編集対象の保存済みメモを指定する | 未ログインで指定された場合は `/memos/edit` へリダイレクトし新規作成扱い |
+| `/edit`       | `memoId`   | 編集対象の保存済みメモを指定する | 未ログインで指定された場合は `/edit` へリダイレクトし新規作成扱い       |
 
 - `memoId` が配列で渡された場合は先頭の値のみを採用する。
 - 新規メモの保存が完了した時点、およびドラフト復元時に、クライアントが `router.replace` で `memoId` を URL へ反映する。履歴は積まず、スクロール位置も維持する。
@@ -82,23 +95,23 @@
 ## 7. 認証まわりの遷移
 
 - ログイン・ログアウトは Auth.js のクライアント関数を通じて `/api/auth/*` を利用する。専用のログインページは持たない。
-- ログイン開始時の `redirectTo` は操作元の URL を渡す。ヘッダーからのログインは現在パス、比較編集画面からのログインはクエリを含む現在 URL（例: `/memos/edit?memoId=12`）へ戻る。
+- ログイン開始時の `redirectTo` は操作元の URL を渡す。ヘッダーからのログインは現在パス、比較編集画面からのログインはクエリを含む現在 URL（例: `/edit?memoId=12`）へ戻る。
 - ログアウト後の既定の戻り先は `/`。
 
 ## 8. 生成される非 HTML URL
 
-| パス                              | 内容                                      | 生成元                                       |
-| --------------------------------- | ----------------------------------------- | -------------------------------------------- |
-| `/robots.txt`                     | クロール許可設定                          | `src/app/robots.ts`                          |
-| `/sitemap.xml`                    | サイトマップ                              | `src/app/sitemap.ts`                         |
-| `/ogp.png`                        | 既定の OGP 画像                           | `src/app/ogp.png/route.tsx`                  |
-| `/memos/[memoId]/opengraph-image` | メモ個別の OGP 画像                       | `src/app/memos/[memoId]/opengraph-image.tsx` |
-| `/icon.png` ほかアイコン各種      | favicon、テーマ別アイコン、Apple アイコン | `public/`                                    |
+| パス                                   | 内容                                      | 生成元                                            |
+| -------------------------------------- | ----------------------------------------- | ------------------------------------------------- |
+| `/robots.txt`                          | クロール許可設定                          | `src/app/robots.ts`                               |
+| `/sitemap.xml`                         | サイトマップ                              | `src/app/sitemap.ts`                              |
+| `/ogp.png`                             | 既定の OGP 画像                           | `src/app/ogp.png/route.tsx`                       |
+| `/{username}/{memoId}/opengraph-image` | メモ個別の OGP 画像                       | `src/app/[username]/[memoId]/opengraph-image.tsx` |
+| `/icon.png` ほかアイコン各種           | favicon、テーマ別アイコン、Apple アイコン | `public/`                                         |
 
-- robots.txt は `/` と `/memos/` を許可し、`/api/`、`/memos/edit`、`/settings` を拒否する。`Sitemap` と `Host` にはサイト URL を出力する。
-- sitemap.xml には `/`、法務 3 ページ、公開メモの `/memos/{public_id}` を列挙する。非公開メモと `/memos`、`/memos/edit` は含めない。
+- robots.txt は `/` を許可し、`/api/`、`/edit`、`/settings` を拒否する。`Sitemap` と `Host` にはサイト URL を出力する。
+- sitemap.xml には `/`、法務 3 ページ、公開メモの `/{username}/{public_id}`、および公開メモを 1 件以上持つユーザーの `/{username}` を列挙する。非公開メモ、公開メモを持たないプロフィール、`/edit`、`/settings` は含めない。
 - robots.txt と sitemap.xml は `force-dynamic` を明示し、リクエスト時点の公開メモとサイト URL を反映する。
-- `/memos/[memoId]/opengraph-image` は非公開メモに対しても既定文言の画像を返す。メモ本文は含めないため公開情報の漏洩は起きない。
+- `/{username}/{memoId}/opengraph-image` は非公開メモに対しても既定文言の画像を返す。メモ本文は含めないため公開情報の漏洩は起きない。
 
 ## 9. 絶対 URL の解決
 
@@ -110,7 +123,8 @@
 ## 10. 変更時の確認観点
 
 - ページを追加した場合は、canonical、sitemap.xml への掲載要否、robots.txt の許可・拒否、`noIndex` 指定の 4 点を同時に決める。
-- 公開範囲に関わる変更を行った場合は、`/memos/[memoId]` の 404 条件、`noIndex` 条件、sitemap.xml の掲載条件が一致していることを確認する。
+- 公開範囲に関わる変更を行った場合は、`/{username}/{memoId}` の 404 条件、`noIndex` 条件、sitemap.xml の掲載条件が一致していることを確認する。
+- `/{username}` の `noIndex` 条件（公開メモ 0 件）と sitemap.xml の掲載条件が一致していることを確認する。
 - URL に露出する識別子を変更する場合は `public_id` と内部 `id` の分離が維持されているかを確認する。
 - クエリパラメータを追加する場合は、`router.replace` による URL 反映と、未ログイン時のリダイレクト条件への影響を確認する。
 - トップレベルのパスを追加した場合は、`src/lib/username.ts` の `RESERVED_USERNAMES` へ同じ語を追加する。

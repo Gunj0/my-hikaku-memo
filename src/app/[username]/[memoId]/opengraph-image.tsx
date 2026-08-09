@@ -11,6 +11,7 @@ export const contentType = "image/png";
 
 type MemoImageProps = {
   params: Promise<{
+    username: string;
     memoId: string;
   }>;
 };

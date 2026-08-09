@@ -35,9 +35,9 @@ E2E テストは `tests/e2e/` に配置し、`pnpm dev` が起動済みであれ
 
 ```
 /                          → ホーム（公開メモ一覧含む、SSR）
-/memos/edit                 → 比較編集フロー（クライアントコンポーネント中心）
-/memos/[memoId]            → メモ閲覧（SSR）
-/memos                     → 保存済みメモ一覧（要ログイン、SSR）
+/[username]                → 公開プロフィール（メモ一覧、SSR）
+/[username]/[memoId]       → メモ閲覧（SSR）
+/edit                      → 比較編集フロー（クライアントコンポーネント中心）
 /settings                  → アカウント設定（表示名・ユーザーID・ログアウト、SSR）
 /terms, /privacy, /commercial-disclosure → 法務ページ（静的）
 /api/memos                 → GET/POST、/api/memos/[memoId] は GET/PUT/DELETE
@@ -48,11 +48,11 @@ E2E テストは `tests/e2e/` に配置し、`pnpm dev` が起動済みであれ
 
 URL の詳細（認証要否、クエリ、インデックス方針）は `docs/11_URL設計.md` を参照する。
 
-**トップレベルのパスを追加する場合は、`src/lib/username.ts` の `RESERVED_USERNAMES` にも同じ語を追加する。** ユーザーID（`users.username`）は将来 `/{username}` としてルート直下を占有するため、予約漏れは既存ユーザーの URL を奪う。
+**トップレベルのパスを追加する場合は、`src/lib/username.ts` の `RESERVED_USERNAMES` にも同じ語を追加する。** ユーザーID（`users.username`）が `/{username}` としてルート直下を占有するため、予約漏れは既存ユーザーの URL を奪う。
 
 ### 比較フローの構造
 
-`/memos/edit` は 5 ステップ構成の単一画面。全体状態は `GadgetComparison`（`src/components/gadget-comparison.tsx`）が保持し、各ステップへ props で渡す。
+`/edit` は 5 ステップ構成の単一画面。全体状態は `GadgetComparison`（`src/components/gadget-comparison.tsx`）が保持し、各ステップへ props で渡す。
 
 ```
 GadgetComparison
@@ -92,3 +92,13 @@ API への書き込みは `src/lib/comparison-schemas.ts` の Zod スキーマ�
 ## ドキュメント更新
 
 実装を変更した場合は、関連する `docs/` または README.md の記述を同一タスク内で更新する。更新不要の場合はその理由を報告する。
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
