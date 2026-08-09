@@ -241,6 +241,18 @@ describe("GadgetComparison", () => {
     expect(readLocalDraft(userLocalDraftKey("user-1"))).toBeNull();
   });
 
+  it("メモ一覧リンクはボタン全体がリンクとして機能する構造になっている", () => {
+    mockSessionState.data = { user: { id: "user-1" } };
+    mockSessionState.status = "authenticated";
+
+    render(<GadgetComparison />);
+
+    const memoListLink = screen.getByRole("link", { name: "メモ一覧" });
+
+    expect(memoListLink).toHaveAttribute("data-slot", "button");
+    expect(memoListLink.closest("button")).toBeNull();
+  });
+
   it("10秒ごとの自動保存タイマーで編集内容を localStorage へ保存する", async () => {
     // interval は render 時に登録されるため、fake timer は render 前に有効化する
     vi.useFakeTimers();

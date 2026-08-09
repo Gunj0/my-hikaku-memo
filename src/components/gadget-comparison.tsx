@@ -504,6 +504,7 @@ export function GadgetComparison({ initialMemoId }: GadgetComparisonProps) {
             <div className="mb-3 grid gap-3 grid-cols-[minmax(0,1fr)_auto] lg:items-start">
               <div className="flex items-center gap-2">
                 <Button
+                  asChild
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground"
