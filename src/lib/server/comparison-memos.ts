@@ -208,6 +208,19 @@ export async function getComparisonMemo(userId: string, memoId: string) {
   return row ? (mapMemo(row) ?? null) : null;
 }
 
+/**
+ * ランダム抽出の母集団サイズ。
+ *
+ * 素直に `ORDER BY RANDOM()` を全公開メモへ当てると、ホーム（force-dynamic）の
+ * 全リクエストで全行スキャン + 全行ソートになり、公開メモ数に比例して劣化する。
+ * 先に「更新が新しい順に N 件」へ絞ると、内側は idx_comparison_memos_public_updated を
+ * 辿って N 件で打ち切れるため、テーブルが何件になっても仕事量が一定になる。
+ *
+ * 代償として、N 件より古い公開メモはホームに出なくなる。
+ * ここを増やすほど古いメモも当たるようになるが、そのぶんソート対象が増える。
+ */
+const RANDOM_MEMO_CANDIDATE_POOL_SIZE = 300;
+
 export async function listRandomComparisonMemos(
   limit: number,
   excludeUserId?: string,
@@ -218,14 +231,19 @@ export async function listRandomComparisonMemos(
       `
         SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
            ${AUTHOR_COLUMNS}
-        FROM comparison_memos AS m
+        FROM (
+          SELECT id, user_id, title, category, is_public, public_id, created_at, updated_at
+          FROM comparison_memos
+          WHERE is_public = 1 AND (?1 IS NULL OR user_id != ?1)
+          ORDER BY updated_at DESC
+          LIMIT ?2
+        ) AS m
         LEFT JOIN users AS u ON u.id = m.user_id
-        WHERE m.is_public = 1 AND (?1 IS NULL OR m.user_id != ?1)
         ORDER BY RANDOM()
-        LIMIT ?2
+        LIMIT ?3
       `,
     )
-    .bind(excludeUserId ?? null, limit)
+    .bind(excludeUserId ?? null, RANDOM_MEMO_CANDIDATE_POOL_SIZE, limit)
     .all<PublicComparisonMemoSummaryRow>();
 
   return result.results.map(mapPublicSummary);

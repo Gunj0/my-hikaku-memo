@@ -43,17 +43,24 @@ function getVisibilityLabel(isPublic: boolean) {
 
 /**
  * URL のハンドルを正規形へ解決する。
- * 大文字小文字が食い違う場合は正規形へ 308 で寄せ、canonical を一意に保つ。
+ * URL が正規形と 1 文字でも異なる場合（大文字混じりなど）は 308 で寄せ、canonical を一意に保つ。
+ *
+ * 比較対象は「正規化した値」ではなく「URL に現れた生の値」であること。
+ * 正規化後どうしを比べると常に一致してしまい、`/Foo` が 200 のまま残る。
+ *
+ * params は App Router が percent-decode 済みの値を渡すため、ここで
+ * decodeURIComponent を重ねてはならない（`/foo%25` が URIError で落ちる）。
  */
 async function resolveProfile(requestedUsername: string) {
-  const normalized = normalizeUsername(decodeURIComponent(requestedUsername));
-  const profile = await getUserProfileByUsernameCached(normalized);
+  const profile = await getUserProfileByUsernameCached(
+    normalizeUsername(requestedUsername),
+  );
 
   if (!profile) {
     return null;
   }
 
-  if (normalized !== profile.username) {
+  if (requestedUsername !== profile.username) {
     permanentRedirect(`/${profile.username}`);
   }
 
@@ -66,14 +73,16 @@ export async function generateMetadata({
   const { username } = await params;
   const siteUrl = await getRequestSiteUrl();
   const profile = await getUserProfileByUsernameCached(
-    normalizeUsername(decodeURIComponent(username)),
+    normalizeUsername(username),
   );
 
   if (!profile) {
     return buildMetadata({
       title: "ユーザーが見つかりません | オレの比較メモ",
       description: "指定されたユーザーは見つかりませんでした。",
-      path: `/${username}`,
+      // 存在しないハンドルはそのまま canonical に載せない。`//evil.com` のような値だと
+      // getAbsoluteUrl の new URL() が別オリジンへ解決してしまうため、1 セグメントに閉じ込める。
+      path: `/${encodeURIComponent(username)}`,
       noIndex: true,
       siteUrl,
     });

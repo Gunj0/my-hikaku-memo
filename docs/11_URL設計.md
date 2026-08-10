@@ -63,6 +63,8 @@
 - `/{username}/{memoId}` はメモの所有者の現在のハンドルと URL のハンドルを照合し、一致しない場合は `/{所有者のusername}/{memoId}` へ 308 で寄せる。
 - この照合により、username を変更しても既存のメモ URL は切れない。旧ハンドルの URL、および削除済みの旧 `/memos/{memoId}` も現在の正規 URL へ寄せられる。切れるのはプロフィール単体 URL `/{旧username}` のみである。
 - リダイレクトは各ページ内の `permanentRedirect()` で行う。ミドルウェアは使わない。
+- 308 の判定は「URL に現れた生の値」と正規形を突き合わせて行う。両辺を正規化してから比較すると常に一致してしまい、大文字混じりの URL が 200 のまま残って canonical が重複する。
+- 動的セグメントは App Router が percent-decode 済みの値を渡すため、ページ側で `decodeURIComponent` を重ねてはならない。二重デコードになるうえ、`/foo%25` のような URL が `URIError` で落ちる。
 
 ## 5. クエリパラメータ
 

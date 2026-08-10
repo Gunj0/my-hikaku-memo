@@ -103,8 +103,10 @@ export default async function OpenGraphImage({ params }: MemoImageProps) {
             color: "rgba(255,255,255,0.78)",
           }}
         >
-          <div>作成者: {authorName}</div>
-          <div>比較ポイントと判断を一覧化</div>
+          {/* Satori は子ノードが 2 つ以上ある要素に display の明示を要求する。
+              テキスト + 変数展開で子が 2 つになるため、省略すると描画が例外で落ちる。 */}
+          <div style={{ display: "flex" }}>作成者: {authorName}</div>
+          <div style={{ display: "flex" }}>比較ポイントと判断を一覧化</div>
         </div>
       </div>
     </div>,

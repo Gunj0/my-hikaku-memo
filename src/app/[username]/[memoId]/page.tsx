@@ -15,7 +15,6 @@ import {
   getPublicComparisonMemoCached,
   getSession,
 } from "@/lib/server/request-scope";
-import { normalizeUsername } from "@/lib/username";
 import { ArrowLeftIcon, PencilIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -45,13 +44,19 @@ function getAuthorNameLabel(name: string | null) {
  * memoId はグローバル一意なので、URL の username が古くてもメモは引ける。
  * その場合は所有者の現在のハンドルへ 308 で寄せる。
  * これにより username 変更後も既存のメモ URL が切れない。
+ *
+ * 比較対象は「URL に現れた生の値」であること。正規化してから比べると
+ * 大文字混じりの URL（`/Foo/1`）が 200 のまま残り、canonical が重複する。
+ *
+ * params は App Router が percent-decode 済みの値を渡すため、ここで
+ * decodeURIComponent を重ねてはならない（`/foo%25/1` が URIError で落ちる）。
  */
 function assertCanonicalUsername(
   requestedUsername: string,
   authorUsername: string,
   memoId: string,
 ): void {
-  if (normalizeUsername(decodeURIComponent(requestedUsername)) !== authorUsername) {
+  if (requestedUsername !== authorUsername) {
     permanentRedirect(`/${authorUsername}/${memoId}`);
   }
 }
@@ -68,7 +73,9 @@ export async function generateMetadata({
     return buildMetadata({
       title: "比較メモが見つかりません | オレの比較メモ",
       description: "指定された比較メモは見つからないか、閲覧できません。",
-      path: `/${username}/${memoId}`,
+      // 見つからない URL の値をそのまま canonical に載せない。`//evil.com` のような値だと
+      // getAbsoluteUrl の new URL() が別オリジンへ解決してしまうため、1 セグメントに閉じ込める。
+      path: `/${encodeURIComponent(username)}/${encodeURIComponent(memoId)}`,
       noIndex: true,
       siteUrl,
     });
