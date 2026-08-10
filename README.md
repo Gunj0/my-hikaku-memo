@@ -94,7 +94,7 @@ pnpm test:unit:watch
 
 ### UIテスト
 
-Playwright で未ログインの基本フローを E2E テストできます。
+Playwright で未ログイン・ログイン済みの両方のフローを E2E テストできます。
 
 初回・ライブラリアップデート時にはブラウザをインストールします。
 
@@ -107,6 +107,18 @@ pnpm test:e2e:install
 ```bash
 pnpm test:e2e
 ```
+
+#### ログイン状態のテスト
+
+Google OAuth は E2E から実行できないため、`tests/e2e/auth.setup.ts` が
+ローカル D1 に users / sessions の行を直接作り、Auth.js のセッション Cookie を
+`tests/e2e/.auth/user.json`（storageState）へ書き出します。
+Auth.js は `session.strategy: "database"` なので、この行と Cookie だけでログイン済みとして扱われます。
+
+- ログイン状態のテストは `tests/e2e/*.auth.spec.ts` に置く（`chromium-auth` プロジェクトが自動で拾う）
+- 未ログインのテストは従来どおり `tests/e2e/*.spec.ts`（`chromium` プロジェクト）
+- テストユーザーの定義は `tests/e2e/support/test-user.ts`。setup で作り直し、全テスト終了後に globalTeardown が削除するため、テストが作ったメモはローカル D1 に残らない
+- ローカル D1 のテストユーザー行（`e2e-test-user`）を作成・削除するので、`pnpm test:e2e` はローカル環境のみで実行すること
 
 ### ビルド
 

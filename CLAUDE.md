@@ -24,6 +24,8 @@ pnpm db:migrate:local # ローカル D1 へ migration 適用のみ
 
 E2E テストは `tests/e2e/` に配置し、`pnpm dev` が起動済みであれば既存サーバーを再利用する。
 
+ログイン済みのテストは `tests/e2e/*.auth.spec.ts` に置く（`chromium-auth` プロジェクトが拾う）。ログイン状態は `tests/e2e/auth.setup.ts` がローカル D1 へ users / sessions を直接 INSERT し、Auth.js のセッション Cookie を storageState に書き出して再現する（Google OAuth は経由しない）。テストユーザーの定義は `tests/e2e/support/test-user.ts`。未ログインのテストは従来どおり `tests/e2e/*.spec.ts`。
+
 ## アーキテクチャ
 
 ### 技術スタック

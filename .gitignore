@@ -54,3 +54,6 @@ next-env.d.ts
 
 
 !.dev.vars.example
+
+# Playwright auth state
+/tests/e2e/.auth
