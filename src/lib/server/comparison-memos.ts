@@ -344,11 +344,13 @@ export async function createComparisonMemo(
   const now = Date.now();
   const memoId = crypto.randomUUID();
 
-  await database
+  // public_id は列挙しない。INTEGER PRIMARY KEY AUTOINCREMENT なので SQLite が原子的に採番する。
+  // アプリ側で MAX(public_id) + 1 を評価すると同時 INSERT で採番が衝突する（migration 0003 参照）。
+  const result = await database
     .prepare(
       `
-        INSERT INTO comparison_memos (id, user_id, title, category, data, is_public, public_id, created_at, updated_at)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, (SELECT COALESCE(MAX(public_id), 0) + 1 FROM comparison_memos), ?7, ?8)
+        INSERT INTO comparison_memos (id, user_id, title, category, data, is_public, created_at, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
       `,
     )
     .bind(
@@ -363,18 +365,14 @@ export async function createComparisonMemo(
     )
     .run();
 
-  const row = await database
-    .prepare(
-      `SELECT public_id FROM comparison_memos WHERE id = ?1 LIMIT 1`,
-    )
-    .bind(memoId)
-    .first<{ public_id: number }>();
+  // public_id は rowid そのものなので last_row_id がそのまま採番結果になる。
+  const publicId = result.meta.last_row_id;
 
-  if (!row) {
+  if (typeof publicId !== "number" || !Number.isInteger(publicId)) {
     return null;
   }
 
-  return getComparisonMemo(userId, String(row.public_id));
+  return getComparisonMemo(userId, String(publicId));
 }
 
 export async function updateComparisonMemo(

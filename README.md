@@ -83,6 +83,15 @@ pnpm dev
 pnpm lint
 ```
 
+### ユニットテスト
+
+Vitest で `src/**/*.test.{ts,tsx}` を実行します。
+
+```bash
+pnpm test:unit
+pnpm test:unit:watch
+```
+
 ### UIテスト
 
 Playwright で未ログインの基本フローを E2E テストできます。

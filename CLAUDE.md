@@ -12,6 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 pnpm dev              # 開発サーバー起動（ローカル D1 へ migration 適用後に next dev）
 pnpm build            # 本番ビルド（実装後は必ず確認）
 pnpm lint             # ESLint
+pnpm test:unit        # Vitest ユニットテスト（src/**/*.test.{ts,tsx}）
+pnpm test:unit:watch  # Vitest ウォッチモード
 pnpm test:e2e         # Playwright E2E テスト（Chromium のみ）
 pnpm test:e2e:ui      # Playwright UI モードで実行
 pnpm preview          # OpenNext Cloudflare プレビュー（PR 前に確認）
@@ -84,6 +86,8 @@ GadgetComparison
 API への書き込みは `src/lib/comparison-schemas.ts` の Zod スキーマで検証。クライアント側は `src/lib/comparison-limits.ts` の上限値でクランプ。
 
 ## レビュー観点
+
+汎用のチェックリストは `docs/12_レビュー観点.md` を参照する。以下はこのリポジトリ固有の必須項目。
 
 - **比較フロー変更時**: 未入力でもステップ間を自由移動できること、保存済みメモのリセットで保存時点の状態へ戻ること、候補削除時に `selectedProductId` の整合性が崩れないこと
 - **公開ページ・メタデータ変更時**: canonical、OGP、robots.txt、sitemap.xml、`NEXT_PUBLIC_SITE_URL` の整合性を確認

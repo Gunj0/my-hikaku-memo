@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  COMPARISON_MEMO_TEXT_MAX_LENGTH,
+  COMPARISON_SHORT_TEXT_MAX_LENGTH,
+} from "@/lib/comparison-limits";
+
 const savedMemoResponse = {
   memo: {
     id: "saved-memo",
@@ -199,23 +204,30 @@ test("guest の保存済みメモ由来 draft をリセットすると初期状�
 });
 
 test("入力欄は保存上限を超える文字を保持しない", async ({ page }) => {
+  // 上限値は comparison-limits から取り込む。ここに数値を直書きすると、
+  // 上限を変更したときにテストだけ古い期待値で残る。
+  const shortTextOverflow = COMPARISON_SHORT_TEXT_MAX_LENGTH + 10;
+  const memoTextOverflow = COMPARISON_MEMO_TEXT_MAX_LENGTH + 100;
+
   await page.goto("/edit");
 
-  await page.getByLabel("その他のカテゴリ").fill("a".repeat(130));
+  await page.getByLabel("その他のカテゴリ").fill("a".repeat(shortTextOverflow));
   await expect(page.getByLabel("その他のカテゴリ")).toHaveValue(
-    "a".repeat(120),
+    "a".repeat(COMPARISON_SHORT_TEXT_MAX_LENGTH),
   );
 
-  await page.getByLabel("メモ（任意）").fill("b".repeat(5_100));
+  await page.getByLabel("メモ（任意）").fill("b".repeat(memoTextOverflow));
   await expect
     .poll(
       async () => (await page.getByLabel("メモ（任意）").inputValue()).length,
     )
-    .toBe(5_000);
+    .toBe(COMPARISON_MEMO_TEXT_MAX_LENGTH);
 
   await page.getByRole("button", { name: /候補/ }).click();
-  await page.getByLabel("候補を追加").fill("c".repeat(130));
-  await expect(page.getByLabel("候補を追加")).toHaveValue("c".repeat(120));
+  await page.getByLabel("候補を追加").fill("c".repeat(shortTextOverflow));
+  await expect(page.getByLabel("候補を追加")).toHaveValue(
+    "c".repeat(COMPARISON_SHORT_TEXT_MAX_LENGTH),
+  );
 });
 
 test("追加後のポイント名と候補名は各入力画面で編集できる", async ({ page }) => {

@@ -43,8 +43,9 @@
 
 ### 4.1 `memoId`
 
-- `/{username}/{memoId}` および `/api/memos/[memoId]`、`/edit?memoId=` で用いる識別子は、`comparison_memos.public_id`（正の整数）である。内部主キー `id` は URL に露出しない。
+- `/{username}/{memoId}` および `/api/memos/[memoId]`、`/edit?memoId=` で用いる識別子は、`comparison_memos.public_id`（正の整数）である。内部識別子である UUID の `id` は URL に露出しない。
 - `public_id` は全ユーザー横断の連番であり、ユーザーごとの連番ではない。したがって `memoId` だけでメモを一意に特定でき、URL 中の `username` は正規化のヒントとして働く。
+- `public_id` は `INTEGER PRIMARY KEY AUTOINCREMENT` で採番する（migration 0003）。SQLite が原子的に単調増加させるため、同時保存でも採番が衝突しない。削除しても採番は巻き戻らないため、共有済みの URL が別のメモを指すことはない。
 - 数値として解釈できない値、0 以下の値は取得層で `null` を返し、画面では 404、API では 404 応答となる。
 - 閲覧可否条件は「公開メモである」または「閲覧者が所有者である」。いずれも満たさない場合は存在有無を区別せず 404 を返す。
 
