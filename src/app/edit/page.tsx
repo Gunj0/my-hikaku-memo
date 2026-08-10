@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/server/request-scope";
 import { GadgetComparison } from "@/components/gadget-comparison";
 import { buildMetadata, getRequestSiteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -23,7 +23,7 @@ type NewMemoPageProps = {
 };
 
 export default async function NewMemoPage({ searchParams }: NewMemoPageProps) {
-  const session = await auth();
+  const session = await getSession();
   const { memoId } = await searchParams;
   const initialMemoId = Array.isArray(memoId) ? memoId[0] : memoId;
 

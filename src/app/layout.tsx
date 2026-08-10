@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/server/request-scope";
 import { AppHeader } from "@/components/app-header";
 import { AuthSessionProvider } from "@/components/auth/session-provider";
 import { buildMetadata, getRequestSiteUrl } from "@/lib/seo";
@@ -65,7 +65,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const session = await getSession();
 
   return (
     <html lang="ja" className="dark bg-background">

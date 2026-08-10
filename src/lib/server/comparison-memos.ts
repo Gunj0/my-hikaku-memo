@@ -1,5 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
+import { COMPARISON_MEMOS_MAX_COUNT_PER_USER } from "@/lib/comparison-limits";
 import {
   comparisonDataSchema,
   comparisonMemoPayloadSchema,
@@ -54,6 +55,19 @@ type PublicComparisonMemoSitemapRow = {
 
 /** 公開メモを持つユーザーの JOIN 句。全ての公開系クエリで共通。 */
 const AUTHOR_COLUMNS = `u.name AS user_name, u.username AS user_username, u.profile_initialized AS user_profile_initialized`;
+
+/**
+ * sitemap.xml に載せる公開メモの上限。
+ * 単一 sitemap の上限は 50,000 URL であり、プロフィール URL と静的ページも同じ file に載る。
+ * ここを超えるようになったら generateSitemaps による分割へ移行すること。
+ */
+const SITEMAP_MAX_MEMOS = 10_000;
+
+/**
+ * 保存件数の上限に達していて作成できなかったことを表すセンチネル。
+ * 呼び出し側が 409 へ変換する（user-profiles の USERNAME_TAKEN と同じ流儀）。
+ */
+export const MEMO_LIMIT_REACHED = "memo-limit-reached" as const;
 
 function getDatabase() {
   const { env } = getCloudflareContext();
@@ -217,39 +231,6 @@ export async function listRandomComparisonMemos(
   return result.results.map(mapPublicSummary);
 }
 
-export async function listPublicComparisonMemos(limit?: number) {
-  const database = getDatabase();
-  const query =
-    typeof limit === "number"
-      ? database
-          .prepare(
-            `
-              SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
-                 ${AUTHOR_COLUMNS}
-              FROM comparison_memos AS m
-              LEFT JOIN users AS u ON u.id = m.user_id
-              WHERE m.is_public = 1
-              ORDER BY m.updated_at DESC
-              LIMIT ?1
-            `,
-          )
-          .bind(limit)
-      : database.prepare(
-          `
-            SELECT m.id, m.user_id, m.title, m.category, m.is_public, m.public_id, m.created_at, m.updated_at,
-               ${AUTHOR_COLUMNS}
-            FROM comparison_memos AS m
-            LEFT JOIN users AS u ON u.id = m.user_id
-            WHERE m.is_public = 1
-            ORDER BY m.updated_at DESC
-          `,
-        );
-
-  const result = await query.all<PublicComparisonMemoSummaryRow>();
-
-  return result.results.map(mapPublicSummary);
-}
-
 export async function listPublicComparisonMemoSitemapEntries() {
   const database = getDatabase();
   const result = await database
@@ -260,8 +241,10 @@ export async function listPublicComparisonMemoSitemapEntries() {
         LEFT JOIN users AS u ON u.id = m.user_id
         WHERE m.is_public = 1
         ORDER BY m.updated_at DESC
+        LIMIT ?1
       `,
     )
+    .bind(SITEMAP_MAX_MEMOS)
     .all<PublicComparisonMemoSitemapRow>();
 
   return result.results.map((row) => ({
@@ -346,11 +329,15 @@ export async function createComparisonMemo(
 
   // public_id は列挙しない。INTEGER PRIMARY KEY AUTOINCREMENT なので SQLite が原子的に採番する。
   // アプリ側で MAX(public_id) + 1 を評価すると同時 INSERT で採番が衝突する（migration 0003 参照）。
+  //
+  // 件数上限は SQL 側の WHERE に埋める。先に COUNT して分岐すると、同時作成が
+  // どちらも上限未満を読んで上限を超えられる（tryClaimUsername と同じ流儀）。
   const result = await database
     .prepare(
       `
         INSERT INTO comparison_memos (id, user_id, title, category, data, is_public, created_at, updated_at)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+        SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8
+        WHERE (SELECT COUNT(*) FROM comparison_memos WHERE user_id = ?2) < ?9
       `,
     )
     .bind(
@@ -362,8 +349,13 @@ export async function createComparisonMemo(
       normalized.isPublic ? 1 : 0,
       now,
       now,
+      COMPARISON_MEMOS_MAX_COUNT_PER_USER,
     )
     .run();
+
+  if (!result.meta.changes) {
+    return MEMO_LIMIT_REACHED;
+  }
 
   // public_id は rowid そのものなので last_row_id がそのまま採番結果になる。
   const publicId = result.meta.last_row_id;

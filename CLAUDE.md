@@ -79,6 +79,8 @@ GadgetComparison
 
 - 未保存ドラフトは `localStorage` に退避（guest / ユーザー単位で分離）
 - 保存済みメモは Cloudflare D1 の `comparison_memos` テーブルへ保存（`data` カラムに `ComparisonData` を JSON シリアライズ）
+- 1 ユーザーあたりの保存件数は 30 件（`COMPARISON_MEMOS_MAX_COUNT_PER_USER`）。上限判定は INSERT 文の条件として評価し、超過時は 409 を返す
+- **同一リクエスト内で重複する読み取りは `src/lib/server/request-scope.ts` を経由する。** `generateMetadata` とページ本体は同じリクエストで走るため、直接取得すると DB 往復が倍になる。書き込み直後に再取得する関数はここへ置かない（同一リクエスト内で更新前の値を返すため）
 - DB スキーマは `migrations/` の SQL が唯一の正。スキーマ変更時は新しい migration ファイルを追加し、`pnpm db:migrate:local`（ローカル）/ `pnpm db:migrate`（本番、`pnpm deploy` にも組み込み済み）で適用する
 
 ### バリデーション

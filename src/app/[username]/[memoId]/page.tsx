@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 
-import { auth } from "@/auth";
 import { ComparisonMemoView } from "@/components/comparison-memo-view";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +11,10 @@ import {
   getRequestSiteUrl,
   serializeJsonLd,
 } from "@/lib/seo";
-import { getPublicComparisonMemo } from "@/lib/server/comparison-memos";
+import {
+  getPublicComparisonMemoCached,
+  getSession,
+} from "@/lib/server/request-scope";
 import { normalizeUsername } from "@/lib/username";
 import { ArrowLeftIcon, PencilIcon } from "lucide-react";
 
@@ -58,8 +60,8 @@ export async function generateMetadata({
   params,
 }: MemoDetailPageProps): Promise<Metadata> {
   const { username, memoId } = await params;
-  const session = await auth();
-  const memo = await getPublicComparisonMemo(memoId, session?.user?.id);
+  const session = await getSession();
+  const memo = await getPublicComparisonMemoCached(memoId, session?.user?.id);
   const siteUrl = await getRequestSiteUrl();
 
   if (!memo) {
@@ -93,8 +95,8 @@ export async function generateMetadata({
 
 export default async function MemoDetailPage({ params }: MemoDetailPageProps) {
   const { username, memoId } = await params;
-  const session = await auth();
-  const memo = await getPublicComparisonMemo(memoId, session?.user?.id);
+  const session = await getSession();
+  const memo = await getPublicComparisonMemoCached(memoId, session?.user?.id);
   const siteUrl = await getRequestSiteUrl();
 
   if (!memo) {

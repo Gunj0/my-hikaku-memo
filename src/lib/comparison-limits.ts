@@ -8,6 +8,13 @@ export const COMPARISON_PRODUCTS_MAX_COUNT = 30;
 export const COMPARISON_SCORES_MAX_COUNT =
   COMPARISON_DECISION_POINTS_MAX_COUNT * COMPARISON_PRODUCTS_MAX_COUNT;
 
+/**
+ * 1 ユーザーが保存できるメモの上限。
+ * 1 メモあたりのサイズは上の各上限で抑えているが、件数を抑えないと
+ * ログイン済みユーザーが D1 を無制限に肥大化させられる。
+ */
+export const COMPARISON_MEMOS_MAX_COUNT_PER_USER = 30;
+
 export function clampComparisonShortText(value: string) {
   return value.slice(0, COMPARISON_SHORT_TEXT_MAX_LENGTH);
 }

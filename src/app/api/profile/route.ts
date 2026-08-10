@@ -9,10 +9,8 @@ import {
 import {
   USERNAME_TAKEN,
   USER_PROFILE_NAME_MAX_LENGTH,
-  getUserProfile,
   normalizeUserProfileName,
-  updateUserProfileName,
-  updateUsername,
+  updateUserProfile,
 } from "@/lib/server/user-profiles";
 import { validateUsername } from "@/lib/username";
 
@@ -64,29 +62,16 @@ export const PATCH = withAuth(
       username = validation.username;
     }
 
-    if (username) {
-      const result = await updateUsername(userId, username);
+    // 表示名と username は 1 本の UPDATE でまとめて適用する。
+    // 分割すると片方だけ反映された中途半端な状態が生まれる。
+    const profile = await updateUserProfile(userId, {
+      ...(name === null ? {} : { name }),
+      ...(username === null ? {} : { username }),
+    });
 
-      if (result === USERNAME_TAKEN) {
-        return jsonError("このユーザーIDはすでに使われています。", 409);
-      }
-
-      if (!result) {
-        return notFoundResponse("プロフィールが見つかりません。");
-      }
+    if (profile === USERNAME_TAKEN) {
+      return jsonError("このユーザーIDはすでに使われています。", 409);
     }
-
-    if (name) {
-      const profile = await updateUserProfileName(userId, name);
-
-      if (!profile) {
-        return notFoundResponse("プロフィールが見つかりません。");
-      }
-
-      return NextResponse.json(profile);
-    }
-
-    const profile = await getUserProfile(userId);
 
     if (!profile) {
       return notFoundResponse("プロフィールが見つかりません。");

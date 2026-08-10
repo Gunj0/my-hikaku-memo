@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 
+import { COMPARISON_MEMOS_MAX_COUNT_PER_USER } from "@/lib/comparison-limits";
 import { comparisonMemoPayloadSchema } from "@/lib/comparison-schemas";
 import { badRequestResponse, jsonError, withAuth } from "@/lib/server/api";
 import {
+  MEMO_LIMIT_REACHED,
   createComparisonMemo,
   listComparisonMemos,
 } from "@/lib/server/comparison-memos";
@@ -22,6 +24,13 @@ export const POST = withAuth(async (userId, request) => {
   }
 
   const memo = await createComparisonMemo(userId, parsed.data);
+
+  if (memo === MEMO_LIMIT_REACHED) {
+    return jsonError(
+      `保存できるメモは${COMPARISON_MEMOS_MAX_COUNT_PER_USER}件までです。不要なメモを削除してから保存してください。`,
+      409,
+    );
+  }
 
   // 採番結果を取り出せない場合。201 で memo: null を返すとクライアントが保存成功として扱ってしまう。
   if (!memo) {

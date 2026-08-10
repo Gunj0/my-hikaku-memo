@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getSession } from "@/lib/server/request-scope";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,7 +51,7 @@ function getInitials(name: string | null) {
 }
 
 export default async function Home() {
-  const session = await auth();
+  const session = await getSession();
   const publicMemos = await listRandomComparisonMemos(6, session?.user?.id);
   const siteUrl = await getRequestSiteUrl();
   const websiteJsonLd = {

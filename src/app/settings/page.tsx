@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { auth } from "@/auth";
+import { getSession } from "@/lib/server/request-scope";
 import { ProfileSettingsCard } from "@/components/profile-settings-card";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SettingsPage() {
-  const session = await auth();
+  const session = await getSession();
   const userId = session?.user?.id;
 
   if (!userId) {

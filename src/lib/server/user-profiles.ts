@@ -25,7 +25,7 @@ export type UserProfile = {
 /** username の自動採番でユニーク制約に当たったときの再試行回数。 */
 const USERNAME_ASSIGN_MAX_ATTEMPTS = 5;
 
-/** username がすでに使われている場合に updateUsernameRecord が返す識別子。 */
+/** username がすでに使われている場合に updateUserProfileRecord が返す識別子。 */
 export const USERNAME_TAKEN = "username-taken" as const;
 
 export const USER_PROFILE_NAME_MAX_LENGTH = 12;
@@ -252,50 +252,68 @@ export async function getUserProfileByUsernameRecord(
   return row ? mapUserProfile(row) : null;
 }
 
+export type UserProfileUpdate = {
+  /** 表示名。省略時は変更しない。 */
+  name?: string;
+  /** URL ハンドル。省略時は変更しない。validateUsername を通した正規形を渡すこと。 */
+  username?: string;
+};
+
 /**
- * username を更新する。
- * 他ユーザーが使用中の場合は USERNAME_TAKEN を返し、呼び出し側が 409 へ変換する。
- * 呼び出し前に validateUsername を通し、正規形を渡すこと。
+ * 表示名と username をまとめて更新する。
+ *
+ * 2 本の UPDATE に分けると、username だけ適用されて表示名の更新が失敗する
+ * 中途半端な状態が生まれる。設定画面は常に両方を送るため実際に踏みうるので、
+ * 1 本の条件付き UPDATE に閉じ込めて原子性を担保する。
+ *
+ * username が他ユーザーに使われている場合は USERNAME_TAKEN を返し、
+ * 対象ユーザーが存在しない場合は null を返す。呼び出し側が 409 / 404 へ変換する。
  */
-export async function updateUsernameRecord(
+export async function updateUserProfileRecord(
   database: D1Database,
   userId: string,
-  username: string,
+  update: UserProfileUpdate,
 ) {
-  const claimed = await tryClaimUsername(database, userId, username);
+  const assignments = ["image = NULL", "profile_initialized = 1"];
+  const bindings: unknown[] = [userId];
 
-  if (!claimed) {
-    return USERNAME_TAKEN;
+  if (update.name !== undefined) {
+    bindings.push(normalizeUserProfileName(update.name));
+    assignments.push(`name = ?${bindings.length}`);
   }
 
-  return getUserProfileRecord(database, userId);
-}
+  if (update.username !== undefined) {
+    bindings.push(update.username);
+    assignments.push(`username = ?${bindings.length}`);
+  }
 
-export async function updateUserProfileNameRecord(
-  database: D1Database,
-  userId: string,
-  name: string,
-) {
-  const normalizedName = normalizeUserProfileName(name);
+  // username を変える場合だけ、他ユーザーが使用中でないことを同じ文の条件に含める。
+  // 別クエリで確認してから UPDATE すると、その隙間に横取りされる。
+  const usernameGuard =
+    update.username === undefined
+      ? ""
+      : `AND NOT EXISTS (
+           SELECT 1 FROM users WHERE username = ?${bindings.length} COLLATE NOCASE AND id != ?1
+         )`;
 
-  await database
+  const result = await database
     .prepare(
       `
         UPDATE users
-        SET name = ?2,
-            image = NULL,
-            profile_initialized = 1
+        SET ${assignments.join(", ")}
         WHERE id = ?1
+        ${usernameGuard}
       `,
     )
-    .bind(userId, normalizedName)
+    .bind(...bindings)
     .run();
 
-  return getUserProfileRecord(database, userId);
-}
+  if (!result.meta.changes) {
+    // 更新できなかった理由は「行が無い」か「username が埋まっている」のどちらか。
+    const row = await getUserProfileRow(database, userId);
 
-export async function getUserProfile(userId: string) {
-  const database = getDatabase();
+    return row ? USERNAME_TAKEN : null;
+  }
 
   return getUserProfileRecord(database, userId);
 }
@@ -306,10 +324,13 @@ export async function ensureUserProfile(userId: string) {
   return ensureUserProfileRecord(database, userId);
 }
 
-export async function updateUserProfileName(userId: string, name: string) {
+export async function updateUserProfile(
+  userId: string,
+  update: UserProfileUpdate,
+) {
   const database = getDatabase();
 
-  return updateUserProfileNameRecord(database, userId, name);
+  return updateUserProfileRecord(database, userId, update);
 }
 
 export async function getUserProfileByUsername(username: string) {
@@ -318,8 +339,3 @@ export async function getUserProfileByUsername(username: string) {
   return getUserProfileByUsernameRecord(database, username);
 }
 
-export async function updateUsername(userId: string, username: string) {
-  const database = getDatabase();
-
-  return updateUsernameRecord(database, userId, username);
-}

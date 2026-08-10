@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 
-import { auth } from "@/auth";
 import { DeleteMemoButton } from "@/components/delete-memo-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { buildMetadata, getRequestSiteUrl } from "@/lib/seo";
-import { listComparisonMemosByUsername } from "@/lib/server/comparison-memos";
-import { getUserProfileByUsername } from "@/lib/server/user-profiles";
+import {
+  getSession,
+  getUserProfileByUsernameCached,
+  listComparisonMemosByUsernameCached,
+} from "@/lib/server/request-scope";
 import { getUserInitials } from "@/lib/user-display";
 import { normalizeUsername } from "@/lib/username";
 import {
@@ -45,7 +47,7 @@ function getVisibilityLabel(isPublic: boolean) {
  */
 async function resolveProfile(requestedUsername: string) {
   const normalized = normalizeUsername(decodeURIComponent(requestedUsername));
-  const profile = await getUserProfileByUsername(normalized);
+  const profile = await getUserProfileByUsernameCached(normalized);
 
   if (!profile) {
     return null;
@@ -63,7 +65,7 @@ export async function generateMetadata({
 }: ProfilePageProps): Promise<Metadata> {
   const { username } = await params;
   const siteUrl = await getRequestSiteUrl();
-  const profile = await getUserProfileByUsername(
+  const profile = await getUserProfileByUsernameCached(
     normalizeUsername(decodeURIComponent(username)),
   );
 
@@ -79,7 +81,7 @@ export async function generateMetadata({
 
   // 公開メモが 1 件も無いプロフィールは薄いページになるため index させない。
   // sitemap.xml の掲載条件と一致させること。
-  const publicMemos = await listComparisonMemosByUsername(profile.username);
+  const publicMemos = await listComparisonMemosByUsernameCached(profile.username);
 
   return buildMetadata({
     title: `${profile.name}さんの比較メモ | オレの比較メモ`,
@@ -98,10 +100,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     notFound();
   }
 
-  const session = await auth();
+  const session = await getSession();
   const viewerUserId = session?.user?.id;
   const isOwner = viewerUserId === profile.id;
-  const memos = await listComparisonMemosByUsername(
+  const memos = await listComparisonMemosByUsernameCached(
     profile.username,
     viewerUserId,
   );
