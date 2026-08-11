@@ -1,0 +1,24 @@
+# Workers Assets 用のセキュリティヘッダ。
+#
+# next.config.ts の headers() は Next のサーバー内で動くため、Worker を起動せずに
+# 返される静的アセット（/icon.png, /_next/static/* など）には届かない。
+# wrangler.jsonc の assets は run_worker_first を指定しておらず、
+# .open-next/assets に存在するファイルは Worker を経由しないためである。
+#
+# このファイルは public/ に置くと OpenNext が .open-next/assets/_headers へコピーし、
+# Workers Assets が配信時に解釈する（Cloudflare が設定として扱うため、この
+# ファイル自体は配信されない）。
+#
+# 動的レスポンス側と重複するのは、配信経路が 2 つある以上避けられない。
+# 片方だけ直すとどちらかが素通しになるため、next.config.ts を変更したら
+# ここも見直すこと。
+#
+# 静的アセットに form-action / base-uri は意味を持たないため入れていない。
+# CSP は frame-ancestors のみで、画像や JS を単体で frame に載せられることを防ぐ。
+
+/*
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=63072000
