@@ -1,9 +1,16 @@
-import type { ComparisonData, DecisionPoint } from "@/lib/types";
-import { DEFAULT_DECISION_POINTS } from "@/lib/types";
+import type { ComparisonData, DecisionPoint, Product } from "@/lib/types";
+import { DEFAULT_DECISION_POINTS, DEFAULT_PRODUCTS } from "@/lib/types";
 
 function createDecisionPoints(): DecisionPoint[] {
   return DEFAULT_DECISION_POINTS.map((point) => ({
     ...point,
+    id: crypto.randomUUID(),
+  }));
+}
+
+function createProducts(): Product[] {
+  return DEFAULT_PRODUCTS.map((product) => ({
+    ...product,
     id: crypto.randomUUID(),
   }));
 }
@@ -14,7 +21,7 @@ export function createInitialComparisonData(): ComparisonData {
     categoryMemo: "",
     decisionPoints: createDecisionPoints(),
     pointsMemo: "",
-    products: [],
+    products: createProducts(),
     productsMemo: "",
     scores: [],
     selectedProductId: null,
@@ -52,13 +59,35 @@ function hasCustomizedDecisionPoints(decisionPoints: DecisionPoint[]) {
   });
 }
 
+function hasCustomizedProducts(products: Product[]) {
+  // 既定候補を削除しただけの空リストは「入力なし」とみなす。
+  // 保存済みメモ以前の下書き（products: []）もここに該当する。
+  if (products.length === 0) {
+    return false;
+  }
+
+  if (products.length !== DEFAULT_PRODUCTS.length) {
+    return true;
+  }
+
+  return products.some((product, index) => {
+    const defaultProduct = DEFAULT_PRODUCTS[index];
+
+    return (
+      !defaultProduct ||
+      product.name !== defaultProduct.name ||
+      product.memo !== defaultProduct.memo
+    );
+  });
+}
+
 export function hasMeaningfulComparisonData(data: ComparisonData) {
   return (
     data.category.trim().length > 0 ||
     data.categoryMemo.trim().length > 0 ||
     hasCustomizedDecisionPoints(data.decisionPoints) ||
     data.pointsMemo.trim().length > 0 ||
-    data.products.length > 0 ||
+    hasCustomizedProducts(data.products) ||
     data.productsMemo.trim().length > 0 ||
     data.scores.length > 0 ||
     data.selectedProductId !== null ||

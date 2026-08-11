@@ -102,9 +102,10 @@ export interface PublicComparisonMemo extends ComparisonMemo {
 
 export const DEFAULT_DECISION_POINTS: Omit<DecisionPoint, "id">[] = [
   { name: "価格", weight: 3, memo: "" },
-  { name: "メーカー・ブランド", weight: 3, memo: "" },
-  { name: "サイズ・重量", weight: 3, memo: "" },
-  { name: "デザイン", weight: 3, memo: "" },
+];
+
+export const DEFAULT_PRODUCTS: Omit<Product, "id">[] = [
+  { name: "現在使用中のもの", memo: "" },
 ];
 
 export const STEPS = [

@@ -92,7 +92,9 @@ test("ステップは未入力でも常に自由に移動できる", async ({ pa
   await expect(page.getByRole("heading", { name: "最終決定" })).toBeVisible();
 
   await page.getByRole("button", { name: /評価/ }).click();
-  await expect(page.getByRole("heading", { name: "評価を入力" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "情報を整理して評価する" }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: /カテゴリ/ }).click();
   await expect(
@@ -282,8 +284,10 @@ test("追加後のポイント名と候補名は各入力画面で編集でき�
 
 test("比較ポイントと候補は30件までしか追加できない", async ({ page }) => {
   await page.goto("/edit");
-  const initialPointCount = 4;
+  const initialPointCount = 1;
+  const initialProductCount = 1;
   const maxPointCount = 30;
+  const maxProductCount = 30;
 
   await page.getByRole("button", { name: "次へ" }).click();
 
@@ -300,12 +304,18 @@ test("比較ポイントと候補は30件までしか追加できない", async 
 
   await page.getByRole("button", { name: /候補/ }).click();
 
-  for (let index = 1; index <= 30; index += 1) {
+  for (
+    let index = 1;
+    index <= maxProductCount - initialProductCount;
+    index += 1
+  ) {
     await page.getByLabel("候補を追加").fill(`候補${index}`);
     await page.getByRole("button", { name: "追加" }).click();
   }
 
-  await expect(page.getByRole("button", { name: /を削除$/ })).toHaveCount(30);
+  await expect(page.getByRole("button", { name: /を削除$/ })).toHaveCount(
+    maxProductCount,
+  );
   await expect(page.getByLabel("候補を追加")).toBeDisabled();
   await expect(page.getByRole("button", { name: "追加" })).toBeDisabled();
 });

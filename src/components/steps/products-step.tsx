@@ -204,36 +204,6 @@ export function ProductsStep({
         </p>
       </div>
 
-      {products.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-          <PackageIcon className="w-12 h-12 mb-4 opacity-50" />
-          <p className="text-sm">まだ製品が追加されていません</p>
-        </div>
-      ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={products.map((product) => product.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-3">
-              {products.map((product) => (
-                <SortableProductItem
-                  key={product.id}
-                  product={product}
-                  onNameChange={(name) => updateProduct(product.id, { name })}
-                  onRemove={() => removeProduct(product.id)}
-                  onMemoChange={(memo) => updateProduct(product.id, { memo })}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-      )}
-
       <div className="space-y-3">
         <Label htmlFor="new-product">候補を追加</Label>
         <p className="text-xs text-muted-foreground">
@@ -271,6 +241,36 @@ export function ProductsStep({
           </Button>
         </div>
       </div>
+
+      {products.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+          <PackageIcon className="w-12 h-12 mb-4 opacity-50" />
+          <p className="text-sm">まだ製品が追加されていません</p>
+        </div>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={products.map((product) => product.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-3">
+              {products.map((product) => (
+                <SortableProductItem
+                  key={product.id}
+                  product={product}
+                  onNameChange={(name) => updateProduct(product.id, { name })}
+                  onRemove={() => removeProduct(product.id)}
+                  onMemoChange={(memo) => updateProduct(product.id, { memo })}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
 
       <div className="space-y-3">
         <Label htmlFor="products-memo">全体メモ（任意）</Label>

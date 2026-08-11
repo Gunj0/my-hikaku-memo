@@ -247,28 +247,6 @@ export function PointsStep({
         </p>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={decisionPoints.map((point) => point.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div className="space-y-2">
-            {decisionPoints.map((point) => (
-              <SortablePointItem
-                key={point.id}
-                point={point}
-                onRemove={() => removePoint(point.id)}
-                onUpdate={(updates) => updatePoint(point.id, updates)}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
-
       <div className="space-y-3">
         <Label htmlFor="new-point">ポイントを追加</Label>
         <p className="text-xs text-muted-foreground">
@@ -306,6 +284,28 @@ export function PointsStep({
           </Button>
         </div>
       </div>
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={decisionPoints.map((point) => point.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-2">
+            {decisionPoints.map((point) => (
+              <SortablePointItem
+                key={point.id}
+                point={point}
+                onRemove={() => removePoint(point.id)}
+                onUpdate={(updates) => updatePoint(point.id, updates)}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       <div className="space-y-3">
         <Label htmlFor="points-memo">全体メモ（任意）</Label>
