@@ -1,6 +1,6 @@
 "use client";
 
-import { DecisionPointImportanceIcon } from "@/components/decision-point-importance-icon";
+import { DecisionPointImportanceSelect } from "@/components/decision-point-importance-select";
 import { EditableItemName } from "@/components/editable-item-name";
 import { LengthCounter } from "@/components/length-counter";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   COMPARISON_MEMO_TEXT_MAX_LENGTH,
   COMPARISON_SHORT_TEXT_MAX_LENGTH,
 } from "@/lib/comparison-limits";
-import { DECISION_POINT_IMPORTANCE_OPTIONS, DecisionPoint } from "@/lib/types";
+import { DecisionPoint } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
   closestCenter,
@@ -85,39 +85,12 @@ function SortablePointItem({
         </Button>
 
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 sm:flex-nowrap">
-          <div
-            className="flex shrink-0 items-center gap-1 rounded-md border border-input bg-background p-1"
-            role="group"
-            aria-label={`${point.name}の重要度`}
-          >
-            {DECISION_POINT_IMPORTANCE_OPTIONS.map((option) => {
-              const isSelected = option.value === point.weight;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => onUpdate({ weight: option.value })}
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-sm transition-colors",
-                    isSelected
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                  title={option.message}
-                  aria-label={option.message}
-                >
-                  <DecisionPointImportanceIcon
-                    weight={option.value}
-                    className={cn(
-                      "h-4 w-4",
-                      isSelected && "text-primary-foreground",
-                    )}
-                  />
-                </button>
-              );
-            })}
-          </div>
+          <DecisionPointImportanceSelect
+            weight={point.weight}
+            onChange={(weight) => onUpdate({ weight })}
+            label={`${point.name}の重要度`}
+            className="w-30"
+          />
 
           <div className="min-w-0 flex-1 space-y-1">
             <EditableItemName

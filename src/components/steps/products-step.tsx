@@ -213,7 +213,7 @@ export function ProductsStep({
           <div className="flex-1 space-y-1">
             <Input
               id="new-product"
-              placeholder="候補を入力..."
+              placeholder="例: iPhone, Pixel..."
               value={newProductName}
               onChange={(e) => setNewProductName(e.target.value)}
               onKeyDown={handleKeyDown}

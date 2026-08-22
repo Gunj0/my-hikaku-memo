@@ -1,6 +1,6 @@
 "use client";
 
-import { LogInIcon, PlusCircleIcon, type LucideIcon } from "lucide-react";
+import { PlusCircleIcon, type LucideIcon } from "lucide-react";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -50,7 +50,7 @@ export function AppHeader() {
   };
 
   return (
-    <header className="border-b border-border/80 bg-background/88 backdrop-blur-md">
+    <header className="bg-background/88 backdrop-blur-md">
       <div className="mx-auto max-w-6xl flex items-center justify-between gap-2 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2 md:gap-6">
           <div className="min-w-0 shrink-0">
@@ -116,7 +116,6 @@ export function AppHeader() {
                   disabled={isLoading}
                   className="shrink-0"
                 >
-                  <LogInIcon className="h-4 w-4" />
                   ログイン
                 </Button>
               </DialogTrigger>

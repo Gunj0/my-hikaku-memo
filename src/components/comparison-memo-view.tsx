@@ -198,7 +198,7 @@ export function ComparisonMemoView({ memo }: ComparisonMemoViewProps) {
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="font-medium">{point.name}</p>
-                <span className="inline-flex items-center justify-center rounded-full bg-primary/10 p-1 text-primary">
+                <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-primary/10 px-2 py-1 text-primary">
                   <DecisionPointImportanceIcon
                     weight={point.weight}
                     className="h-4 w-4"

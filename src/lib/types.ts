@@ -1,21 +1,19 @@
 export interface DecisionPoint {
   id: string;
   name: string;
-  weight: number; // 1-4
+  weight: number; // 1-3
   memo: string;
 }
 
 export type DecisionPointImportanceIconName =
-  | "circle-alert"
-  | "circle"
-  | "triangle"
-  | "x";
+  | "required"
+  | "preferred"
+  | "either";
 
 export const DECISION_POINT_IMPORTANCE_OPTIONS = [
-  { value: 4, icon: "circle-alert", message: "最も重要" },
-  { value: 3, icon: "circle", message: "重要" },
-  { value: 2, icon: "triangle", message: "どちらでもいい" },
-  { value: 1, icon: "x", message: "いらない" },
+  { value: 3, icon: "required", message: "必須" },
+  { value: 2, icon: "preferred", message: "できれば" },
+  { value: 1, icon: "either", message: "どちらでも" },
 ] as const;
 
 export type DecisionPointWeight =
@@ -24,18 +22,15 @@ export type DecisionPointWeight =
 export function normalizeDecisionPointWeight(
   weight: number,
 ): DecisionPointWeight {
-  if (weight >= 4) {
-    return 4;
-  }
-
-  if (weight === 3) {
+  if (weight >= 3) {
     return 3;
   }
 
-  if (weight === 2) {
+  if (weight >= 2) {
     return 2;
   }
 
+  // NaN もここで 1 になる
   return 1;
 }
 

@@ -402,7 +402,7 @@ function SortablePointRow({
         </div>
       </TableCell>
       <TableCell className="text-center">
-        <span className="inline-flex items-center justify-center rounded-full bg-primary/10 p-1 text-primary">
+        <span className="inline-flex items-center justify-center rounded-full bg-primary/10 px-2 py-1 text-primary">
           <DecisionPointImportanceIcon
             weight={point.weight}
             className="h-4 w-4"
@@ -657,7 +657,7 @@ export function EvaluationStep({
                   <TableHead className="sticky left-0 z-30 w-56 min-w-37.5 max-w-56 border-r bg-background whitespace-normal">
                     ポイント
                   </TableHead>
-                  <TableHead className="text-center w-20">重要度</TableHead>
+                  <TableHead className="text-center w-28">重要度</TableHead>
                   {products.map((product) => (
                     <SortableProductHeader
                       key={product.id}

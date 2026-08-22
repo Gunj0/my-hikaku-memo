@@ -8,17 +8,12 @@ import {
   COMPARISON_SCORES_MAX_COUNT,
   COMPARISON_SHORT_TEXT_MAX_LENGTH,
 } from "@/lib/comparison-limits";
-import { normalizeDecisionPointWeight } from "@/lib/types";
 
 export const decisionPointSchema = z.object({
   id: z.string().min(1).max(COMPARISON_ID_MAX_LENGTH),
   name: z.string().max(COMPARISON_SHORT_TEXT_MAX_LENGTH),
-  weight: z
-    .number()
-    .int()
-    .min(1)
-    .max(5)
-    .transform(normalizeDecisionPointWeight),
+  // 重要度は「必須」(3)「できれば」(2)「どちらでも」(1) の 3 段階のみ
+  weight: z.number().int().min(1).max(3),
   memo: z.string().max(COMPARISON_MEMO_TEXT_MAX_LENGTH),
 });
 
