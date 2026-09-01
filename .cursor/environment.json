@@ -1,0 +1,17 @@
+{
+  "name": "オレの比較メモ (my-hikaku-memo)",
+  "install": "./.cursor/install.sh",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "corepack pnpm dev --hostname 127.0.0.1 --port 3000",
+      "description": "Next.js dev server on http://127.0.0.1:3000 (applies local D1 migrations first)."
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}
